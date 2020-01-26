@@ -28,28 +28,28 @@ describe("get target from object", () => {
 describe("set value at target location of object to get next immutable progression", () => {
     it("sets the value at target location and keeps other refs", () => {
         const theObject = {
-            level1Prop1: {
-                level2Prop1: {
+            prop1: {
+                prop1: {
                     target: "original value"
                 },
-                level2Prop2: {}
+                prop2: {}
             },
-            level1Prop2: {}
+            prop2: {}
         };
 
-        const progession = set("level1Prop1.level2Prop1.target")
+        const progession = set("prop1.prop1.target")
             .to("updated value")
             .in(theObject);
 
         expect(progession
-            .level1Prop1
-            .level2Prop1
+            .prop1
+            .prop1
             .target)
             .toBe("updated value");
 
-        expect(progession.level1Prop2).toBe(theObject.level1Prop2);
+        expect(progession.prop2).toBe(theObject.prop2);
 
-        expect(progession.level1Prop1.level2Prop2).toBe(theObject.level1Prop1.level2Prop2);
+        expect(progession.prop1.prop2).toBe(theObject.prop1.prop2);
     });
 
     it("can build an object by setting locations that dont exist", () => {
