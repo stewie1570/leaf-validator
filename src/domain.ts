@@ -1,14 +1,14 @@
-export const get = (target: string) => ({
-    from: (obj: any): any => {
-        const dotIndex = target.indexOf(".");
-        const next = dotIndex === -1
+export const get = <T>(target: string) => ({
+    from: (obj: any): T => {
+        const firstDotIndex = target.indexOf(".");
+        const childLocation = firstDotIndex === -1
             ? target
-            : target.substring(0, dotIndex);
+            : target.substring(0, firstDotIndex);
 
         return target === "" || obj === undefined ? obj
-            : dotIndex === -1
+            : firstDotIndex === -1
                 ? obj[target]
-                : get(target.substring(dotIndex + 1)).from(obj[next]);
+                : get(target.substring(firstDotIndex + 1)).from(obj[childLocation]);
     }
 });
 
@@ -22,11 +22,17 @@ export const set = (target: string) => ({
             const currentLocation = lastDotIndex === -1
                 ? target
                 : target.substring(lastDotIndex + 1);
+            const currentArrayIndex = parseInt(currentLocation);
+            const currentlyInArray = !isNaN(currentArrayIndex);
 
-            const updated = {
-                ...get(parentLocation).from(obj),
-                [currentLocation]: update
-            };
+            const updated = currentlyInArray
+                ? get<Array<any>>(parentLocation)
+                    .from(obj)
+                    .map((node, index) => index === currentArrayIndex ? update : node)
+                : {
+                    ...get<any>(parentLocation).from(obj),
+                    [currentLocation]: update
+                };
 
             return lastDotIndex === -1
                 ? updated

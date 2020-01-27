@@ -61,4 +61,20 @@ describe("set value at target location of object to get next immutable progressi
             }
         });
     });
+
+    it("can set a target value that navigates through an array", () => {
+        expect(set("list.1.value").to("updated").in({
+            list: [
+                { value: "old" },
+                { value: "old" },
+                { value: "old" }
+            ]
+        })).toEqual({
+            list: [
+                { value: "old" },
+                { value: "updated" },
+                { value: "old" }
+            ]
+        });
+    });
 });
