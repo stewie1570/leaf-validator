@@ -12,11 +12,11 @@ test("can read & edit model nodes nested inside complex object models and arrays
         });
 
         return <Model model={model} onChange={setModel} target="lists.emails">
-            {(emailNodes: Array<any>) => emailNodes.map((emailNode, index) => <Model
+            {(emailNodes: Array<any>, setEmailNodes) => emailNodes.map((emailNode, index) => <Model
                 key={index}
-                model={model}
-                onChange={setModel}
-                target={`lists.emails.${index}.email`}>
+                model={emailNode}
+                onChange={update => setEmailNodes(emailNodes.map((orig, i) => i === index ? update : orig))}
+                target={`email`}>
                 {(email: string, onChange) => <TextInput
                     data-testid={`email${index}`}
                     value={email}
