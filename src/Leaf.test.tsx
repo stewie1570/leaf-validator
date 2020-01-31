@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { render, fireEvent } from '@testing-library/react'
-import { Model } from './Model'
+import { Leaf } from './Leaf'
 import { TextInput } from './TextInput'
 
 test("can read & edit model nodes nested inside complex object models and arrays", () => {
@@ -11,18 +11,18 @@ test("can read & edit model nodes nested inside complex object models and arrays
             }
         });
 
-        return <Model model={model} onChange={setModel} target="lists.emails">
-            {(emailNodes: Array<any>, setEmailNodes) => emailNodes.map((emailNode, index) => <Model
+        return <Leaf model={model} onChange={setModel} location="lists.emails">
+            {(emailNodes: Array<any>, setEmailNodes) => emailNodes.map((emailNode, index) => <Leaf
                 key={index}
                 model={emailNode}
                 onChange={update => setEmailNodes(emailNodes.map((orig, i) => i === index ? update : orig))}
-                target={`email`}>
+                location={`email`}>
                 {(email: string, onChange) => <TextInput
                     data-testid={`email${index}`}
                     value={email}
                     onChange={onChange} />}
-            </Model>)}
-        </Model>
+            </Leaf>)}
+        </Leaf>
     }
 
     const { getByTestId } = render(<Wrapper />);

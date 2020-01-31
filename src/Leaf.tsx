@@ -1,16 +1,16 @@
 import React from 'react'
 import { get, set } from './domain'
 
-export function Model<TModel, TTarget>(props: {
+export function Leaf<TModel, TTarget>(props: {
     children: (model: TTarget, onChange: (updatedModel: TTarget) => void) => any,
-    target: string,
+    location: string,
     model: TModel,
     onChange: React.Dispatch<React.SetStateAction<TModel>>
 }) {
-    const { children, target, model, onChange } = props;
+    const { children, location, model, onChange } = props;
 
     return children(
-        get<any>(target).from(model),
-        update => onChange(set(target).to(update).in(model))
+        get<any>(location).from(model),
+        update => onChange(set(location).to(update).in(model))
     );
 }
