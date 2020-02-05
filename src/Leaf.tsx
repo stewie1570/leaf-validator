@@ -1,5 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { get, set } from './domain'
+
+type Validator = (value: any) => Array<string> | any;
+
+export function useValidationFor(model: any) {
+    const [validationModel, setValidationModel] = useState<any>({});
+
+    return {
+        validate: (target: string) => ({
+            conformsTo: (validator: Validator) => {
+                setValidationModel((currentValidationModel: any) => ({
+                    ...currentValidationModel,
+                    [target]: validator(get(target).from(model))
+                }));
+            }
+        }),
+        validationResultsFor: (target: string) => validationModel[target] || []
+    }
+}
 
 export function Leaf<TModel, TTarget>(props: {
     children: (model: TTarget, onChange: (updatedModel: TTarget) => void) => any,
