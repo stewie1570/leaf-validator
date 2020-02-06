@@ -78,12 +78,12 @@ test("validate model immediately show errors", () => {
         const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 
         return <Leaf
+            showErrors
             model={model}
             onChange={setModel}
             location="contact.email"
             validationModel={validationModel}
-            validators={[isRequired]}
-            showErrors={true}>
+            validators={[isRequired]}>
             {(email: string, onChange, onBlur, errors) => <>
                 <TextInput value={email} onChange={onChange} onBlur={onBlur} />
                 {errors.length > 0 && <ul>
@@ -107,12 +107,12 @@ test("validate multiple model nodes", () => {
 
         return <>
             <Leaf
+                showErrors
                 model={model}
                 onChange={setModel}
                 location="contact.firstName"
                 validationModel={validationModel}
-                validators={[isRequired]}
-                showErrors={true}>
+                validators={[isRequired]}>
                 {(email: string, onChange, onBlur, errors) => <>
                     <TextInput value={email} onChange={onChange} onBlur={onBlur} />
                     {errors.length > 0 && <ul>
@@ -121,12 +121,12 @@ test("validate multiple model nodes", () => {
                 </>}
             </Leaf>
             <Leaf
+                showErrors
                 model={model}
                 onChange={setModel}
                 location="contact.lastName"
                 validationModel={validationModel}
-                validators={[isRequired]}
-                showErrors={true}>
+                validators={[isRequired]}>
                 {(email: string, onChange, onBlur, errors) => <>
                     <TextInput value={email} onChange={onChange} onBlur={onBlur} />
                     {errors.length > 0 && <ul>
