@@ -9,7 +9,7 @@ type ValidationModel = {
     get: (target: string) => Array<string>
 };
 
-export function useValidationFor(model: any): ValidationModel {
+export function useValidationModelFor(model: any): ValidationModel {
     const [validationModel, setValidationModel] = useState<any>({});
 
     return {

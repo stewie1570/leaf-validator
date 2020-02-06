@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { render, fireEvent } from '@testing-library/react'
-import { Leaf, useValidationFor } from './Leaf'
+import { Leaf, useValidationModelFor } from './Leaf'
 import { TextInput } from './TextInput'
 import { get, set } from './domain'
 
@@ -43,7 +43,7 @@ test("can read & edit model nodes nested inside complex object models and arrays
 test("validate model node and show errors on blur", () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
-        const validationModel = useValidationFor(model);
+        const validationModel = useValidationModelFor(model);
 
         const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 
@@ -69,7 +69,7 @@ test("validate model node and show errors on blur", () => {
 test("validate model immediately show errors", () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "" } });
-        const validationModel = useValidationFor(model);
+        const validationModel = useValidationModelFor(model);
 
         const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 
@@ -97,7 +97,7 @@ test("validate model immediately show errors", () => {
 test("validate multiple model nodes", () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { firstName: "", lastName: "" } });
-        const validationModel = useValidationFor(model);
+        const validationModel = useValidationModelFor(model);
 
         const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 
