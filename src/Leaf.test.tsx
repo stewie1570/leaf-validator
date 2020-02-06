@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { render, fireEvent } from '@testing-library/react'
 import { Leaf, useValidationModelFor } from './Leaf'
 import { TextInput } from './TextInput'
-import { get, set } from './domain'
 
 test("can read & edit model nodes nested inside complex object models and arrays", () => {
     const Wrapper = () => {
@@ -47,7 +46,12 @@ test("validate model node and show errors on blur", () => {
 
         const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 
-        return <Leaf model={model} onChange={setModel} location="contact.email" validationModel={validationModel} validators={[isRequired]}>
+        return <Leaf
+            model={model}
+            onChange={setModel}
+            location="contact.email"
+            validationModel={validationModel}
+            validators={[isRequired]}>
             {(email: string, onChange, onBlur, errors) => <>
                 <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="email" />
                 {errors.length > 0 && <ul>
