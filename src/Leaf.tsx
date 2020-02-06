@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { get, set } from './domain'
 
-type Validator = (value: any) => Array<string> | any;
+type Validator<T> = (value: T) => Array<string> | any;
 type Update<TTarget> = (updatedModel: TTarget) => void;
 type Blur = () => void;
 type ValidationModel = {
@@ -18,18 +18,18 @@ export function useValidationModelFor(model: any): ValidationModel {
     }
 }
 
-export function Leaf<TModel, TTarget>(props: {
-    children: (model: TTarget, onChange: Update<TTarget>, onBlur: Blur, errors: Array<string>) => any,
+export function Leaf<Model, Target>(props: {
+    children: (model: Target, onChange: Update<Target>, onBlur: Blur, errors: Array<string>) => any,
     location: string,
-    model: TModel,
-    onChange: React.Dispatch<React.SetStateAction<TModel>>,
+    model: Model,
+    onChange: React.Dispatch<React.SetStateAction<Model>>,
     validationModel?: ValidationModel,
-    validators?: Array<Validator>,
+    validators?: Array<Validator<Target>>,
     showErrors?: boolean
 }) {
     const [hasBlurred, setHasBlurred] = useState(false);
     const { children, location, model, validationModel, validators, onChange, showErrors } = props;
-    const targetValue = get<any>(location).from(model);
+    const targetValue = get<Target>(location).from(model);
 
     useEffect(() => {
         if (validationModel && validators && validators.length) {
