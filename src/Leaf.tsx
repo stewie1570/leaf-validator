@@ -15,14 +15,16 @@ type ValidationModel = {
     getAllErrorsForLocation: (location: string) => Array<Error>
 };
 
-function filteredObjectToArray<T>(
-    obj: any,
+type FilteredObjectOptions<T> = {
     keyFilter: (key: string) => boolean,
-    mapper: (key: string, value: any) => T): Array<T> {
+    mapper: (key: string, value: any) => T
+}
+
+function filteredObjectToArray<T>(obj: any, options: FilteredObjectOptions<T>): Array<T> {
     return Object
         .keys(obj)
-        .filter(keyFilter)
-        .map(key => mapper(key, obj[key]));
+        .filter(options.keyFilter)
+        .map(key => options.mapper(key, obj[key]));
 }
 
 export function useValidationModelFor(model: any): ValidationModel {
@@ -32,8 +34,10 @@ export function useValidationModelFor(model: any): ValidationModel {
         set: setValidationModel,
         get: (location: string) => validationModel[location] || [],
         getAllErrorsForLocation: location => filteredObjectToArray(validationModel,
-            key => key.startsWith(location),
-            (key, value) => ({ location: key, messages: value }))
+            {
+                keyFilter: key => key.startsWith(location),
+                mapper: (key, value) => ({ location: key, messages: value })
+            })
             .filter(error => error?.messages?.length)
     }
 }
