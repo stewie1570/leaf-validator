@@ -136,7 +136,7 @@ test("validate multiple model nodes", () => {
             </Leaf>
             <ul>
                 {validationModel.getAllErrorsForLocation("").map((error, index) => <li key={index} data-testid="top-level-error">
-                    {error.location} - {error.message}
+                    {error.location} - {error.messages}
                 </li>)}
             </ul>
         </>

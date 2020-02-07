@@ -6,7 +6,7 @@ type Update<TTarget> = (updatedModel: TTarget) => void;
 type Blur = () => void;
 type Error = {
     location: string;
-    message: string;
+    messages: Array<string>;
 };
 
 type ValidationModel = {
@@ -33,8 +33,8 @@ export function useValidationModelFor(model: any): ValidationModel {
         get: (location: string) => validationModel[location] || [],
         getAllErrorsForLocation: location => filteredObjectToArray(validationModel,
             key => key.startsWith(location),
-            (key, value) => ({ location: key, message: value }))
-            .filter(error => error?.message?.length)
+            (key, value) => ({ location: key, messages: value }))
+            .filter(error => error?.messages?.length)
     }
 }
 
