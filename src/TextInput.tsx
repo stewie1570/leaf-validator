@@ -15,7 +15,7 @@ export function TextInput(props: TextInputProps) {
     const theInput = useRef<any>({ focus: noOp });
 
     useEffect(() => {
-        autofocus && theInput?.current?.focus()
+        if (autofocus) theInput?.current?.focus()
     }, [autofocus]);
 
     return <input

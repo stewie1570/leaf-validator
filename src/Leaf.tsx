@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { get, set } from './domain'
 
 type Validator<T> = (value: T) => Array<string> | any;
@@ -29,9 +29,11 @@ export function Leaf<Model, Target>(props: {
 }) {
     const [hasBlurred, setHasBlurred] = useState(false);
     const { children, location, model, validationModel, validators, onChange, showErrors } = props;
+    const instance = useRef({ validationModel, validators })
     const targetValue = get<Target>(location).from(model);
 
     useEffect(() => {
+        const { validationModel, validators } = instance.current
         if (validationModel && validators && validators.length) {
             validationModel.set((origValidationModel: any) => ({
                 ...origValidationModel,
@@ -41,7 +43,7 @@ export function Leaf<Model, Target>(props: {
                     .flat()
             }));
         }
-    }, [targetValue]);
+    }, [targetValue, location]);
 
     return children(
         targetValue,
