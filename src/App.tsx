@@ -86,8 +86,13 @@ const App: React.FC = () => {
 
                 <button className="btn btn-primary" type="submit" onClick={submit}>Submit</button>
                 <br />
+                Model:
                 <pre>
                     {JSON.stringify(model, null, 4)}
+                </pre>
+                Validation Query For Model Root:
+                <pre>
+                    {JSON.stringify(validationModel.getAllErrorsForLocation(""), null, 4)}
                 </pre>
             </form>
         </div >

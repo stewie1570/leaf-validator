@@ -4,17 +4,37 @@ import { get, set } from './domain'
 type Validator<T> = (value: T) => Array<string> | any;
 type Update<TTarget> = (updatedModel: TTarget) => void;
 type Blur = () => void;
+type Error = {
+    location: string;
+    message: string;
+};
+
 type ValidationModel = {
     set: React.Dispatch<any>,
-    get: (target: string) => Array<string>
+    get: (location: string) => Array<string>,
+    getAllErrorsForLocation: (location: string) => Array<Error>
 };
+
+function filteredObjectToArray<T>(
+    obj: any,
+    keyFilter: (key: string) => boolean,
+    mapper: (key: string, value: any) => T): Array<T> {
+    return Object
+        .keys(obj)
+        .filter(keyFilter)
+        .map(key => mapper(key, obj[key]));
+}
 
 export function useValidationModelFor(model: any): ValidationModel {
     const [validationModel, setValidationModel] = useState<any>({});
 
     return {
         set: setValidationModel,
-        get: (target: string) => validationModel[target] || []
+        get: (location: string) => validationModel[location] || [],
+        getAllErrorsForLocation: location => filteredObjectToArray(validationModel,
+            key => key.startsWith(location),
+            (key, value) => ({ location: key, message: value }))
+            .filter(error => error?.message?.length)
     }
 }
 

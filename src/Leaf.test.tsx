@@ -114,7 +114,7 @@ test("validate multiple model nodes", () => {
                 validationModel={validationModel}
                 validators={[isRequired]}>
                 {(email: string, onChange, onBlur, errors) => <>
-                    <TextInput value={email} onChange={onChange} onBlur={onBlur} />
+                    <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="firstName" />
                     {errors.length > 0 && <ul>
                         {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
                     </ul>}
@@ -128,19 +128,34 @@ test("validate multiple model nodes", () => {
                 validationModel={validationModel}
                 validators={[isRequired]}>
                 {(email: string, onChange, onBlur, errors) => <>
-                    <TextInput value={email} onChange={onChange} onBlur={onBlur} />
+                    <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="lastName" />
                     {errors.length > 0 && <ul>
                         {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
                     </ul>}
                 </>}
             </Leaf>
+            <ul>
+                {validationModel.getAllErrorsForLocation("").map((error, index) => <li key={index} data-testid="top-level-error">
+                    {error.location} - {error.message}
+                </li>)}
+            </ul>
         </>
     }
 
-    const { getAllByTestId } = render(<Wrapper />);
+    const { getByTestId, getAllByTestId, queryAllByTestId } = render(<Wrapper />);
 
     expect(getAllByTestId("error").map(node => node.textContent)).toEqual([
         "Value is required",
         "Value is required"
     ]);
+    expect(getAllByTestId("top-level-error").map(node => node.textContent)).toEqual([
+        "contact.firstName - Value is required",
+        "contact.lastName - Value is required"
+    ]);
+
+    fireEvent.change(getByTestId("firstName"), { target: { value: "Stewart" } });
+    fireEvent.change(getByTestId("lastName"), { target: { value: "Anderson" } });
+
+    expect(queryAllByTestId("error").map(node => node.textContent)).toEqual([]);
+    expect(queryAllByTestId("top-level-error").map(node => node.textContent)).toEqual([]);
 });
