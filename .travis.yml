@@ -10,7 +10,7 @@ install:
 
 before_script: cd package
 
-script: ls && npm install codecov -g && yarn test
+script: npm install codecov -g
 
 deploy:
   provider: npm
