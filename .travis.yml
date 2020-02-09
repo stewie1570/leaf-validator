@@ -5,12 +5,13 @@ node_js:
   
 cache: yarn
 
-install:
-  - yarn install
-
-before_script: cd package
-
-script: npm install codecov -g
+script:
+  - npm install codecov -g
+  - cd implementation
+  - yarn
+  - yarn test
+  - codecov
+  - cd ../package
 
 deploy:
   provider: npm
@@ -20,6 +21,3 @@ deploy:
   on:
     tags: true
     all_branches: true
-
-after_success:
-  - codecov
