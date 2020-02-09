@@ -7,12 +7,9 @@ cache: yarn
 
 script:
   - npm install codecov -g
-  - cd implementation
   - yarn
   - yarn test
   - codecov
-  - cd ../package
-  - yarn
 
 deploy:
   provider: npm
