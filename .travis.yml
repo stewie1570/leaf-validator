@@ -11,9 +11,7 @@ script:
   - yarn
   - yarn test
   - codecov
-
-before_deploy:
-  - cd package
+  - cd ../package
 
 deploy:
   provider: npm
