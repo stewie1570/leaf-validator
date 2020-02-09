@@ -12,6 +12,7 @@ script:
   - yarn test
   - codecov
   - cd ../package
+  - yarn
 
 deploy:
   provider: npm
