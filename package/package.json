@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "repository": "https://github.com/stewie1570/leaf",
   "author": "Stewart Anderson",
-  "license": "GPL-3",
+  "license": "GPL-3.0",
   "dependencies": {},
   "peerDependencies": {},
   "devDependencies": {
