@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import { Leaf, useValidationModelFor } from './Leaf';
+import { Leaf, useValidationModelFor } from './lib/Leaf';
 import { TextInput } from './TextInput';
 
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];

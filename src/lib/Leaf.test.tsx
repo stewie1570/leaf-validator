@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { render, fireEvent } from '@testing-library/react'
 import { Leaf, useValidationModelFor } from './Leaf'
-import { TextInput } from './TextInput'
+import { TextInput } from '../TextInput'
 
 test("can read & edit model nodes nested inside complex object models and arrays", () => {
     const Wrapper = () => {
