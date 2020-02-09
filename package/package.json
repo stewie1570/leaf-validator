@@ -1,6 +1,6 @@
 {
   "name": "leaf-validator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Declarative state progression & validation",
   "main": "build/index.js",
   "repository": "https://github.com/stewie1570/leaf",
