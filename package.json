@@ -24,7 +24,8 @@
     "typescript": "^3.7.5"
   },
   "files": [
-    "dist/**/*.js"
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
   ],
   "scripts": {
     "start": "react-scripts start",
