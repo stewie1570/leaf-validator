@@ -67,9 +67,9 @@ const validationModel = useValidationModelFor(model);
     location="person.contact.phoneNumber"
     validationModel={validationModel}
     validators={[isRequired, isValidPhoneNumber]}>
-    {(email, onChange, onBlur, errors) => <label>
+    {(phoneNumber, onChange, onBlur, errors) => <label>
         Phone Number
-        <TextInput value={email} onChange={onChange} onBlur={onBlur} className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
+        <TextInput value={phoneNumber} onChange={onChange} onBlur={onBlur} className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
         {errors.length > 0 && <ul className="errors">
             {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
         </ul>}
