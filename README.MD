@@ -1,3 +1,9 @@
+# leaf-validator
+
+[![Build](https://travis-ci.org/stewie1570/leaf-validator.svg)](https://travis-ci.org/stewie1570/leaf-validator)
+[![Codecov](https://img.shields.io/codecov/c/github/stewie1570/leaf-validator)](https://codecov.io/gh/stewie1570/leaf-validator)
+[![npm version](https://badge.fury.io/js/leaf-validator.svg)](https://badge.fury.io/js/leaf-validator)
+
 ## Hypothetical:
 
 You have this model:
@@ -45,7 +51,7 @@ So the new state progression is created from the inside out (New Phone Number ->
 If I updated **phoneNumber** to an invalid phone number then there should be a state somewhere that says the **phoneNumber** is invalid. If the **phoneNumber** is invalid that means **contact** is invalid. If **contact** is invalid then **person** is invalid. So the shape of the validation model needs to mirror the shape of the model it validates.
 
 
-## The Experimental Solution:
+## Experimental Solution:
 Lets declaratively create state progressions and update the validaiton model.
 
 ```jsx
