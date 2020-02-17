@@ -6,7 +6,7 @@
 
 ## Hypothetical:
 
-You have this model:
+In a React application, you have this model:
 
 ```json
 {
@@ -55,6 +55,8 @@ If I updated **phoneNumber** to an invalid phone number then there should be a s
 Lets declaratively create state progressions and update the validaiton model.
 
 ```jsx
+import { Leaf, useValidationModelFor } from "leaf-validator";
+
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 const isValidPhoneNumber = (value: string) => !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(value) && [`"${value || ""}" is not a valid phone number`];
 
@@ -76,3 +78,5 @@ const validationModel = useValidationModelFor(model);
     </label>}
 </Leaf>
 ```
+
+[![Edit Leaf Example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/leaf-example-n0e8v?fontsize=14&hidenavigation=1&theme=dark)
