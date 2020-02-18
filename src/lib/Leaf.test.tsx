@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { render, fireEvent } from '@testing-library/react'
+import { render, fireEvent, waitForDomChange } from '@testing-library/react'
 import { Leaf, useValidationModelFor } from './Leaf'
 import { TextInput } from '../TextInput'
 
@@ -32,14 +32,12 @@ test("can read & edit model nodes nested inside complex object models and arrays
 
     expect((getByTestId("email0") as HTMLInputElement).value).toBe("stewie1570@gmail.com");
     expect((getByTestId("email1") as HTMLInputElement).value).toBe("something_at_something.com");
-
     fireEvent.change(getByTestId("email1"), { target: { value: "stewie1570@hotmail.com" } });
-
     expect((getByTestId("email0") as HTMLInputElement).value).toBe("stewie1570@gmail.com");
     expect((getByTestId("email1") as HTMLInputElement).value).toBe("stewie1570@hotmail.com");
 });
 
-test("validate model node and show errors on blur", () => {
+test("validate model node and show errors on blur", async () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
         const validationModel = useValidationModelFor(model);
@@ -67,10 +65,41 @@ test("validate model node and show errors on blur", () => {
     fireEvent.change(getByTestId("email"), { target: { value: "" } });
     expect(queryAllByTestId("error").map(node => node.textContent)).toEqual([]);
     fireEvent.blur(getByTestId("email"));
+    await waitForDomChange();
     expect(getAllByTestId("error").map(node => node.textContent)).toEqual(["Value is required"]);
 });
 
-test("validate model immediately show errors", () => {
+test("validate model asynchronously and show errors on blur", async () => {
+    const Wrapper = () => {
+        const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
+        const validationModel = useValidationModelFor(model);
+
+        const isRequired = async (value: string) => (!value || value.trim() === "") && await Promise.resolve(["Value is required"]);
+
+        return <Leaf
+            model={model}
+            onChange={setModel}
+            location="contact.email"
+            validationModel={validationModel}
+            validators={[isRequired]}>
+            {(email: string, onChange, onBlur, errors) => <>
+                <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="email" />
+                {errors.length > 0 && <ul>
+                    {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
+                </ul>}
+            </>}
+        </Leaf>
+    }
+
+    const { getByTestId, queryAllByTestId, getAllByTestId } = render(<Wrapper />);
+
+    fireEvent.change(getByTestId("email"), { target: { value: "" } });
+    fireEvent.blur(getByTestId("email"));
+    await waitForDomChange();
+    expect(getAllByTestId("error").map(node => node.textContent)).toEqual(["Value is required"]);
+});
+
+test("validate model immediately show errors", async () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "" } });
         const validationModel = useValidationModelFor(model);
@@ -95,10 +124,12 @@ test("validate model immediately show errors", () => {
 
     const { getAllByTestId } = render(<Wrapper />);
 
+    await waitForDomChange();
+
     expect(getAllByTestId("error").map(node => node.textContent)).toEqual(["Value is required"]);
 });
 
-test("validate multiple model nodes", () => {
+test("validate multiple model nodes", async () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { firstName: "", lastName: "" } });
         const validationModel = useValidationModelFor(model);
@@ -144,6 +175,8 @@ test("validate multiple model nodes", () => {
 
     const { getByTestId, getAllByTestId, queryAllByTestId } = render(<Wrapper />);
 
+    await waitForDomChange();
+
     expect(getAllByTestId("error").map(node => node.textContent)).toEqual([
         "Value is required",
         "Value is required"
@@ -155,6 +188,8 @@ test("validate multiple model nodes", () => {
 
     fireEvent.change(getByTestId("firstName"), { target: { value: "Stewart" } });
     fireEvent.change(getByTestId("lastName"), { target: { value: "Anderson" } });
+
+    await waitForDomChange();
 
     expect(queryAllByTestId("error").map(node => node.textContent)).toEqual([]);
     expect(queryAllByTestId("top-level-error").map(node => node.textContent)).toEqual([]);

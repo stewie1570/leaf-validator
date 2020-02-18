@@ -57,16 +57,20 @@ export function Leaf<Model, Target>(props: {
     const targetValue = get<Target>(location).from(model);
 
     useEffect(() => {
-        const { validationModel, validators } = instance.current
-        if (validationModel && validators && validators.length) {
-            validationModel.set((origValidationModel: any) => ({
-                ...origValidationModel,
-                [location]: validators
-                    .map(validator => validator(targetValue))
+        const runValidation = async () => {
+            const { validationModel, validators } = instance.current
+            if (validationModel && validators && validators.length) {
+                const validationResults = (await Promise.all(validators.map(validator => validator(targetValue))))
                     .filter(value => value)
-                    .flat()
-            }));
-        }
+                    .flat();
+                validationModel.set((origValidationModel: any) => ({
+                    ...origValidationModel,
+                    [location]: validationResults
+                }));
+            }
+        };
+
+        runValidation();
     }, [targetValue, location]);
 
     return children(
