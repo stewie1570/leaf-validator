@@ -37,7 +37,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "tdd": "react-scripts test",
-    "test": "react-scripts test --watchAll=false --coverage --collectCoverageFrom=src/lib**/*.*",
+    "test": "react-scripts test --watchAll=false --colors --coverage --collectCoverageFrom=src/lib**/*.*",
     "eject": "react-scripts eject",
     "build-package": "del-cli ./dist && tsc index.ts -d --jsx react --esModuleInterop --lib \"ES2019\",\"DOM\" --outDir ./dist",
     "prepublishOnly": "yarn build-package"
