@@ -4,6 +4,11 @@ type ModelUpdate<T> = {
     model: T
 };
 
+type ValueTarget = {
+    target: string,
+    obj: any
+}
+
 function getModelProgressionFrom<T>({ target, update, model }: ModelUpdate<T>): T {
     const lastDotIndex = target.lastIndexOf(".");
     const parentLocation = lastDotIndex === -1
@@ -29,18 +34,20 @@ function getModelProgressionFrom<T>({ target, update, model }: ModelUpdate<T>): 
         : set(parentLocation).to(updated).in(model);
 }
 
-export const get = <T>(target: string) => ({
-    from: (obj: any): T => {
-        const firstDotIndex = target.indexOf(".");
-        const childLocation = firstDotIndex === -1
-            ? target
-            : target.substring(0, firstDotIndex);
+function getValueFrom<T>({ target, obj }: ValueTarget): T {
+    const firstDotIndex = target.indexOf(".");
+    const childLocation = firstDotIndex === -1
+        ? target
+        : target.substring(0, firstDotIndex);
 
-        return target === "" || obj === undefined ? obj
-            : firstDotIndex === -1
-                ? obj[target]
-                : get(target.substring(firstDotIndex + 1)).from(obj[childLocation]);
-    }
+    return target === "" || obj === undefined ? obj
+        : firstDotIndex === -1
+            ? obj[target]
+            : get(target.substring(firstDotIndex + 1)).from(obj[childLocation]);
+}
+
+export const get = <T>(target: string) => ({
+    from: (obj: any): T => getValueFrom<T>({ target, obj })
 });
 
 export const set = (target: string) => ({
