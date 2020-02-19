@@ -50,21 +50,20 @@ const App: React.FC = () => {
                         {JSON.stringify(model, null, 4)}
                     </pre>
                 </div>
-                <div style={{ verticalAlign: "top", display: "inline-block", width: "33%" }}>
-                    Validation Query For Model Root:
-                    <pre>
-                        {JSON.stringify(validationModel.getAllErrorsForLocation(""), null, 4)}
-                    </pre>
-                </div>
-                <div style={{ verticalAlign: "top", display: "inline-block", width: "33%" }}>
-                    Validation Query For Person->Contact:
-                    <pre>
-                        {JSON.stringify(validationModel.getAllErrorsForLocation("person.contact"), null, 4)}
-                    </pre>
-                </div>
+                {validationOutput("", validationModel)}
+                {validationOutput("person.contact", validationModel)}
             </form>
         </div >
     );
+}
+
+function validationOutput(location: string, validationModel: any) {
+    return <div style={{ verticalAlign: "top", display: "inline-block", width: "33%" }}>
+        Validation Model for "{location}":
+        <pre>
+            {JSON.stringify(validationModel.getAllErrorsForLocation(location), null, 4)}
+        </pre>
+    </div>
 }
 
 export default App;
