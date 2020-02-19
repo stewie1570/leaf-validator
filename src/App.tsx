@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Dispatch, SetStateAction } from 'react';
 import './App.css';
 import { Leaf, useValidationModelFor } from './lib/Leaf';
 import { TextInput } from './TextInput';
@@ -6,8 +6,14 @@ import { TextInput } from './TextInput';
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 const isValidEmailAddress = (value: string) => !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) && [`"${value || ""}" is not a valid email address`];
 const isValidPhoneNumber = (value: string) => !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(value) && [`"${value || ""}" is not a valid phone number`];
+const form = [
+    { name: "First Name", location: "person.firstName", validators: [isRequired] },
+    { name: "Last Name", location: "person.lastName", validators: [isRequired] },
+    { name: "Email", location: "person.contact.email", validators: [isRequired, isValidEmailAddress] },
+    { name: "Phone Number", location: "person.contact.phoneNumber", validators: [isRequired, isValidPhoneNumber] },
+]
 
-const App: React.FC = () => {
+function App() {
     const [model, setModel] = useState({});
     const validationModel = useValidationModelFor(model);
     const [showAllValidation, setShowAllValidation] = useState(false);
@@ -16,32 +22,10 @@ const App: React.FC = () => {
         setShowAllValidation(true);
     }
 
-    const form = [
-        { name: "First Name", location: "person.firstName", validators: [isRequired] },
-        { name: "Last Name", location: "person.lastName", validators: [isRequired] },
-        { name: "Email", location: "person.contact.email", validators: [isRequired, isValidEmailAddress] },
-        { name: "Phone Number", location: "person.contact.phoneNumber", validators: [isRequired, isValidPhoneNumber] },
-    ]
-
     return (
         <div className="App">
             <form>
-
-                {form.map(({ name, ...formElement }) => <Leaf
-                    showErrors={showAllValidation}
-                    model={model}
-                    onChange={setModel}
-                    validationModel={validationModel}
-                    {...formElement}>
-                    {(value: string, onChange, onBlur, errors) => <label>
-                        {name}
-                        <TextInput value={value} onChange={onChange} onBlur={onBlur} className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
-                        {errors.length > 0 && <ul className="errors">
-                            {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
-                        </ul>}
-                    </label>}
-                </Leaf>)}
-
+                {formElements(model, setModel, showAllValidation, validationModel)}
                 <button className="btn btn-primary" type="submit" onClick={submit}>Submit</button>
                 <br />
                 <div style={{ verticalAlign: "top", display: "inline-block", width: "33%" }}>
@@ -55,6 +39,24 @@ const App: React.FC = () => {
             </form>
         </div >
     );
+}
+
+function formElements(model: any, setModel: Dispatch<SetStateAction<any>>, showAllValidation: boolean, validationModel: any) {
+    return form.map(({ name, ...formElement }, index) => <Leaf
+        key={index}
+        showErrors={showAllValidation}
+        model={model}
+        onChange={setModel}
+        validationModel={validationModel}
+        {...formElement}>
+        {(value: string, onChange, onBlur, errors) => <label>
+            {name}
+            <TextInput value={value} onChange={onChange} onBlur={onBlur} className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
+            {errors.length > 0 && <ul className="errors">
+                {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
+            </ul>}
+        </label>}
+    </Leaf>)
 }
 
 function validationOutput(location: string, validationModel: any) {
