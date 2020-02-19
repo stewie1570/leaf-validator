@@ -16,73 +16,31 @@ const App: React.FC = () => {
         setShowAllValidation(true);
     }
 
+    const form = [
+        { name: "First Name", location: "person.firstName", validators: [isRequired] },
+        { name: "Last Name", location: "person.lastName", validators: [isRequired] },
+        { name: "Email", location: "person.contact.email", validators: [isRequired, isValidEmailAddress] },
+        { name: "Phone Number", location: "person.contact.phoneNumber", validators: [isRequired, isValidPhoneNumber] },
+    ]
+
     return (
         <div className="App">
             <form>
 
-                <Leaf
+                {form.map(({ name, ...formElement }) => <Leaf
                     showErrors={showAllValidation}
                     model={model}
                     onChange={setModel}
-                    location="person.firstName"
                     validationModel={validationModel}
-                    validators={[isRequired]}>
+                    {...formElement}>
                     {(email: string, onChange, onBlur, errors) => <label>
-                        First Name
+                        {name}
                         <TextInput value={email} onChange={onChange} onBlur={onBlur} className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
                         {errors.length > 0 && <ul className="errors">
                             {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
                         </ul>}
                     </label>}
-                </Leaf>
-
-                <Leaf
-                    showErrors={showAllValidation}
-                    model={model}
-                    onChange={setModel}
-                    location="person.lastName"
-                    validationModel={validationModel}
-                    validators={[isRequired]}>
-                    {(email: string, onChange, onBlur, errors) => <label>
-                        Last Name
-                        <TextInput value={email} onChange={onChange} onBlur={onBlur} className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
-                        {errors.length > 0 && <ul className="errors">
-                            {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
-                        </ul>}
-                    </label>}
-                </Leaf>
-
-                <Leaf
-                    showErrors={showAllValidation}
-                    model={model}
-                    onChange={setModel}
-                    location="person.contact.email"
-                    validationModel={validationModel}
-                    validators={[isRequired, isValidEmailAddress]}>
-                    {(email: string, onChange, onBlur, errors) => <label>
-                        Email Address
-                        <TextInput value={email} onChange={onChange} onBlur={onBlur} className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
-                        {errors.length > 0 && <ul className="errors">
-                            {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
-                        </ul>}
-                    </label>}
-                </Leaf>
-
-                <Leaf
-                    showErrors={showAllValidation}
-                    model={model}
-                    onChange={setModel}
-                    location="person.contact.phoneNumber"
-                    validationModel={validationModel}
-                    validators={[isRequired, isValidPhoneNumber]}>
-                    {(email: string, onChange, onBlur, errors) => <label>
-                        Phone Number
-                        <TextInput value={email} onChange={onChange} onBlur={onBlur} className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
-                        {errors.length > 0 && <ul className="errors">
-                            {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
-                        </ul>}
-                    </label>}
-                </Leaf>
+                </Leaf>)}
 
                 <button className="btn btn-primary" type="submit" onClick={submit}>Submit</button>
                 <br />
