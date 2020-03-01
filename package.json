@@ -8,7 +8,8 @@
     "validation",
     "state management"
   ],
-  "main": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "repository": "https://github.com/stewie1570/leaf",
   "author": "Stewart Anderson",
   "license": "GPL-3.0",
@@ -39,7 +40,9 @@
     "tdd": "react-scripts test",
     "test": "react-scripts test --watchAll=false --colors --coverage --collectCoverageFrom=src/lib**/*.*",
     "eject": "react-scripts eject",
-    "build-package": "del-cli ./dist && tsc index.ts -d --jsx react --esModuleInterop --lib \"ES2019\",\"DOM\" --outDir ./dist",
+    "build-package": "del-cli ./dist && yarn build-cjs && yarn build-esm",
+    "build-cjs": "tsc index.ts -d --jsx react --esModuleInterop --lib \"ES2019\",\"DOM\" --outDir ./dist/cjs",
+    "build-esm": "tsc index.ts -d --jsx react --allowSyntheticDefaultImports --moduleResolution \"node\" --module \"esnext\" --lib \"ES2019\",\"DOM\" --outDir ./dist/esm",
     "prepublishOnly": "yarn build-package"
   },
   "eslintConfig": {
