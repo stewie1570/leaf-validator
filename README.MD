@@ -8,7 +8,7 @@
 
 ## Hypothetical:
 
-In a React application, you have this model:
+You have this model in a React app:
 
 ```json
 {
