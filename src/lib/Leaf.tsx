@@ -20,6 +20,12 @@ type FilteredObjectOptions<T> = {
     mapper: (key: string, value: any) => T
 }
 
+type Instance<Target> = {
+    validationModel?: ValidationModel
+    validators?: Array<Validator<Target>>
+    validationTarget?: Target
+};
+
 function filteredObjectToArray<T>(obj: any, options: FilteredObjectOptions<T>): Array<T> {
     return Object
         .keys(obj)
@@ -53,7 +59,7 @@ export function Leaf<Model, Target>(props: {
 }) {
     const [hasBlurred, setHasBlurred] = useState(false);
     const { children, location, model, validationModel, validators, onChange, showErrors } = props;
-    const instance = useRef({ validationModel, validators })
+    const instance = useRef<Instance<Target>>({ validationModel, validators });
     const targetValue = get<Target>(location).from(model);
 
     useEffect(() => {
@@ -63,13 +69,15 @@ export function Leaf<Model, Target>(props: {
                 const validationResults = (await Promise.all(validators.map(validator => validator(targetValue))))
                     .filter(value => value)
                     .flat();
-                validationModel.set((origValidationModel: any) => ({
+
+                targetValue === instance.current.validationTarget && validationModel.set((origValidationModel: any) => ({
                     ...origValidationModel,
                     [location]: validationResults
                 }));
             }
         };
 
+        instance.current.validationTarget = targetValue;
         runValidation();
     }, [targetValue, location]);
 
