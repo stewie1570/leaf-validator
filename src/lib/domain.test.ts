@@ -24,6 +24,47 @@ describe("diff", () => {
         })).toEqual([{ location: "changed", updatedValue: "p1 value 2" }]);
     });
 
+    it("should show an entire sub-object has been removed from the original", () => {
+        expect(diff.from({
+            left: {
+                with: {
+                    some: ["values"]
+                }
+            },
+            right: {
+                has: {
+                    some: ["other values"]
+                }
+            }
+        }).to({
+            right: {
+                has: {
+                    some: ["other values"]
+                }
+            }
+        })).toEqual([{ location: "left", updatedValue: undefined }]);
+
+        expect(diff.from({
+            left: {
+                with: {
+                    some: ["values"]
+                }
+            },
+            right: {
+                has: {
+                    some: ["other values"]
+                }
+            }
+        }).to({
+            left: {
+                with: {
+                    some: ["values"]
+                }
+            },
+            right: {}
+        })).toEqual([{ location: "right.has", updatedValue: undefined }]);
+    });
+
     it("should map simple non-symmetrical objects to their diffs", () => {
         const result = diff.from({
             changed: "p1 value 1",
