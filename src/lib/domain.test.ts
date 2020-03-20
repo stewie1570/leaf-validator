@@ -8,10 +8,10 @@ describe("diff", () => {
     });
 
     it("should return updated value types", () => {
-        expect(diff.from(1).to(2)).toEqual([{ location: "", value: 2 }]);
-        expect(diff.from(1).to({})).toEqual([{ location: "", value: {} }]);
-        expect(diff.from("hello").to("hi")).toEqual([{ location: "", value: "hi" }]);
-        expect(diff.from(true).to(false)).toEqual([{ location: "", value: false }]);
+        expect(diff.from(1).to(2)).toEqual([{ location: "", updatedValue: 2 }]);
+        expect(diff.from(1).to({})).toEqual([{ location: "", updatedValue: {} }]);
+        expect(diff.from("hello").to("hi")).toEqual([{ location: "", updatedValue: "hi" }]);
+        expect(diff.from(true).to(false)).toEqual([{ location: "", updatedValue: false }]);
     });
 
     it("should map simple symmetrical objects to their diffs", () => {
@@ -21,7 +21,7 @@ describe("diff", () => {
         }).to({
             changed: "p1 value 2",
             original: "p2 value 1"
-        })).toEqual([{ location: "changed", value: "p1 value 2" }]);
+        })).toEqual([{ location: "changed", updatedValue: "p1 value 2" }]);
     });
 
     it("should map simple non-symmetrical objects to their diffs", () => {
@@ -34,9 +34,9 @@ describe("diff", () => {
         });
 
         expect(result).toEqual([
-            { location: "changed", value: "p1 value 2" },
-            { location: "original", value: undefined },
-            { location: "new", value: "p2 value 1" }
+            { location: "changed", updatedValue: "p1 value 2" },
+            { location: "original", updatedValue: undefined },
+            { location: "new", updatedValue: "p2 value 1" }
         ]);
     });
 
@@ -54,9 +54,9 @@ describe("diff", () => {
         });
 
         expect(result).toEqual([
-            { location: "outer.changed", value: "p1 value 2" },
-            { location: "outer.original", value: undefined },
-            { location: "outer.new", value: "p2 value 1" }
+            { location: "outer.changed", updatedValue: "p1 value 2" },
+            { location: "outer.original", updatedValue: undefined },
+            { location: "outer.new", updatedValue: "p2 value 1" }
         ]);
     });
 
@@ -82,9 +82,9 @@ describe("diff", () => {
         });
 
         expect(result).toEqual([
-            { location: "outer.0.wrapper.changed", value: "p1 value 2" },
-            { location: "outer.0.wrapper.original", value: undefined },
-            { location: "outer.0.wrapper.new", value: "p2 value 1" }
+            { location: "outer.0.wrapper.changed", updatedValue: "p1 value 2" },
+            { location: "outer.0.wrapper.original", updatedValue: undefined },
+            { location: "outer.0.wrapper.new", updatedValue: "p2 value 1" }
         ]);
     });
 });
@@ -114,7 +114,7 @@ describe("diff and set working together", () => {
         const diffs = diff.from(original).to(updated);
         let constructed = original;
         diffs.forEach(diff => {
-            constructed = set(diff.location).to(diff.value).in(constructed);
+            constructed = set(diff.location).to(diff.updatedValue).in(constructed);
         });
 
         expect(constructed).toEqual(updated);

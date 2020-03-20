@@ -65,7 +65,7 @@ const distinctArrayFrom = (left: Array<any>, right: Array<any>) => {
 
 export const diff = {
     from: (original: any) => ({
-        to: (updated: any): Array<{ location: string, value: any }> => {
+        to: (updated: any): Array<{ location: string, updatedValue: any }> => {
             const isObject = original instanceof Object && updated instanceof Object;
             const prefixedLocation = (location: string) => (location || "").length > 0
                 ? `.${location}`
@@ -79,7 +79,7 @@ export const diff = {
                         .map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })))
                 : [original === updated ? noDiff : updated]
                     .filter(diff => diff !== noDiff)
-                    .map(updatedValue => ({ location: "", value: updatedValue }));
+                    .map(updatedValue => ({ location: "", updatedValue: updatedValue }));
         }
     })
 };
