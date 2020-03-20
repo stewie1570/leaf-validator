@@ -1,4 +1,125 @@
-import { get, set } from './domain'
+import { get, set, diff } from './domain'
+
+describe("diff", () => {
+    it("should be empty for same value types", () => {
+        expect(diff.from(1).to(1)).toEqual([]);
+        expect(diff.from("hello").to("hello")).toEqual([]);
+        expect(diff.from(true).to(true)).toEqual([]);
+    });
+
+    it("should return updated value types", () => {
+        expect(diff.from(1).to(2)).toEqual([{ location: "", value: 2 }]);
+        expect(diff.from(1).to({})).toEqual([{ location: "", value: {} }]);
+        expect(diff.from("hello").to("hi")).toEqual([{ location: "", value: "hi" }]);
+        expect(diff.from(true).to(false)).toEqual([{ location: "", value: false }]);
+    });
+
+    it("should map simple symmetrical objects to their diffs", () => {
+        expect(diff.from({
+            changed: "p1 value 1",
+            original: "p2 value 1"
+        }).to({
+            changed: "p1 value 2",
+            original: "p2 value 1"
+        })).toEqual([{ location: "changed", value: "p1 value 2" }]);
+    });
+
+    it("should map simple non-symmetrical objects to their diffs", () => {
+        const result = diff.from({
+            changed: "p1 value 1",
+            original: "p2 value 1"
+        }).to({
+            changed: "p1 value 2",
+            new: "p2 value 1"
+        });
+
+        expect(result).toEqual([
+            { location: "changed", value: "p1 value 2" },
+            { location: "original", value: undefined },
+            { location: "new", value: "p2 value 1" }
+        ]);
+    });
+
+    it("should map complex non-symmetrical objects to their diffs", () => {
+        const result = diff.from({
+            outer: {
+                changed: "p1 value 1",
+                original: "p2 value 1"
+            }
+        }).to({
+            outer: {
+                changed: "p1 value 2",
+                new: "p2 value 1"
+            }
+        });
+
+        expect(result).toEqual([
+            { location: "outer.changed", value: "p1 value 2" },
+            { location: "outer.original", value: undefined },
+            { location: "outer.new", value: "p2 value 1" }
+        ]);
+    });
+
+    it("should map complex non-symmetrical objects inside arrays inside an object to their diffs", () => {
+        const result = diff.from({
+            outer: [
+                {
+                    wrapper: {
+                        changed: "p1 value 1",
+                        original: "p2 value 1"
+                    }
+                }
+            ]
+        }).to({
+            outer: [
+                {
+                    wrapper: {
+                        changed: "p1 value 2",
+                        new: "p2 value 1"
+                    }
+                }
+            ]
+        });
+
+        expect(result).toEqual([
+            { location: "outer.0.wrapper.changed", value: "p1 value 2" },
+            { location: "outer.0.wrapper.original", value: undefined },
+            { location: "outer.0.wrapper.new", value: "p2 value 1" }
+        ]);
+    });
+});
+
+describe("diff and set working together", () => {
+    it("should show that applying the diffs (created from original to updated) to the original constructs an updated equivalent", () => {
+        const original = {
+            outer: [
+                {
+                    wrapper: {
+                        changed: "p1 value 1",
+                        original: "p2 value 1"
+                    }
+                }
+            ]
+        };
+        const updated = {
+            outer: [
+                {
+                    wrapper: {
+                        changed: "p1 value 2",
+                        new: "p2 value 1"
+                    }
+                }
+            ]
+        };
+        const diffs = diff.from(original).to(updated);
+        let constructed = original;
+        diffs.forEach(diff => {
+            constructed = set(diff.location).to(diff.value).in(constructed);
+        });
+
+        expect(constructed).toEqual(updated);
+    })
+});
 
 describe("get target from object", () => {
     it("gets value from object location", () => {

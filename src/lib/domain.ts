@@ -55,3 +55,31 @@ export const set = (target: string) => ({
         in: <T>(obj: T): T => getModelProgressionFrom({ target, update, model: obj })
     })
 });
+
+const noDiff = {};
+
+const distinctArrayFrom = (left: Array<any>, right: Array<any>) => {
+    const composite = [...left, ...right];
+    return composite.filter((value, index) => composite.indexOf(value) === index);
+}
+
+export const diff = {
+    from: (original: any) => ({
+        to: (updated: any): Array<{ location: string, value: any }> => {
+            const isObject = original instanceof Object && updated instanceof Object;
+            const prefixedLocation = (location: string) => (location || "").length > 0
+                ? `.${location}`
+                : location;
+
+            return isObject
+                ? distinctArrayFrom(Object.keys(original), Object.keys(updated))
+                    .flatMap(key => diff
+                        .from(original[key])
+                        .to(updated[key])
+                        .map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })))
+                : [original === updated ? noDiff : updated]
+                    .filter(diff => diff !== noDiff)
+                    .map(updatedValue => ({ location: "", value: updatedValue }));
+        }
+    })
+};
