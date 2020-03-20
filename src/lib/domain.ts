@@ -9,6 +9,11 @@ type ValueTarget = {
     obj: any
 }
 
+type Diffs = Array<{
+    location: string;
+    updatedValue: any;
+}>;
+
 function getModelProgressionFrom<T>({ target, update, model }: ModelUpdate<T>): T {
     const lastDotIndex = target.lastIndexOf(".");
     const parentLocation = lastDotIndex === -1
@@ -63,23 +68,26 @@ const distinctArrayFrom = (left: Array<any>, right: Array<any>) => {
     return composite.filter((value, index) => composite.indexOf(value) === index);
 }
 
+const processDiffFor = (original: any, updated: any): Diffs => {
+    const isObject = original instanceof Object && updated instanceof Object;
+    const prefixedLocation = (location: string) => (location || "").length > 0
+        ? `.${location}`
+        : location;
+
+    return isObject
+        ? distinctArrayFrom(Object.keys(original), Object.keys(updated))
+            .flatMap(key => diff
+                .from(original[key])
+                .to(updated[key])
+                .map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })))
+        : [original === updated ? noDiff : updated]
+            .filter(diff => diff !== noDiff)
+            .map(updatedValue => ({ location: "", updatedValue: updatedValue }));
+};
+
+
 export const diff = {
     from: (original: any) => ({
-        to: (updated: any): Array<{ location: string, updatedValue: any }> => {
-            const isObject = original instanceof Object && updated instanceof Object;
-            const prefixedLocation = (location: string) => (location || "").length > 0
-                ? `.${location}`
-                : location;
-
-            return isObject
-                ? distinctArrayFrom(Object.keys(original), Object.keys(updated))
-                    .flatMap(key => diff
-                        .from(original[key])
-                        .to(updated[key])
-                        .map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })))
-                : [original === updated ? noDiff : updated]
-                    .filter(diff => diff !== noDiff)
-                    .map(updatedValue => ({ location: "", updatedValue: updatedValue }));
-        }
+        to: (updated: any): Diffs => processDiffFor(original, updated)
     })
 };
