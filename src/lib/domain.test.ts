@@ -80,17 +80,20 @@ describe("diff", () => {
             some: {
                 complex: {
                     object: {
-                        with: ["values"]
+                        with: ["values"],
+                        and: ["other", "values"]
                     }
                 }
             }
         })).toEqual([
             {
-                location: "", updatedValue: {
+                location: "",
+                updatedValue: {
                     some: {
                         complex: {
                             object: {
-                                with: ["values"]
+                                with: ["values"],
+                                and: ["other", "values"]
                             }
                         }
                     }

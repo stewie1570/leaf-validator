@@ -199,3 +199,50 @@ expect(constructed).toEqual(updated);
 ```
 
 The **diff** method is especially useful when you need to send a diff of what the user last loaded vs. the user updated model to the server. When updates are done via diffs instead of sending full user updated objects you can avoid race-conditions that could cause concurrent users to overwrite each other.
+
+
+### **leafDiff**: will do the same as the **diff** function except when a new object is constructed because it didn't exist in the original. Instead of creating that object in one diff this function will create a diff for each leaf in that new object.
+
+**Example (_from a unit test_):**
+
+```js
+expect(diff.from(null).to({
+    some: {
+        complex: {
+            object: {
+                with: ["values"],
+                and: ["other", "values"]
+            }
+        }
+    }
+})).toEqual([
+    {
+        location: "",
+        updatedValue: {
+            some: {
+                complex: {
+                    object: {
+                        with: ["values"],
+                        and: ["other", "values"]
+                    }
+                }
+            }
+        }
+    }
+]);
+
+expect(leafDiff.from(null).to({
+    some: {
+        complex: {
+            object: {
+                with: ["values"],
+                and: ["other", "values"]
+            }
+        }
+    }
+})).toEqual([
+    { location: "some.complex.object.with.0", updatedValue: "values" },
+    { location: "some.complex.object.and.0", updatedValue: "other" },
+    { location: "some.complex.object.and.1", updatedValue: "values" }
+]);
+```
