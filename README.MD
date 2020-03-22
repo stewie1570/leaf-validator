@@ -139,7 +139,7 @@ will return the equivalent of:
 }
 ```
 
-### **Set**: _(see example below)_
+### **Get**: _(see example below)_
 
 **Example:**
 
