@@ -68,25 +68,35 @@ const distinctArrayFrom = (left: Array<any>, right: Array<any>) => {
     return composite.filter((value, index) => composite.indexOf(value) === index);
 }
 
-const processDiffFor = (original: any, updated: any): Diffs => {
-    const isObject = original instanceof Object && updated instanceof Object;
+type IsObjectCheck = (original: any, updated: any) => boolean;
+
+const bothAreObjects: IsObjectCheck = (original, updated) =>
+    original instanceof Object && updated instanceof Object;
+
+const updatedIsObject: IsObjectCheck = (original, updated) => updated instanceof Object;
+
+const processDiffFor = (original: any, updated: any, isObject: IsObjectCheck): Diffs => {
     const prefixedLocation = (location: string) => (location || "").length > 0
         ? `.${location}`
         : location;
 
-    return original === updated
-        ? []
-        : isObject ? distinctArrayFrom(Object.keys(original), Object.keys(updated))
-            .flatMap(key => diff
-                .from(original[key])
-                .to(updated[key])
+    return original === updated ? []
+        : isObject(original, updated) ? distinctArrayFrom(
+            Object.keys(original instanceof Object ? original : {}),
+            Object.keys(updated))
+            .flatMap(key => processDiffFor((original || {})[key], updated[key], isObject)
                 .map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })))
-        : [{ location: "", updatedValue: updated }];
+            : [{ location: "", updatedValue: updated }];
 };
-
 
 export const diff = {
     from: (original: any) => ({
-        to: (updated: any): Diffs => processDiffFor(original, updated)
+        to: (updated: any): Diffs => processDiffFor(original, updated, bothAreObjects)
+    })
+};
+
+export const leafDiff = {
+    from: (original: any) => ({
+        to: (updated: any): Diffs => processDiffFor(original, updated, updatedIsObject)
     })
 };

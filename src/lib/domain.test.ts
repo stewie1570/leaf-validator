@@ -1,132 +1,186 @@
-import { get, set, diff } from './domain'
+import { get, set, diff, leafDiff } from './domain'
 
 describe("diff", () => {
     it("should be empty for same value types", () => {
-        expect(diff.from(1).to(1)).toEqual([]);
-        expect(diff.from("hello").to("hello")).toEqual([]);
-        expect(diff.from(true).to(true)).toEqual([]);
+        [diff, leafDiff].forEach(sut => {
+            expect(sut.from(1).to(1)).toEqual([]);
+            expect(sut.from("hello").to("hello")).toEqual([]);
+            expect(sut.from(true).to(true)).toEqual([]);
+        });
     });
 
     it("should return updated value types", () => {
-        expect(diff.from(1).to(2)).toEqual([{ location: "", updatedValue: 2 }]);
+        [diff, leafDiff].forEach(sut => {
+            expect(sut.from(1).to(2)).toEqual([{ location: "", updatedValue: 2 }]);
+            expect(sut.from("hello").to("hi")).toEqual([{ location: "", updatedValue: "hi" }]);
+            expect(sut.from(true).to(false)).toEqual([{ location: "", updatedValue: false }]);
+        });
+
         expect(diff.from(1).to({})).toEqual([{ location: "", updatedValue: {} }]);
-        expect(diff.from("hello").to("hi")).toEqual([{ location: "", updatedValue: "hi" }]);
-        expect(diff.from(true).to(false)).toEqual([{ location: "", updatedValue: false }]);
     });
 
     it("should map simple symmetrical objects to their diffs", () => {
-        expect(diff.from({
-            changed: "p1 value 1",
-            original: "p2 value 1"
-        }).to({
-            changed: "p1 value 2",
-            original: "p2 value 1"
-        })).toEqual([{ location: "changed", updatedValue: "p1 value 2" }]);
+        [diff, leafDiff].forEach(sut => {
+            expect(sut.from({
+                changed: "p1 value 1",
+                original: "p2 value 1"
+            }).to({
+                changed: "p1 value 2",
+                original: "p2 value 1"
+            })).toEqual([{ location: "changed", updatedValue: "p1 value 2" }]);
+        });
     });
 
     it("should show an entire sub-object has been removed from the original", () => {
-        expect(diff.from({
-            left: {
-                with: {
-                    some: ["values"]
+        [diff, leafDiff].forEach(sut => {
+            expect(sut.from({
+                left: {
+                    with: {
+                        some: ["values"]
+                    }
+                },
+                right: {
+                    has: {
+                        some: ["other values"]
+                    }
                 }
-            },
-            right: {
-                has: {
-                    some: ["other values"]
+            }).to({
+                right: {
+                    has: {
+                        some: ["other values"]
+                    }
                 }
-            }
-        }).to({
-            right: {
-                has: {
-                    some: ["other values"]
-                }
-            }
-        })).toEqual([{ location: "left", updatedValue: undefined }]);
+            })).toEqual([{ location: "left", updatedValue: undefined }]);
 
-        expect(diff.from({
-            left: {
-                with: {
-                    some: ["values"]
+            expect(sut.from({
+                left: {
+                    with: {
+                        some: ["values"]
+                    }
+                },
+                right: {
+                    has: {
+                        some: ["other values"]
+                    }
                 }
-            },
-            right: {
-                has: {
-                    some: ["other values"]
-                }
-            }
-        }).to({
-            left: {
-                with: {
-                    some: ["values"]
-                }
-            },
-            right: {}
-        })).toEqual([{ location: "right.has", updatedValue: undefined }]);
+            }).to({
+                left: {
+                    with: {
+                        some: ["values"]
+                    }
+                },
+                right: {}
+            })).toEqual([{ location: "right.has", updatedValue: undefined }]);
+        });
     });
 
-    it("should map simple non-symmetrical objects to their diffs", () => {
-        const result = diff.from({
-            changed: "p1 value 1",
-            original: "p2 value 1"
-        }).to({
-            changed: "p1 value 2",
-            new: "p2 value 1"
-        });
-
-        expect(result).toEqual([
-            { location: "changed", updatedValue: "p1 value 2" },
-            { location: "original", updatedValue: undefined },
-            { location: "new", updatedValue: "p2 value 1" }
+    it("should support leaf creation and object creation", () => {
+        expect(diff.from(null).to({
+            some: {
+                complex: {
+                    object: {
+                        with: ["values"]
+                    }
+                }
+            }
+        })).toEqual([
+            {
+                location: "", updatedValue: {
+                    some: {
+                        complex: {
+                            object: {
+                                with: ["values"]
+                            }
+                        }
+                    }
+                }
+            }
         ]);
+
+        expect(leafDiff.from(null).to({
+            some: {
+                complex: {
+                    object: {
+                        with: ["values"],
+                        and: ["other", "values"]
+                    }
+                }
+            }
+        })).toEqual([
+            { location: "some.complex.object.with.0", updatedValue: "values" },
+            { location: "some.complex.object.and.0", updatedValue: "other" },
+            { location: "some.complex.object.and.1", updatedValue: "values" }
+        ]);
+    })
+
+    it("should map simple non-symmetrical objects to their diffs", () => {
+        [diff, leafDiff].forEach(sut => {
+            const result = sut.from({
+                changed: "p1 value 1",
+                original: "p2 value 1"
+            }).to({
+                changed: "p1 value 2",
+                new: "p2 value 1"
+            });
+
+            expect(result).toEqual([
+                { location: "changed", updatedValue: "p1 value 2" },
+                { location: "original", updatedValue: undefined },
+                { location: "new", updatedValue: "p2 value 1" }
+            ]);
+        });
     });
 
     it("should map complex non-symmetrical objects to their diffs", () => {
-        const result = diff.from({
-            outer: {
-                changed: "p1 value 1",
-                original: "p2 value 1"
-            }
-        }).to({
-            outer: {
-                changed: "p1 value 2",
-                new: "p2 value 1"
-            }
-        });
+        [diff, leafDiff].forEach(sut => {
+            const result = sut.from({
+                outer: {
+                    changed: "p1 value 1",
+                    original: "p2 value 1"
+                }
+            }).to({
+                outer: {
+                    changed: "p1 value 2",
+                    new: "p2 value 1"
+                }
+            });
 
-        expect(result).toEqual([
-            { location: "outer.changed", updatedValue: "p1 value 2" },
-            { location: "outer.original", updatedValue: undefined },
-            { location: "outer.new", updatedValue: "p2 value 1" }
-        ]);
+            expect(result).toEqual([
+                { location: "outer.changed", updatedValue: "p1 value 2" },
+                { location: "outer.original", updatedValue: undefined },
+                { location: "outer.new", updatedValue: "p2 value 1" }
+            ]);
+        });
     });
 
     it("should map complex non-symmetrical objects inside arrays inside an object to their diffs", () => {
-        const result = diff.from({
-            outer: [
-                {
-                    wrapper: {
-                        changed: "p1 value 1",
-                        original: "p2 value 1"
+        [diff, leafDiff].forEach(sut => {
+            const result = sut.from({
+                outer: [
+                    {
+                        wrapper: {
+                            changed: "p1 value 1",
+                            original: "p2 value 1"
+                        }
                     }
-                }
-            ]
-        }).to({
-            outer: [
-                {
-                    wrapper: {
-                        changed: "p1 value 2",
-                        new: "p2 value 1"
+                ]
+            }).to({
+                outer: [
+                    {
+                        wrapper: {
+                            changed: "p1 value 2",
+                            new: "p2 value 1"
+                        }
                     }
-                }
-            ]
-        });
+                ]
+            });
 
-        expect(result).toEqual([
-            { location: "outer.0.wrapper.changed", updatedValue: "p1 value 2" },
-            { location: "outer.0.wrapper.original", updatedValue: undefined },
-            { location: "outer.0.wrapper.new", updatedValue: "p2 value 1" }
-        ]);
+            expect(result).toEqual([
+                { location: "outer.0.wrapper.changed", updatedValue: "p1 value 2" },
+                { location: "outer.0.wrapper.original", updatedValue: undefined },
+                { location: "outer.0.wrapper.new", updatedValue: "p2 value 1" }
+            ]);
+        });
     });
 });
 
