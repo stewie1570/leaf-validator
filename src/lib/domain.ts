@@ -14,6 +14,13 @@ type Diffs = Array<{
     updatedValue: any;
 }>;
 
+const expand = ({ array, toMinLength }: { array: Array<any>, toMinLength: number }): Array<any> => {
+    const theArray = array || [];
+    return theArray.length >= toMinLength
+        ? array
+        : [...theArray, ...Array(toMinLength - theArray.length).fill(undefined)];
+}
+
 function getModelProgressionFrom<T>({ target, update, model }: ModelUpdate<T>): T {
     const lastDotIndex = target.lastIndexOf(".");
     const parentLocation = lastDotIndex === -1
@@ -26,9 +33,10 @@ function getModelProgressionFrom<T>({ target, update, model }: ModelUpdate<T>): 
     const currentlyInArray = !isNaN(currentArrayIndex);
 
     const updated = currentlyInArray
-        ? get<Array<any>>(parentLocation)
-            .from(model)
-            .map((node, index) => index === currentArrayIndex ? update : node)
+        ? expand({
+            array: get<Array<any>>(parentLocation).from(model),
+            toMinLength: currentArrayIndex + 1
+        }).map((node, index) => index === currentArrayIndex ? update : node)
         : {
             ...get<any>(parentLocation).from(model),
             [currentLocation]: update

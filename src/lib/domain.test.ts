@@ -204,6 +204,10 @@ describe("diff and set working together", () => {
                         wrapper: {
                             changed: "p1 value 2",
                             new: "p2 value 1"
+                        },
+                        other: {
+                            created: "stuff",
+                            and: ["other", "stuff"]
                         }
                     }
                 ]
@@ -245,6 +249,19 @@ describe("get target from object", () => {
 });
 
 describe("set value at target location of object to get next immutable progression", () => {
+    it("can build complex objects with multiple nested arrays in the middle", () => {
+        expect(set("outer.1.inner.0.prop").to("value").in({})).toEqual({
+            outer: [
+                undefined,
+                {
+                    inner: [
+                        { prop: "value" }
+                    ]
+                }
+            ]
+        });
+    });
+
     it("sets the value at target location and keeps other refs", () => {
         const theObject = {
             prop1: {
