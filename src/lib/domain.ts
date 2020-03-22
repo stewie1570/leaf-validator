@@ -74,15 +74,14 @@ const processDiffFor = (original: any, updated: any): Diffs => {
         ? `.${location}`
         : location;
 
-    return isObject
-        ? distinctArrayFrom(Object.keys(original), Object.keys(updated))
+    return original === updated
+        ? []
+        : isObject ? distinctArrayFrom(Object.keys(original), Object.keys(updated))
             .flatMap(key => diff
                 .from(original[key])
                 .to(updated[key])
                 .map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })))
-        : [original === updated ? noDiff : updated]
-            .filter(diff => diff !== noDiff)
-            .map(updatedValue => ({ location: "", updatedValue: updatedValue }));
+        : [{ location: "", updatedValue: updated }];
 };
 
 
