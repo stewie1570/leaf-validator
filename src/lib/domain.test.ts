@@ -187,33 +187,35 @@ describe("diff", () => {
 
 describe("diff and set working together", () => {
     it("should show that applying the diffs (created from original to updated) to the original constructs an updated equivalent", () => {
-        const original = {
-            outer: [
-                {
-                    wrapper: {
-                        changed: "p1 value 1",
-                        original: "p2 value 1"
+        [diff, leafDiff].forEach(sut => {
+            const original = {
+                outer: [
+                    {
+                        wrapper: {
+                            changed: "p1 value 1",
+                            original: "p2 value 1"
+                        }
                     }
-                }
-            ]
-        };
-        const updated = {
-            outer: [
-                {
-                    wrapper: {
-                        changed: "p1 value 2",
-                        new: "p2 value 1"
+                ]
+            };
+            const updated = {
+                outer: [
+                    {
+                        wrapper: {
+                            changed: "p1 value 2",
+                            new: "p2 value 1"
+                        }
                     }
-                }
-            ]
-        };
-        const diffs = diff.from(original).to(updated);
-        let constructed = original;
-        diffs.forEach(diff => {
-            constructed = set(diff.location).to(diff.updatedValue).in(constructed);
-        });
+                ]
+            };
+            const diffs = sut.from(original).to(updated);
+            let constructed = original;
+            diffs.forEach(diff => {
+                constructed = set(diff.location).to(diff.updatedValue).in(constructed);
+            });
 
-        expect(constructed).toEqual(updated);
+            expect(constructed).toEqual(updated);
+        });
     })
 });
 
