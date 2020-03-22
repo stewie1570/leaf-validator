@@ -89,14 +89,12 @@ const processDiffFor = (original: any, updated: any, isObject: IsObjectCheck): D
             : [{ location: "", updatedValue: updated }];
 };
 
-export const diff = {
+const diffApiFrom = (isObjectCheck: IsObjectCheck) => ({
     from: (original: any) => ({
-        to: (updated: any): Diffs => processDiffFor(original, updated, bothAreObjects)
+        to: (updated: any) => processDiffFor(original, updated, isObjectCheck)
     })
-};
+})
 
-export const leafDiff = {
-    from: (original: any) => ({
-        to: (updated: any): Diffs => processDiffFor(original, updated, updatedIsObject)
-    })
-};
+export const diff = diffApiFrom(bothAreObjects);
+
+export const leafDiff = diffApiFrom(updatedIsObject);

@@ -17,6 +17,7 @@ describe("diff", () => {
         });
 
         expect(diff.from(1).to({})).toEqual([{ location: "", updatedValue: {} }]);
+        expect(leafDiff.from(1).to({})).toEqual([]);
     });
 
     it("should map simple symmetrical objects to their diffs", () => {
