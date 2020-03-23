@@ -76,7 +76,7 @@ describe("diff", () => {
     });
 
     it("should support leaf creation and object creation", () => {
-        expect(diff.from(null).to({
+        const updatedObject = {
             some: {
                 complex: {
                     object: {
@@ -85,32 +85,15 @@ describe("diff", () => {
                     }
                 }
             }
-        })).toEqual([
+        };
+        expect(diff.from(null).to(updatedObject)).toEqual([
             {
                 location: "",
-                updatedValue: {
-                    some: {
-                        complex: {
-                            object: {
-                                with: ["values"],
-                                and: ["other", "values"]
-                            }
-                        }
-                    }
-                }
+                updatedValue: updatedObject
             }
         ]);
 
-        expect(leafDiff.from(null).to({
-            some: {
-                complex: {
-                    object: {
-                        with: ["values"],
-                        and: ["other", "values"]
-                    }
-                }
-            }
-        })).toEqual([
+        expect(leafDiff.from(null).to(updatedObject)).toEqual([
             { location: "some.complex.object.with.0", updatedValue: "values" },
             { location: "some.complex.object.and.0", updatedValue: "other" },
             { location: "some.complex.object.and.1", updatedValue: "values" }
