@@ -2,6 +2,7 @@ import React, { useState, Dispatch, SetStateAction } from 'react';
 import './App.css';
 import { Leaf, useValidationModelFor } from './lib/Leaf';
 import { TextInput } from './TextInput';
+import { leafDiff } from './lib/domain';
 
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 const isValidEmailAddress = (value: string) => !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) && [`"${value || ""}" is not a valid email address`];
@@ -21,12 +22,14 @@ const form = [
 ]
 
 function App() {
-    const [model, setModel] = useState({});
+    const [originalModel, setOriginalModel] = useState();
+    const [model, setModel] = useState();
     const validationModel = useValidationModelFor(model);
     const [showAllValidation, setShowAllValidation] = useState(false);
     const submit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         setShowAllValidation(true);
+        validationModel.getAllErrorsForLocation("person").length === 0 && setOriginalModel(model);
     }
 
     return (
@@ -43,6 +46,12 @@ function App() {
                 </div>
                 {validationOutput("", validationModel)}
                 {validationOutput("person.contact", validationModel)}
+                <p>
+                    <b>Diff</b>
+                    <pre>
+                        {JSON.stringify(leafDiff.from(originalModel).to(model), null, 2)}
+                    </pre>
+                </p>
             </form>
         </div >
     );
