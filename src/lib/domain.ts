@@ -76,7 +76,7 @@ const distinctArrayFrom = (left: Array<any>, right: Array<any>) => {
 
 type IsObjectCheck = (original: any, updated: any) => boolean;
 
-const bothAreObjects: IsObjectCheck = (original, updated) =>
+const origAndUpdatedAreObjects: IsObjectCheck = (original, updated) =>
     original instanceof Object && updated instanceof Object;
 
 const updatedIsObject: IsObjectCheck = (original, updated) => updated instanceof Object;
@@ -95,12 +95,12 @@ const processDiffFor = (original: any, updated: any, isObject: IsObjectCheck): D
             : [{ location: "", updatedValue: updated }];
 };
 
-const diffApiFrom = (isObjectCheck: IsObjectCheck) => ({
+const diffApiFrom = ({ recurseWhen }: { recurseWhen: IsObjectCheck }) => ({
     from: (original: any) => ({
-        to: (updated: any) => processDiffFor(original, updated, isObjectCheck)
+        to: (updated: any) => processDiffFor(original, updated, recurseWhen)
     })
 })
 
-export const diff = diffApiFrom(bothAreObjects);
+export const diff = diffApiFrom({ recurseWhen: origAndUpdatedAreObjects });
 
-export const leafDiff = diffApiFrom(updatedIsObject);
+export const leafDiff = diffApiFrom({ recurseWhen: updatedIsObject });
