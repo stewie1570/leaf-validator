@@ -7,14 +7,15 @@ import { leafDiff } from './lib/domain';
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 const isValidEmailAddress = (value: string) => !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) && [`"${value || ""}" is not a valid email address`];
 const isValidPhoneNumber = (value: string) => !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(value) && [`"${value || ""}" is not a valid phone number`];
-const doesNotExistYet = (value: string) => new Promise(resolve => setTimeout(() => resolve([`"${value}" already exists.`]), Math.random() * 2000))
+const doesNotExistYet = (value: string) => new Promise(resolve => setTimeout(() => resolve([`"${value}" is not valid.`]), Math.random() * 2000))
     .then(result => {
         console.log(`validated "${value}"`);
         return result;
     });
 
 const form = [
-    { name: "Username", location: "username", validators: [doesNotExistYet] },
+    { name: "Deferred Async Validation", location: "deferredAsyncValidation", deferredValidators: [doesNotExistYet] },
+    { name: "Async Validation", location: "asyncValidation", validators: [doesNotExistYet] },
     { name: "First Name", location: "person.firstName", validators: [isRequired] },
     { name: "Last Name", location: "person.lastName", validators: [isRequired] },
     { name: "Email", location: "person.contact.email", validators: [isRequired, isValidEmailAddress] },
@@ -46,12 +47,11 @@ function App() {
                 </div>
                 {validationOutput("", validationModel)}
                 {validationOutput("person.contact", validationModel)}
-                <p>
-                    <b>Diff</b>
-                    <pre>
-                        {JSON.stringify(leafDiff.from(originalModel).to(model), null, 2)}
-                    </pre>
-                </p>
+                <br />
+                <b>Diff</b>
+                <pre>
+                    {JSON.stringify(leafDiff.from(originalModel).to(model), null, 2)}
+                </pre>
             </form>
         </div >
     );

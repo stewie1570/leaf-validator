@@ -22,8 +22,10 @@ type FilteredObjectOptions<T> = {
 
 type Instance<Target> = {
     validationModel?: ValidationModel
-    validators?: Array<Validator<Target>>
-    validationTarget?: Target
+    validators?: Array<Validator<Target>>,
+    deferredValidators?: Array<Validator<Target>>,
+    validationTarget?: Target,
+    deferrmentTimeout?: any
 };
 
 function filteredObjectToArray<T>(obj: any, options: FilteredObjectOptions<T>): Array<T> {
@@ -55,31 +57,60 @@ export function Leaf<Model, Target>(props: {
     onChange: React.Dispatch<React.SetStateAction<Model>>,
     validationModel?: ValidationModel,
     validators?: Array<Validator<Target>>,
+    deferredValidators?: Array<Validator<Target>>,
+    deferMilliseconds?: number,
     showErrors?: boolean
 }) {
     const [hasBlurred, setHasBlurred] = useState(false);
-    const { children, location, model, validationModel, validators, onChange, showErrors } = props;
-    const instance = useRef<Instance<Target>>({ validationModel, validators });
+    const {
+        children,
+        location,
+        model,
+        validationModel,
+        validators,
+        deferredValidators,
+        deferMilliseconds,
+        onChange,
+        showErrors
+    } = props;
+    const instance = useRef<Instance<Target>>({
+        validationModel,
+        validators,
+        deferredValidators
+    });
     const targetValue = get<Target>(location).from(model);
 
     useEffect(() => {
-        const runValidation = async () => {
-            const { validationModel, validators } = instance.current
+
+        async function validateWith(validationModel: ValidationModel | undefined, validators: Validator<Target>[] | undefined) {
             if (validationModel && validators && validators.length) {
                 const validationResults = (await Promise.all(validators.map(validator => validator(targetValue))))
                     .filter(value => value)
                     .flat();
-
                 targetValue === instance.current.validationTarget && validationModel.set((origValidationModel: any) => ({
                     ...origValidationModel,
                     [location]: validationResults
                 }));
             }
+        }
+        
+        const runValidation = async () => {
+            const { validationModel, validators } = instance.current
+            await validateWith(validationModel, validators);
+        };
+
+        const queueDeferredValidation = () => {
+            const { validationModel, deferredValidators } = instance.current
+            instance.current.deferrmentTimeout && clearTimeout(instance.current.deferrmentTimeout);
+            instance.current.deferrmentTimeout = setTimeout(
+                () => validateWith(validationModel, deferredValidators),
+                deferMilliseconds || 500);
         };
 
         instance.current.validationTarget = targetValue;
         runValidation();
-    }, [targetValue, location]);
+        queueDeferredValidation();
+    }, [targetValue, location, deferMilliseconds]);
 
     return children(
         targetValue,

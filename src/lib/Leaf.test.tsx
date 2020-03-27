@@ -84,13 +84,53 @@ test("validate model asynchronously and show errors on blur", async () => {
                 return new Promise(resolve => { resolver = () => resolve(value) });
         };
 
-
         return <Leaf
             model={model}
             onChange={setModel}
             location="contact.email"
             validationModel={validationModel}
             validators={[isValid]}>
+            {(email: string, onChange, onBlur, errors) => <>
+                <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="email" />
+                {errors.length > 0 && <ul>
+                    {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
+                </ul>}
+            </>}
+        </Leaf>
+    }
+
+    const { getByTestId, getAllByTestId } = render(<Wrapper />);
+
+    fireEvent.change(getByTestId("email"), { target: { value: "first" } });
+    fireEvent.blur(getByTestId("email"));
+    fireEvent.change(getByTestId("email"), { target: { value: "second" } });
+    fireEvent.blur(getByTestId("email"));
+    await waitForDomChange();
+    resolver();
+    expect(getAllByTestId("error").map(node => node.textContent)).toEqual(['"second" is invalid.']);
+});
+
+test("validate model asynchronously on an interval and show errors on blur", async () => {
+    let resolver = () => { };
+
+    const Wrapper = () => {
+        const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
+        const validationModel = useValidationModelFor(model);
+
+        const isValid = async (value: string) => {
+            if (value === "second")
+                return Promise.resolve(`"${value}" is invalid.`);
+
+            if (value === "first")
+                return new Promise(resolve => { resolver = () => resolve(value) });
+        };
+
+        return <Leaf
+            model={model}
+            onChange={setModel}
+            location="contact.email"
+            validationModel={validationModel}
+            deferredValidators={[isValid]}>
             {(email: string, onChange, onBlur, errors) => <>
                 <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="email" />
                 {errors.length > 0 && <ul>
