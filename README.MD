@@ -49,13 +49,36 @@ So the new state progression is created from the inside out (New Phone Number ->
   - For example: **person** is undefined in the **origModel**. When you spread **origModel.person.contact** you'll experience an undefined reference error unless each part of your reducer tests for undefined.
 - The reducers will need to be completely re-written if/when the model shape changes.
 
+## Solution:
+
+Lets not write reducers or set state callbacks and just declaratively operate immutable state progression.
+
+```jsx
+import { Leaf } from "leaf-validator";
+
+const [model, setModel] = useState({});
+
+<Leaf
+  model={model}
+  onChange={setModel}
+  location="person.contact.phoneNumber"
+>
+  {(phoneNumber, onChange) => (
+    <label>
+      Phone Number
+      <TextInput value={phoneNumber} onChange={onChange} />
+    </label>
+  )}
+</Leaf>;
+```
+
 ## Validation:
 
 If I updated **phoneNumber** to an invalid phone number then there should be a state somewhere that says the **phoneNumber** is invalid. If the **phoneNumber** is invalid that means **contact** is invalid. If **contact** is invalid then **person** is invalid. So the shape of the validation model needs to mirror the shape of the model it validates.
 
-## Experimental Solution:
+## Solution:
 
-Lets declaratively create state progressions and update the validaiton model.
+Lets declaratively update the validation model.
 
 ```jsx
 import { Leaf, useValidationModelFor } from "leaf-validator";
