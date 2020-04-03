@@ -84,17 +84,10 @@ const validationModel = useValidationModelFor(model);
         value={phoneNumber}
         onChange={onChange}
         onBlur={onBlur}
-        className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`}
       />
-      {errors.length > 0 && (
-        <ul className="errors">
-          {errors.map((error, index) => (
-            <li data-testid="error" key={index}>
-              {error}
-            </li>
-          ))}
-        </ul>
-      )}
+      {errors.length > 0 && <ul>
+        {errors.map((error, index) => <li key={index}>{error}</li>)}
+      </ul>}
     </label>
   )}
 </Leaf>;
