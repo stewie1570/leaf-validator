@@ -204,13 +204,10 @@ const updated = {
   ]
 };
 const diffs = diff.from(original).to(updated);
-let constructed = original;
-diffs.forEach(diff => {
-  constructed = set(diff.location)
-    .to(diff.updatedValue)
-    .in(constructed);
-});
-
+const constructed = [original, ...diffs]
+    .reduce((currentValue, diff) => set(diff.location)
+        .to(diff.updatedValue)
+        .in(currentValue));
 expect(constructed).toEqual(updated);
 ```
 

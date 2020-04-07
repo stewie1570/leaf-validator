@@ -199,11 +199,10 @@ describe("diff and set working together", () => {
                 ]
             };
             const diffs = sut.from(original).to(updated);
-            let constructed = original;
-            diffs.forEach(diff => {
-                constructed = set(diff.location).to(diff.updatedValue).in(constructed);
-            });
-
+            const constructed = [original, ...diffs]
+                .reduce((currentValue, diff: any) => set(diff.location)
+                    .to(diff.updatedValue)
+                    .in(currentValue));
             expect(constructed).toEqual(updated);
         });
     })
