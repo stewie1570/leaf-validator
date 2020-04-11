@@ -1,6 +1,6 @@
 import React, { useState, Dispatch, SetStateAction } from 'react';
 import './App.css';
-import { Leaf, useValidationModelFor } from './lib/Leaf';
+import { Leaf, useValidationModel } from './lib/Leaf';
 import { TextInput } from './TextInput';
 import { leafDiff } from './lib/domain';
 
@@ -25,7 +25,7 @@ const form = [
 function App() {
     const [originalModel, setOriginalModel] = useState();
     const [model, setModel] = useState();
-    const validationModel = useValidationModelFor(model);
+    const validationModel = useValidationModel();
     const [showAllValidation, setShowAllValidation] = useState(false);
     const submit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();

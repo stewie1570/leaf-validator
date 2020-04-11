@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { render, fireEvent, waitForDomChange } from '@testing-library/react'
-import { Leaf, useValidationModelFor } from './Leaf'
+import { Leaf, useValidationModel } from './Leaf'
 import { TextInput } from '../TextInput'
 
 test("can read & edit model nodes nested inside complex object models and arrays", () => {
@@ -40,7 +40,7 @@ test("can read & edit model nodes nested inside complex object models and arrays
 test("validate model node and show errors on blur", async () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
-        const validationModel = useValidationModelFor(model);
+        const validationModel = useValidationModel();
 
         const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 
@@ -74,7 +74,7 @@ test("validate model asynchronously and show errors on blur", async () => {
 
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
-        const validationModel = useValidationModelFor(model);
+        const validationModel = useValidationModel();
 
         const isValid = async (value: string) => {
             if (value === "second")
@@ -115,7 +115,7 @@ test("validate model asynchronously on an interval and show errors on blur", asy
 
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
-        const validationModel = useValidationModelFor(model);
+        const validationModel = useValidationModel();
 
         const isValid = async (value: string) => {
             if (value === "second")
@@ -154,7 +154,7 @@ test("validate model asynchronously on an interval and show errors on blur", asy
 test("validate model immediately show errors", async () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "" } });
-        const validationModel = useValidationModelFor(model);
+        const validationModel = useValidationModel();
 
         const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 
@@ -184,7 +184,7 @@ test("validate model immediately show errors", async () => {
 test("validate multiple model nodes", async () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { firstName: "", lastName: "" } });
-        const validationModel = useValidationModelFor(model);
+        const validationModel = useValidationModel();
 
         const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 

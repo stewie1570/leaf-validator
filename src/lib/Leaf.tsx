@@ -35,7 +35,7 @@ function filteredObjectToArray<T>(obj: any, options: FilteredObjectOptions<T>): 
         .map(key => options.mapper(key, obj[key]));
 }
 
-export function useValidationModelFor(model: any): ValidationModel {
+export function useValidationModel(): ValidationModel {
     const [validationModel, setValidationModel] = useState<any>({});
 
     return {
