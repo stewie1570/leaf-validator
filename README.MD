@@ -63,10 +63,10 @@ const [model, setModel] = useState({});
   onChange={setModel}
   location="person.contact.phoneNumber"
 >
-  {(phoneNumber, onChange) => (
+  {(phoneNumber, onPhoneNumberChange) => (
     <label>
       Phone Number
-      <TextInput value={phoneNumber} onChange={onChange} />
+      <TextInput value={phoneNumber} onChange={onPhoneNumberChange} />
     </label>
   )}
 </Leaf>;
@@ -81,7 +81,7 @@ If I updated **phoneNumber** to an invalid phone number then there should be a s
 Lets declaratively update the validation model.
 
 ```jsx
-import { Leaf, useValidationModelFor } from "leaf-validator";
+import { Leaf, useValidationModel } from "leaf-validator";
 
 const isRequired = (value: string) =>
   (!value || value.trim() === "") && ["Value is required"];
@@ -91,7 +91,7 @@ const isValidPhoneNumber = (value: string) =>
   ];
 
 const [model, setModel] = useState({});
-const validationModel = useValidationModelFor(model);
+const validationModel = useValidationModel();
 
 <Leaf
   model={model}
@@ -100,12 +100,12 @@ const validationModel = useValidationModelFor(model);
   validationModel={validationModel}
   validators={[isRequired, isValidPhoneNumber]}
 >
-  {(phoneNumber, onChange, onBlur, errors) => (
+  {(phoneNumber, onPhoneNumberChange, onBlur, errors) => (
     <label>
       Phone Number
       <TextInput
         value={phoneNumber}
-        onChange={onChange}
+        onChange={onPhoneNumberChange}
         onBlur={onBlur}
       />
       {errors.length > 0 && <ul>
