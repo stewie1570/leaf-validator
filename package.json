@@ -36,14 +36,13 @@
   ],
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && yarn build-package",
     "tdd": "react-scripts test",
     "test": "react-scripts test --watchAll=false --colors --coverage --collectCoverageFrom=src/lib**/*.*",
     "eject": "react-scripts eject",
     "build-package": "del-cli ./dist && yarn build-cjs && yarn build-esm",
     "build-cjs": "tsc index.ts -d --jsx react --esModuleInterop --lib \"ES2019\",\"DOM\" --outDir ./dist/cjs",
-    "build-esm": "tsc index.ts -d --jsx react --allowSyntheticDefaultImports --moduleResolution \"node\" --module \"esnext\" --lib \"ES2019\",\"DOM\" --outDir ./dist/esm",
-    "prepublishOnly": "yarn build-package"
+    "build-esm": "tsc index.ts -d --jsx react --allowSyntheticDefaultImports --moduleResolution \"node\" --module \"esnext\" --lib \"ES2019\",\"DOM\" --outDir ./dist/esm"
   },
   "eslintConfig": {
     "extends": "react-app"

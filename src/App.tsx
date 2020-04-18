@@ -1,6 +1,7 @@
 import React, { useState, Dispatch, SetStateAction } from 'react';
 import './App.css';
-import { Leaf, useValidationModel } from './lib/Leaf';
+import { Leaf } from './lib/Leaf';
+import { useValidationModel } from './lib/hooks/useValidationModel'
 import { TextInput } from './TextInput';
 import { leafDiff } from './lib/domain';
 

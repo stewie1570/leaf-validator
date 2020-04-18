@@ -1,24 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { get, set } from './domain'
+import { ValidationModel } from './models';
 
 type Validator<T> = (value: T) => Array<string> | any;
 type Update<TTarget> = (updatedModel: TTarget) => void;
 type Blur = () => void;
-type Error = {
-    location: string;
-    messages: Array<string>;
-};
-
-type ValidationModel = {
-    set: React.Dispatch<any>,
-    get: (location: string) => Array<string>,
-    getAllErrorsForLocation: (location: string) => Array<Error>
-};
-
-type FilteredObjectOptions<T> = {
-    keyFilter: (key: string) => boolean,
-    mapper: (key: string, value: any) => T
-}
 
 type Instance<Target> = {
     validationModel?: ValidationModel
@@ -27,28 +13,6 @@ type Instance<Target> = {
     validationTarget?: Target,
     deferrmentTimeout?: any
 };
-
-function filteredObjectToArray<T>(obj: any, options: FilteredObjectOptions<T>): Array<T> {
-    return Object
-        .keys(obj)
-        .filter(options.keyFilter)
-        .map(key => options.mapper(key, obj[key]));
-}
-
-export function useValidationModel(): ValidationModel {
-    const [validationModel, setValidationModel] = useState<any>({});
-
-    return {
-        set: setValidationModel,
-        get: (location: string) => validationModel[location] || [],
-        getAllErrorsForLocation: location => filteredObjectToArray(validationModel,
-            {
-                keyFilter: key => key.startsWith(location),
-                mapper: (key, value) => ({ location: key, messages: value })
-            })
-            .filter(error => error?.messages?.length)
-    }
-}
 
 export function Leaf<Model, Target>(props: {
     children: (model: Target, onChange: Update<Target>, onBlur: Blur, errors: Array<string>) => any,
