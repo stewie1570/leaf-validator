@@ -18,6 +18,7 @@ test("should show loading while resolving and then not-loading once resolved", a
     const { getByText } = render(<TestComponent />);
     getByText("not started");
     getByText("Execute").click();
+    getByText("Loading...");
     await waitForDomChange();
     getByText("resolved value");
 });
@@ -44,6 +45,7 @@ test("should show loading while resolving and not-loading once rejected", async 
     const { getByText } = render(<TestComponent />);
     getByText("not started");
     getByText("Execute").click();
+    getByText("Loading...");
     await waitForDomChange();
     getByText("the error");
 });
