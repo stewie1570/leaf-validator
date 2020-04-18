@@ -5,8 +5,7 @@ export function useLoadingState(): [boolean, <T>(theOperation: Promise<T>) => Pr
     async function start<T>(theOperation: Promise<T>): Promise<T> {
         setIsLoading(true);
         try {
-            const result = await theOperation;
-            return result;
+            return await theOperation;
         }
         finally {
             setIsLoading(false);
