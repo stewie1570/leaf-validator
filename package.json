@@ -38,7 +38,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build && yarn build-package",
     "tdd": "react-scripts test",
-    "test": "react-scripts test --watchAll=false --colors --coverage --collectCoverageFrom=src/lib**/*.*",
+    "test": "react-scripts test --watchAll=false --colors --coverage --collectCoverageFrom=src/lib/**/*.*",
     "eject": "react-scripts eject",
     "build-package": "del-cli ./dist && yarn build-cjs && yarn build-esm",
     "build-cjs": "tsc index.ts -d --jsx react --esModuleInterop --lib \"ES2019\",\"DOM\" --outDir ./dist/cjs",
