@@ -118,6 +118,31 @@ const validationModel = useValidationModel();
 
 [![Edit Leaf Example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/leaf-example-n0e8v?fontsize=14&hidenavigation=1&theme=dark)
 
+## Bonus Hooks
+**useLoadingState**
+```jsx
+const [isRunning, showWhileRunning] = useLoadingState();
+.
+.
+.
+//showWhileRunning will return a promise that rejects or resolves the same value
+//that the getDataFromServer() would've resolved on its own.
+const response = await showWhileRunning(getDataFromServer());
+.
+.
+.
+{isRunning && <span>Running...</span>}
+```
+
+**useDeferredEffect**
+
+Same as useEffect but will only fire once per configured milliseconds timeout.
+```jsx
+useDeferredEffect(() => {
+    //whatever effect(s) you want
+}, deferMilliseconds || 500, [targetValue, location, deferMilliseconds]);
+```
+
 ## Immutable Helpers
 
 ### **Set**: helps create immutable progressions.

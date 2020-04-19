@@ -25,11 +25,11 @@ const form = [
 ]
 
 const fakeSuccessSubmit = async () => {
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    return await new Promise(resolve => setTimeout(() => resolve("successful result..."), 3000));
 }
 
 const fakeFailSubmit = async () => {
-    await new Promise((resolve, reject) => setTimeout(reject, 3000));
+    return await new Promise((resolve, reject) => setTimeout(() => reject("failed result..."), 3000));
 }
 
 function App() {
@@ -37,14 +37,14 @@ function App() {
     const [model, setModel] = useState();
     const validationModel = useValidationModel();
     const [showAllValidation, setShowAllValidation] = useState(false);
-    const [isSubmitting, showSubmittingWhile] = useLoadingState()
+    const [isSubmitting, showSubmittingWhile] = useLoadingState();
 
     const submit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         setShowAllValidation(true);
 
         if (validationModel.getAllErrorsForLocation("person").length === 0) {
-            await showSubmittingWhile(fakeSuccessSubmit());
+            console.log(await showSubmittingWhile(fakeSuccessSubmit()));
             setOriginalModel(model);
         }
     }
@@ -53,7 +53,7 @@ function App() {
         setShowAllValidation(true);
 
         if (validationModel.getAllErrorsForLocation("person").length === 0) {
-            await showSubmittingWhile(fakeFailSubmit());
+            console.log(await showSubmittingWhile(fakeFailSubmit()));
         }
     }
 
