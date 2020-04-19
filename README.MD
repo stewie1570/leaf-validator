@@ -23,7 +23,7 @@ You have this model in a React app:
 }
 ```
 
-You have a text input that will create a new immutable state (lets call that a state progression) each time the text input calls an onChange function. You would then need to write a reducer or setState callback function that would look something like this:
+You have a text input that will call this function to create a new immutable state (lets call that a state progression) each time onChange is invoked:
 
 ```javascript
 function onPhoneNumberChange(updatedPhoneNumber) {
