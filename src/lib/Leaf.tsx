@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { get, set } from './domain'
 import { ValidationModel } from './models';
+import { useDeferredEffect } from './hooks/useDeferredEffect'
 
 type Validator<T> = (value: T) => Array<string> | any;
 type Update<TTarget> = (updatedModel: TTarget) => void;
@@ -13,6 +14,22 @@ type Instance<Target> = {
     validationTarget?: Target,
     deferrmentTimeout?: any
 };
+
+async function validateWith<Target>(
+    validators: Validator<Target>[] | undefined,
+    instance: Instance<Target>,
+    location: string,
+    targetValue: Target) {
+    if (instance.validationModel && validators && validators.length) {
+        const validationResults = (await Promise.all(validators.map(validator => validator(targetValue))))
+            .filter(value => value)
+            .flat();
+        targetValue === instance.validationTarget && instance.validationModel.set((origValidationModel: any) => ({
+            ...origValidationModel,
+            [location]: validationResults
+        }));
+    }
+}
 
 export function Leaf<Model, Target>(props: {
     children: (model: Target, onChange: Update<Target>, onBlur: Blur, errors: Array<string>) => any,
@@ -45,36 +62,26 @@ export function Leaf<Model, Target>(props: {
     const targetValue = get<Target>(location).from(model);
 
     useEffect(() => {
-
-        async function validateWith(validationModel: ValidationModel | undefined, validators: Validator<Target>[] | undefined) {
-            if (validationModel && validators && validators.length) {
-                const validationResults = (await Promise.all(validators.map(validator => validator(targetValue))))
-                    .filter(value => value)
-                    .flat();
-                targetValue === instance.current.validationTarget && validationModel.set((origValidationModel: any) => ({
-                    ...origValidationModel,
-                    [location]: validationResults
-                }));
-            }
-        }
-        
-        const runValidation = async () => {
-            const { validationModel, validators } = instance.current
-            await validateWith(validationModel, validators);
-        };
-
-        const queueDeferredValidation = () => {
-            const { validationModel, deferredValidators } = instance.current
-            instance.current.deferrmentTimeout && clearTimeout(instance.current.deferrmentTimeout);
-            instance.current.deferrmentTimeout = setTimeout(
-                () => validateWith(validationModel, deferredValidators),
-                deferMilliseconds || 500);
-        };
-
         instance.current.validationTarget = targetValue;
-        runValidation();
-        queueDeferredValidation();
-    }, [targetValue, location, deferMilliseconds]);
+        const { validators } = instance.current;
+
+        validateWith(
+            validators,
+            instance.current,
+            location,
+            targetValue);
+    }, [targetValue, location]);
+
+    useDeferredEffect(() => {
+        instance.current.validationTarget = targetValue;
+        const { deferredValidators } = instance.current;
+
+        validateWith(
+            deferredValidators,
+            instance.current,
+            location,
+            targetValue)
+    }, deferMilliseconds || 500, [targetValue, location, deferMilliseconds]);
 
     return children(
         targetValue,

@@ -1,4 +1,5 @@
 export { Leaf } from './src/lib/Leaf'
 export { useValidationModel } from './src/lib/hooks/useValidationModel'
 export { useLoadingState } from './src/lib/hooks/useLoadingState'
+export { useDeferredEffect } from './src/lib/hooks/useDeferredEffect'
 export { get, set, diff, leafDiff } from './src/lib/domain'
