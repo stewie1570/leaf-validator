@@ -4,6 +4,7 @@ import { Leaf } from './lib/Leaf';
 import { useValidationModel } from './lib/hooks/useValidationModel'
 import { TextInput } from './TextInput';
 import { leafDiff } from './lib/domain';
+import { useLoadingState } from './lib/hooks/useLoadingState'
 
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 const isValidEmailAddress = (value: string) => !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) && [`"${value || ""}" is not a valid email address`];
@@ -23,22 +24,47 @@ const form = [
     { name: "Phone Number", location: "person.contact.phoneNumber", validators: [isRequired, isValidPhoneNumber] },
 ]
 
+const fakeSuccessSubmit = async () => {
+    await new Promise(resolve => setTimeout(resolve, 3000));
+}
+
+const fakeFailSubmit = async () => {
+    await new Promise((resolve, reject) => setTimeout(reject, 3000));
+}
+
 function App() {
     const [originalModel, setOriginalModel] = useState();
     const [model, setModel] = useState();
     const validationModel = useValidationModel();
     const [showAllValidation, setShowAllValidation] = useState(false);
-    const submit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const [isSubmitting, showSubmittingWhile] = useLoadingState()
+
+    const submit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         setShowAllValidation(true);
-        validationModel.getAllErrorsForLocation("person").length === 0 && setOriginalModel(model);
+
+        if (validationModel.getAllErrorsForLocation("person").length === 0) {
+            await showSubmittingWhile(fakeSuccessSubmit());
+            setOriginalModel(model);
+        }
+    }
+
+    const submitFailire = async () => {
+        setShowAllValidation(true);
+
+        if (validationModel.getAllErrorsForLocation("person").length === 0) {
+            await showSubmittingWhile(fakeFailSubmit());
+        }
     }
 
     return (
         <div className="App">
             <form>
                 {formElements(model, setModel, showAllValidation, validationModel)}
-                <button className="btn btn-primary" type="submit" onClick={submit}>Submit</button>
+                <button className="btn btn-primary" type="submit" disabled={isSubmitting} onClick={submit}>Fake Submit Success</button>
+                &nbsp;
+                <button className="btn btn-secondary" type="button" disabled={isSubmitting} onClick={submitFailire}>Fake Submit Failure</button>
+                {isSubmitting && <i>Submitting...</i>}
                 <br />
                 <div style={{ verticalAlign: "top", display: "inline-block", width: "33%" }}>
                     Model:
