@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useMountedOnlyState } from "./useMountedOnlyState";
 
 export function useLoadingState(): [boolean, <T>(theOperation: Promise<T>) => Promise<T>] {
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useMountedOnlyState(false);
     async function start<T>(theOperation: Promise<T>): Promise<T> {
         setIsLoading(true);
         try {

@@ -143,6 +143,10 @@ useDeferredEffect(() => {
 }, deferMilliseconds || 500, [targetValue, location, deferMilliseconds]);
 ```
 
+**useMountedOnlyState**
+
+*(exactly the same as useState except it will not set state when the component is not mounted)*
+
 ## Immutable Helpers
 
 ### **Set**: helps create immutable progressions.
