@@ -1,5 +1,5 @@
 import { ValidationModel } from "../models";
-import { useState } from "react";
+import { useMountedOnlyState } from "./useMountedOnlyState";
 
 type FilteredObjectOptions<T> = {
     keyFilter: (key: string) => boolean,
@@ -14,7 +14,7 @@ function filteredObjectToArray<T>(obj: any, options: FilteredObjectOptions<T>): 
 }
 
 export function useValidationModel(): ValidationModel {
-    const [validationModel, setValidationModel] = useState<any>({});
+    const [validationModel, setValidationModel] = useMountedOnlyState<any>({});
 
     return {
         set: setValidationModel,

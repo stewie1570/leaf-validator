@@ -51,7 +51,7 @@ test("should not set state when component is not mounted", async () => {
 
         return <>
             {isChildrenMounted ? children : "no child components"}
-            <button onClick={() => setIsChildrenMounted(!isChildrenMounted)}>Toggle children</button>
+            <button onClick={() => setIsChildrenMounted(false)}>Unmount</button>
         </>;
     }
 
@@ -62,12 +62,10 @@ test("should not set state when component is not mounted", async () => {
 
     getByText("initial state");
     getByText("Change").click();
-    getByText("Toggle children").click();
+    getByText("Unmount").click();
     resolve();
 
     await promise;
 
     getByText("no child components");
-    getByText("Toggle children").click();
-    getByText("initial state");
 });
