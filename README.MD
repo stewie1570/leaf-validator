@@ -121,13 +121,13 @@ const validationModel = useValidationModel();
 ## Bonus Hooks
 **useLoadingState**
 ```jsx
-const [isRunning, showWhileRunning] = useLoadingState();
+const [isRunning, showRunningWhile] = useLoadingState();
 .
 .
 .
-//showWhileRunning will return a promise that rejects or resolves the same value
+//showRunningWhile will return a promise that rejects or resolves the same value
 //that the getDataFromServer() would've resolved on its own.
-const response = await showWhileRunning(getDataFromServer());
+const response = await showRunningWhile(getDataFromServer());
 .
 .
 .
