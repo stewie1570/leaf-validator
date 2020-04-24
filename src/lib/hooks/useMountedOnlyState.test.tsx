@@ -31,6 +31,28 @@ test("should behave just like useState when component is mounted", async () => {
     getByText("updated");
 });
 
+test("callback form of useState should behave just like useState when component is mounted", async () => {
+    const TestComponent = ({ doTask }: { doTask: () => Promise<void> }) => {
+        const [state, setState] = useMountedOnlyState("initial state");
+        const change = async () => {
+            await doTask();
+            setState(originalState => `${originalState} - updated`);
+        }
+
+        return <>
+            {state}
+            <button onClick={change}>Change</button>
+        </>;
+    }
+
+    const { getByText } = render(<TestComponent doTask={() => Promise.resolve()} />);
+
+    getByText("initial state");
+    getByText("Change").click();
+    await waitForDomChange();
+    getByText("initial state - updated");
+});
+
 test("should not set state when component is not mounted", async () => {
     const AsyncStateUpdates = ({ doTask }: { doTask: () => Promise<void> }) => {
         const [state, setState] = useMountedOnlyState("initial state");
