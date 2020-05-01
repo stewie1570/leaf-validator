@@ -38,6 +38,49 @@ test("can read & edit model nodes nested inside complex object models and arrays
     expect((getByTestId("email1") as HTMLInputElement).value).toBe("stewie1570@hotmail.com");
 });
 
+test("uses failOverLocations when location in model is undefined", () => {
+    const Wrapper = (props: { modelReporter: (model: any) => void }) => {
+        const [model, setModel] = useState({
+            second: {
+                backupLocation: "correct"
+            },
+            third: {
+                backupLocation: "wrong, I'm the third one"
+            }
+        });
+
+        return <>
+            <Leaf
+                model={model}
+                onChange={setModel}
+                location="original.location"
+                failOverLocations={["first.backupLocation", "second.backupLocation", "third.backupLocation"]}>
+                {(value: string, onChange) => <TextInput value={value} onChange={onChange} data-testid="test-input" />}
+            </Leaf>
+            <button onClick={() => props.modelReporter(model)}>Report Model</button>
+        </>;
+    }
+
+    let receivedModel;
+    const { getByTestId, getByText } = render(<Wrapper modelReporter={model => { receivedModel = model; }} />);
+
+    expect((getByTestId("test-input") as HTMLInputElement).value).toBe("correct");
+    fireEvent.change(getByTestId("test-input"), { target: { value: "updated value" } });
+    expect((getByTestId("test-input") as HTMLInputElement).value).toBe("updated value");
+    getByText("Report Model").click();
+    expect(receivedModel).toEqual({
+        original: {
+            location: "updated value"
+        },
+        second: {
+            backupLocation: "correct"
+        },
+        third: {
+            backupLocation: "wrong, I'm the third one"
+        }
+    });
+});
+
 test("validate model node and show errors on blur", async () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });

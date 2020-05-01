@@ -31,6 +31,13 @@ async function validateWith<Target>(
     }
 }
 
+function findDefinedTargetIn<Target>(model: any, targets: Array<string>): Target {
+    const value = get<Target>(targets[0]).from(model);
+    return value !== undefined || targets.length <= 1
+        ? value
+        : findDefinedTargetIn(model, targets.slice(1));
+}
+
 export function Leaf<Model, Target>(props: {
     children: (model: Target, onChange: Update<Target>, onBlur: Blur, errors: Array<string>) => any,
     location: string,
@@ -40,7 +47,8 @@ export function Leaf<Model, Target>(props: {
     validators?: Array<Validator<Target>>,
     deferredValidators?: Array<Validator<Target>>,
     deferMilliseconds?: number,
-    showErrors?: boolean
+    showErrors?: boolean,
+    failOverLocations?: Array<string>
 }) {
     const [hasBlurred, setHasBlurred] = useState(false);
     const {
@@ -59,7 +67,10 @@ export function Leaf<Model, Target>(props: {
         validators,
         deferredValidators
     });
-    const targetValue = get<Target>(location).from(model);
+    const preferredTargetValue = get<Target>(location).from(model);
+    const targetValue = preferredTargetValue === undefined
+        ? findDefinedTargetIn<Target>(model, props.failOverLocations || [])
+        : preferredTargetValue;
 
     useEffect(() => {
         instance.current.validationTarget = targetValue;
