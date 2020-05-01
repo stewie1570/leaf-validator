@@ -6,6 +6,8 @@
 [![Package Size](https://badgen.net/bundlephobia/min/leaf-validator)](https://bundlephobia.com/result?p=leaf-validator)
 [![Maintainability](https://api.codeclimate.com/v1/badges/c49423ebf81ddf1542c0/maintainability)](https://codeclimate.com/github/stewie1570/leaf-validator/maintainability)
 
+**NOTE:** The ESM build of this package targets **ES2019**. This way the package is smaller and executes faster. Since this package is for React applications the assumption is that you're already polyfilling and compiling your app. This gives you more control and helps you deliver a faster app with less overhead.
+
 ## Hypothetical:
 
 You have this model in a React app:

@@ -42,7 +42,7 @@
     "eject": "react-scripts eject",
     "build-package": "del-cli ./dist && yarn build-cjs && yarn build-esm",
     "build-cjs": "tsc index.ts -d --jsx react --esModuleInterop --lib \"ES2019\",\"DOM\" --outDir ./dist/cjs",
-    "build-esm": "tsc index.ts -d --jsx react --allowSyntheticDefaultImports --moduleResolution \"node\" --module \"esnext\" --lib \"ES2019\",\"DOM\" --outDir ./dist/esm"
+    "build-esm": "tsc index.ts -d --target \"ES2019\" --jsx react --allowSyntheticDefaultImports --moduleResolution \"node\" --module \"esnext\" --lib \"ES2019\",\"DOM\" --outDir ./dist/esm"
   },
   "eslintConfig": {
     "extends": "react-app"
