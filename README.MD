@@ -25,7 +25,7 @@ You have this model in a React app:
 }
 ```
 
-You have a text input that will call this function to create a new immutable state (lets call that a state progression) each time onChange is invoked:
+You might write reducers or setState callback functions like this:
 
 ```javascript
 function onPhoneNumberChange(updatedPhoneNumber) {
@@ -42,14 +42,12 @@ function onPhoneNumberChange(updatedPhoneNumber) {
 }
 ```
 
-So the new state progression is created from the inside out (New Phone Number -> New contact -> New Person) and the rest of the properties are spread into the new object and maintain their original references.
-
 ## The Problems:
 
-- The reducers are not re-usable for different parts of the model. So you tend to write a lot of them.
-- The reducers will fail if they attempt to update an object that doesn't exist in the original model.
+- **Not Re-usable**: The reducers are not re-usable for different parts of the model. So you tend to write a lot of them.
+- **Complex**: The reducers will fail if they attempt to update an object that doesn't exist in the original model.
   - For example: **person** is undefined in the **origModel**. When you spread **origModel.person.contact** you'll experience an undefined reference error unless each part of your reducer tests for undefined.
-- The reducers will need to be completely re-written if/when the model shape changes.
+- **Coupled**: The reducers will need to be completely re-written if/when the model shape changes.
 
 ## Solution:
 
@@ -74,13 +72,13 @@ const [model, setModel] = useState({});
 </Leaf>;
 ```
 
+[![Edit Leaf Example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/leaf-example-n0e8v?fontsize=14&hidenavigation=1&theme=dark)
+
 ## Validation:
 
 If I updated **phoneNumber** to an invalid phone number then there should be a state somewhere that says the **phoneNumber** is invalid. If the **phoneNumber** is invalid that means **contact** is invalid. If **contact** is invalid then **person** is invalid. So the shape of the validation model needs to mirror the shape of the model it validates.
 
-## Solution:
-
-Lets declaratively update the validation model.
+Lets declaratively update the validation model:
 
 ```jsx
 import { Leaf, useValidationModel } from "leaf-validator";
@@ -118,7 +116,31 @@ const validationModel = useValidationModel();
 </Leaf>;
 ```
 
-[![Edit Leaf Example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/leaf-example-n0e8v?fontsize=14&hidenavigation=1&theme=dark)
+## Backwards Compatible
+
+Here's another hypothetical. You're persisting the same model that you have in a client-side app to a Mongo Database and you've changed the shape of the model. You don't want downtime and you don't want to coordinate DB migrations with code updates. So, lets make the app backward compatible with the previous model shape(s):
+
+```jsx
+import { Leaf } from "leaf-validator";
+
+const [model, setModel] = useState({});
+
+<Leaf
+  model={model}
+  onChange={setModel}
+  location="newLocation.phoneNumber"
+  failOverLocations={["oldLocation.phoneNumber", "olderLocation.phoneNumber", "oldestLocation.phoneNumber"]}
+>
+  {(phoneNumber, onPhoneNumberChange) => (
+    <label>
+      Phone Number
+      <TextInput value={phoneNumber} onChange={onPhoneNumberChange} />
+    </label>
+  )}
+</Leaf>;
+```
+
+Now you can run DB migration whenever you want.
 
 ## Bonus Hooks
 **useLoadingState**
@@ -207,6 +229,8 @@ obj?.level1?.prop1;
 
 The difference being that the location of the target value is a string and therefore allows for more dynamic access to the target value.
 
+## Diffs
+
 ### **Diff**: will create a list of diffs that define all immutable progressions necessary to go from the original object to an updated object.
 
 The diffs are coheasive with the **set** method such that you could run the diffs via the **set** method on the original object to re-construct the updated object. _(see example below)_
@@ -290,3 +314,5 @@ expect(leafDiff.from(null).to({
     { location: "some.complex.object.and.1", updatedValue: "values" }
 ]);
 ```
+
+**NOTE**: See [this example](https://github.com/stewie1570/mongo-leaf-validator-example) for a simple way to use these diffs to operate Mongo updates.
