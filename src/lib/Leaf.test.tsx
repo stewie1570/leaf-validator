@@ -81,6 +81,27 @@ test("uses failOverLocations when location in model is undefined", () => {
     });
 });
 
+test("build an empty model with leafs", async () => {
+    const Wrapper = () => {
+        const [model, setModel] = useState({});
+
+        return <Leaf
+            model={model}
+            onChange={setModel}
+            location="contact.email">
+            {(email: string, onChange) => <>
+                <TextInput value={email} onChange={onChange} data-testid="email" />
+            </>}
+        </Leaf>
+    }
+
+    const { getByTestId } = render(<Wrapper />);
+
+    expect((getByTestId("email") as HTMLInputElement).value).toBe("");
+    fireEvent.change(getByTestId("email"), { target: { value: "stewie1570@gmail.com" } });
+    expect((getByTestId("email") as HTMLInputElement).value).toBe("stewie1570@gmail.com");
+});
+
 test("validate model node and show errors on blur", async () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });

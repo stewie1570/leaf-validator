@@ -48,7 +48,7 @@ function getModelProgressionFrom<T>({ target, update, model }: ModelUpdate<T>): 
 }
 
 function getValueFrom<T>({ target, obj }: ValueTarget): T {
-    const firstDotIndex = target.indexOf(".");
+    const firstDotIndex = (target || "").indexOf(".");
     const childLocation = firstDotIndex === -1
         ? target
         : target.substring(0, firstDotIndex);
