@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { render, waitForDomChange } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { useLoadingState } from './useLoadingState';
 
 test("should show loading while resolving and then not-loading once resolved", async () => {
@@ -15,12 +15,11 @@ test("should show loading while resolving and then not-loading once resolved", a
         </>;
     }
 
-    const { getByText } = render(<TestComponent />);
+    const { getByText, findByText } = render(<TestComponent />);
     getByText("not started");
     getByText("Execute").click();
     getByText("Loading...");
-    await waitForDomChange();
-    getByText("resolved value");
+    await findByText("resolved value");
 });
 
 test("should show loading while resolving and not-loading once rejected", async () => {
@@ -42,10 +41,9 @@ test("should show loading while resolving and not-loading once rejected", async 
         </>;
     }
 
-    const { getByText } = render(<TestComponent />);
+    const { getByText, findByText } = render(<TestComponent />);
     getByText("not started");
     getByText("Execute").click();
     getByText("Loading...");
-    await waitForDomChange();
-    getByText("the error");
+    await findByText("the error");
 });

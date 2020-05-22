@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { render, fireEvent, waitForDomChange } from '@testing-library/react'
+import { render, fireEvent, waitFor } from '@testing-library/react'
 import { Leaf } from './Leaf'
 import { TextInput } from '../TextInput'
 import { useValidationModel } from './hooks/useValidationModel';
@@ -124,14 +124,13 @@ test("validate model node and show errors on blur", async () => {
         </Leaf>
     }
 
-    const { getByTestId, queryAllByTestId, getAllByTestId } = render(<Wrapper />);
+    const { getByTestId, queryAllByTestId, findAllByTestId } = render(<Wrapper />);
 
     expect(queryAllByTestId("error").map(node => node.textContent)).toEqual([]);
     fireEvent.change(getByTestId("email"), { target: { value: "" } });
     expect(queryAllByTestId("error").map(node => node.textContent)).toEqual([]);
     fireEvent.blur(getByTestId("email"));
-    await waitForDomChange();
-    expect(getAllByTestId("error").map(node => node.textContent)).toEqual(["Value is required"]);
+    expect((await findAllByTestId("error")).map(node => node.textContent)).toEqual(["Value is required"]);
 });
 
 test("validate model asynchronously and show errors on blur", async () => {
@@ -164,15 +163,14 @@ test("validate model asynchronously and show errors on blur", async () => {
         </Leaf>
     }
 
-    const { getByTestId, getAllByTestId } = render(<Wrapper />);
+    const { getByTestId, findAllByTestId } = render(<Wrapper />);
 
     fireEvent.change(getByTestId("email"), { target: { value: "first" } });
     fireEvent.blur(getByTestId("email"));
     fireEvent.change(getByTestId("email"), { target: { value: "second" } });
     fireEvent.blur(getByTestId("email"));
-    await waitForDomChange();
     resolver();
-    expect(getAllByTestId("error").map(node => node.textContent)).toEqual(['"second" is invalid.']);
+    expect((await findAllByTestId("error")).map(node => node.textContent)).toEqual(['"second" is invalid.']);
 });
 
 test("validate model asynchronously on an interval and show errors on blur", async () => {
@@ -205,15 +203,14 @@ test("validate model asynchronously on an interval and show errors on blur", asy
         </Leaf>
     }
 
-    const { getByTestId, getAllByTestId } = render(<Wrapper />);
+    const { getByTestId, findAllByTestId } = render(<Wrapper />);
 
     fireEvent.change(getByTestId("email"), { target: { value: "first" } });
     fireEvent.blur(getByTestId("email"));
     fireEvent.change(getByTestId("email"), { target: { value: "second" } });
     fireEvent.blur(getByTestId("email"));
-    await waitForDomChange();
     resolver();
-    expect(getAllByTestId("error").map(node => node.textContent)).toEqual(['"second" is invalid.']);
+    expect((await findAllByTestId("error")).map(node => node.textContent)).toEqual(['"second" is invalid.']);
 });
 
 test("validate model immediately show errors", async () => {
@@ -239,11 +236,9 @@ test("validate model immediately show errors", async () => {
         </Leaf>
     }
 
-    const { getAllByTestId } = render(<Wrapper />);
+    const { findAllByTestId } = render(<Wrapper />);
 
-    await waitForDomChange();
-
-    expect(getAllByTestId("error").map(node => node.textContent)).toEqual(["Value is required"]);
+    expect((await findAllByTestId("error")).map(node => node.textContent)).toEqual(["Value is required"]);
 });
 
 test("validate multiple model nodes", async () => {
@@ -290,11 +285,9 @@ test("validate multiple model nodes", async () => {
         </>
     }
 
-    const { getByTestId, getAllByTestId, queryAllByTestId } = render(<Wrapper />);
+    const { getByTestId, getAllByTestId, findAllByTestId, queryAllByTestId } = render(<Wrapper />);
 
-    await waitForDomChange();
-
-    expect(getAllByTestId("error").map(node => node.textContent)).toEqual([
+    expect((await findAllByTestId("error")).map(node => node.textContent)).toEqual([
         "Value is required",
         "Value is required"
     ]);
@@ -306,8 +299,8 @@ test("validate multiple model nodes", async () => {
     fireEvent.change(getByTestId("firstName"), { target: { value: "Stewart" } });
     fireEvent.change(getByTestId("lastName"), { target: { value: "Anderson" } });
 
-    await waitForDomChange();
-
-    expect(queryAllByTestId("error").map(node => node.textContent)).toEqual([]);
-    expect(queryAllByTestId("top-level-error").map(node => node.textContent)).toEqual([]);
+    await waitFor(() => {
+        expect(queryAllByTestId("error").map(node => node.textContent)).toEqual([]);
+        expect(queryAllByTestId("top-level-error").map(node => node.textContent)).toEqual([]);
+    });
 });

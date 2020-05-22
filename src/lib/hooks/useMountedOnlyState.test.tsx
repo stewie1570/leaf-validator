@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { render, waitForDomChange } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { useMountedOnlyState } from './useMountedOnlyState';
 
 function manuallyResolvableTask<T>() {
@@ -23,12 +23,11 @@ test("should behave just like useState when component is mounted", async () => {
         </>;
     }
 
-    const { getByText } = render(<TestComponent doTask={() => Promise.resolve()} />);
+    const { getByText, findByText } = render(<TestComponent doTask={() => Promise.resolve()} />);
 
     getByText("initial state");
     getByText("Change").click();
-    await waitForDomChange();
-    getByText("updated");
+    await findByText("updated");
 });
 
 test("callback form of useState should behave just like useState when component is mounted", async () => {
@@ -45,12 +44,11 @@ test("callback form of useState should behave just like useState when component 
         </>;
     }
 
-    const { getByText } = render(<TestComponent doTask={() => Promise.resolve()} />);
+    const { getByText, findByText } = render(<TestComponent doTask={() => Promise.resolve()} />);
 
     getByText("initial state");
     getByText("Change").click();
-    await waitForDomChange();
-    getByText("initial state - updated");
+    await findByText("initial state - updated");
 });
 
 test("should not set state when component is not mounted", async () => {
