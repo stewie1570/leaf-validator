@@ -6,11 +6,33 @@
 [![Package Size](https://badgen.net/bundlephobia/min/leaf-validator)](https://bundlephobia.com/result?p=leaf-validator)
 [![Maintainability](https://api.codeclimate.com/v1/badges/c49423ebf81ddf1542c0/maintainability)](https://codeclimate.com/github/stewie1570/leaf-validator/maintainability)
 
-**NOTE:** The ESM build of this package targets **ES2019**. This way the package is smaller and executes faster. Since this package is for React applications the assumption is that you're already polyfilling and compiling your app. This gives you more control and helps you deliver a faster app with less overhead.
+ECMAScript Target: **ES2019**
 
-## Hypothetical:
+## Philosophy
 
-You have this model in a React app:
+- There should be a declarative interface to allow navigating objects from the root to any value.
+- Via this declarative interface, you should be able to compute the next immutable version of an object to update any value.
+- This API should help loosen coupling of data from queries and updates.
+
+**MongoDB** uses a very similar concept called [Dot Notation](https://docs.mongodb.com/manual/core/document/#dot-notation).
+
+**Redis** encourages a best practice very similar to this concept that they just call a ['path'](https://redislabs.com/redis-best-practices/data-storage-patterns/object-hash-storage/)
+
+This declarative API to complex models has **advantages in**:
+
+- [State Management](#state-management)
+- [Validation](#validation)
+- [Backward Compatibility](#backward-compatibility)
+
+Other related features include:
+
+- [Diff Functions](#diff-functions) based on the 'path' or Dot Notation API & principles.
+- [Get & Set pure functions](#get-&-set-pure-functions) based on the 'path' or Dot Notation API & principles.
+- [Hooks](#hooks) for common problems in React applications.
+
+## State Management
+
+Here is an example model:
 
 ```json
 {
@@ -25,48 +47,46 @@ You have this model in a React app:
 }
 ```
 
-You might write reducers or setState callback functions like this:
+Here is an example set state callback function (below) to update the phone number in the model (above):
 
 ```javascript
 function onPhoneNumberChange(updatedPhoneNumber) {
-  setState(origModel => ({
+  setState((origModel) => ({
     ...origModel,
     person: {
       ...origModel.person,
       contact: {
         ...origModel.person.contact,
-        phoneNumber: updatedPhoneNumber
-      }
-    }
+        phoneNumber: updatedPhoneNumber,
+      },
+    },
   }));
 }
 ```
 
-## The Problems:
+**The Problems:**
 
-- **Not Re-usable**: The reducers are not re-usable for different parts of the model. So you tend to write a lot of them.
-- **Complex**: The reducers will fail if they attempt to update an object that doesn't exist in the original model.
+Whether the phone number update was written as a reducer or set state callback function the problems (below) are the same:
+
+- **Reusability**: The reducers are not re-usable for different parts of the model. So you tend to write a lot of them.
+- **Complexity**: The reducers will fail if they attempt to update an object that doesn't exist in the original model.
   - For example: **person** is undefined in the **origModel**. When you spread **origModel.person.contact** you'll experience an undefined reference error unless each part of your reducer tests for undefined.
-- **Coupled**: The reducers will need to be completely re-written if/when the model shape changes.
+- **Coupling**: The reducers will need to be completely re-written if/when the model shape changes.
 
-## Solution:
+**Solution:**
 
-Lets not write reducers or set state callbacks and just declaratively operate immutable state progression.
+Lets not write reducers or set state callbacks and just declaratively operate immutable state progression for that same complex model.
 
 ```jsx
 import { Leaf } from "leaf-validator";
 
 const [model, setModel] = useState({});
 
-<Leaf
-  model={model}
-  onChange={setModel}
-  location="person.contact.phoneNumber"
->
-  {(phoneNumber, onPhoneNumberChange) => (
+<Leaf model={model} onChange={setModel} location="person.contact.phoneNumber">
+  {(phoneNumber, setPhoneNumberInModel) => (
     <label>
       Phone Number
-      <TextInput value={phoneNumber} onChange={onPhoneNumberChange} />
+      <TextInput value={phoneNumber} onChange={setPhoneNumberInModel} />
     </label>
   )}
 </Leaf>;
@@ -87,7 +107,7 @@ const isRequired = (value: string) =>
   (!value || value.trim() === "") && ["Value is required"];
 const isValidPhoneNumber = (value: string) =>
   !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(value) && [
-    `"${value || ""}" is not a valid phone number`
+    `"${value || ""}" is not a valid phone number`,
   ];
 
 const [model, setModel] = useState({});
@@ -100,23 +120,35 @@ const validationModel = useValidationModel();
   validationModel={validationModel}
   validators={[isRequired, isValidPhoneNumber]}
 >
-  {(phoneNumber, onPhoneNumberChange, onBlur, errors) => (
+  {(phoneNumber, setPhoneNumber, showErrors, errors) => (
     <label>
       Phone Number
       <TextInput
         value={phoneNumber}
-        onChange={onPhoneNumberChange}
-        onBlur={onBlur}
+        onChange={setPhoneNumber}
+        onBlur={showErrors}
       />
-      {errors.length > 0 && <ul>
-        {errors.map((error, index) => <li key={index}>{error}</li>)}
-      </ul>}
+      {errors.length > 0 && (
+        <ul>
+          {errors.map((error, index) => (
+            <li key={index}>{error}</li>
+          ))}
+        </ul>
+      )}
     </label>
   )}
 </Leaf>;
 ```
 
-## Backwards Compatible
+So the above will keep track of validation state at each location in the model. What if I wanted to know if everything in `person.contact` is valid?
+
+```jsx
+validationModel.getAllErrorsForLocation("person.contact");
+
+//will return Array<{ location: string, messages: Array<string> }> of all errors (or [] if there are no errors) at that location or downstream of that location.
+```
+
+## Backward Compatibility
 
 Here's another hypothetical. You're persisting the same model that you have in a client-side app to a Mongo Database and you've changed the shape of the model. You don't want downtime and you don't want to coordinate DB migrations with code updates. So, lets make the app backward compatible with the previous model shape(s):
 
@@ -129,12 +161,16 @@ const [model, setModel] = useState({});
   model={model}
   onChange={setModel}
   location="newLocation.phoneNumber"
-  failOverLocations={["oldLocation.phoneNumber", "olderLocation.phoneNumber", "oldestLocation.phoneNumber"]}
+  failOverLocations={[
+    "oldLocation.phoneNumber",
+    "olderLocation.phoneNumber",
+    "oldestLocation.phoneNumber",
+  ]}
 >
-  {(phoneNumber, onPhoneNumberChange) => (
+  {(phoneNumber, setPhoneNumber) => (
     <label>
       Phone Number
-      <TextInput value={phoneNumber} onChange={onPhoneNumberChange} />
+      <TextInput value={phoneNumber} onChange={setPhoneNumber} />
     </label>
   )}
 </Leaf>;
@@ -142,8 +178,10 @@ const [model, setModel] = useState({});
 
 Now you can run DB migration whenever you want.
 
-## Bonus Hooks
+## Hooks
+
 **useLoadingState**
+
 ```jsx
 const [isRunning, showRunningWhile] = useLoadingState();
 .
@@ -161,17 +199,22 @@ const response = await showRunningWhile(getDataFromServer());
 **useDeferredEffect**
 
 Same as useEffect but will only fire once per configured milliseconds timeout.
+
 ```jsx
-useDeferredEffect(() => {
+useDeferredEffect(
+  () => {
     //whatever effect(s) you want
-}, deferMilliseconds || 500, [targetValue, location, deferMilliseconds]);
+  },
+  deferMilliseconds || 500,
+  [targetValue, location, deferMilliseconds]
+);
 ```
 
 **useMountedOnlyState**
 
-*(exactly the same as useState except it will not set state when the component is not mounted)*
+_(exactly the same as useState except it will not set state when the component is not mounted)_
 
-## Immutable Helpers
+## Get & Set pure functions
 
 ### **Set**: helps create immutable progressions.
 
@@ -179,18 +222,16 @@ useDeferredEffect(() => {
 
 ```js
 const theObject = {
+  prop1: {
     prop1: {
-        prop1: {
-            target: "original value"
-        },
-        prop2: {}
+      target: "original value",
     },
-    prop2: {}
+    prop2: {},
+  },
+  prop2: {},
 };
 
-const progession = set("prop1.prop1.target")
-  .to("updated value")
-  .in(theObject);
+const progession = set("prop1.prop1.target").to("updated value").in(theObject);
 ```
 
 will return the equivalent of:
@@ -229,7 +270,7 @@ obj?.level1?.prop1;
 
 The difference being that the location of the target value is a string and therefore allows for more dynamic access to the target value.
 
-## Diffs
+## Diff Functions
 
 ### **Diff**: will create a list of diffs that define all immutable progressions necessary to go from the original object to an updated object.
 
@@ -259,59 +300,61 @@ const updated = {
   ]
 };
 const diffs = diff.from(original).to(updated);
-const constructed = [original, ...diffs]
-    .reduce((currentValue, diff) => set(diff.location)
-        .to(diff.updatedValue)
-        .in(currentValue));
+const constructed = [original, ...diffs].reduce((currentValue, diff) =>
+  set(diff.location).to(diff.updatedValue).in(currentValue)
+);
 expect(constructed).toEqual(updated);
 ```
 
 The **diff** method is especially useful when you need to send a diff of what the user last loaded vs. the user updated model to the server. When updates are done via diffs instead of sending full user updated objects you can avoid race-conditions that could cause concurrent users to overwrite each other.
-
 
 ### **leafDiff**: will do the same as the **diff** function except when a new object is constructed because it didn't exist in the original. Instead of creating that object in one diff this function will create a diff for each leaf in that new object.
 
 **Example (_from a unit test_):**
 
 ```js
-expect(diff.from(null).to({
+expect(
+  diff.from(null).to({
     some: {
+      complex: {
+        object: {
+          with: ["values"],
+          and: ["other", "values"]
+        }
+      }
+    }
+  })
+).toEqual([
+  {
+    location: "",
+    updatedValue: {
+      some: {
         complex: {
-            object: {
-                with: ["values"],
-                and: ["other", "values"]
-            }
+          object: {
+            with: ["values"],
+            and: ["other", "values"]
+          }
         }
+      }
     }
-})).toEqual([
-    {
-        location: "",
-        updatedValue: {
-            some: {
-                complex: {
-                    object: {
-                        with: ["values"],
-                        and: ["other", "values"]
-                    }
-                }
-            }
-        }
-    }
+  }
 ]);
 
-expect(leafDiff.from(null).to({
+expect(
+  leafDiff.from(null).to({
     some: {
-        complex: {
-            object: {
-                with: ["values"],
-                and: ["other", "values"]
-            }
+      complex: {
+        object: {
+          with: ["values"],
+          and: ["other", "values"]
         }
+      }
     }
-})).toEqual([
-    { location: "some.complex.object.with.0", updatedValue: "values" },
-    { location: "some.complex.object.and.0", updatedValue: "other" },
-    { location: "some.complex.object.and.1", updatedValue: "values" }
+  })
+).toEqual([
+  { location: "some.complex.object.with.0", updatedValue: "values" },
+  { location: "some.complex.object.and.0", updatedValue: "other" },
+  { location: "some.complex.object.and.1", updatedValue: "values" }
 ]);
 ```
 
