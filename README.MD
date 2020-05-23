@@ -27,7 +27,7 @@ This declarative API to complex models has **advantages in**:
 Other related features include:
 
 - [Diff Functions](#diff-functions) based on the 'path' or Dot Notation API & principles.
-- [Get & Set pure functions](#get-&-set-pure-functions) based on the 'path' or Dot Notation API & principles.
+- [Get & Set pure functions](#get--set-pure-functions) based on the 'path' or Dot Notation API & principles.
 - [Hooks](#hooks) for common problems in React applications.
 
 ## State Management
@@ -139,8 +139,7 @@ const validationModel = useValidationModel();
   )}
 </Leaf>;
 ```
-
-So the above will keep track of validation state at each location in the model. What if I wanted to know if everything in `person.contact` is valid?
+So the above code will track the validation state of each leaf. What if I want to know the validation state of everything downstream of a given location in the model? Here's an example.
 
 ```jsx
 validationModel.getAllErrorsForLocation("person.contact");
