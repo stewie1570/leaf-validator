@@ -16,7 +16,7 @@ ECMAScript Target: **ES2019**
 
 **MongoDB** uses a very similar concept called [Dot Notation](https://docs.mongodb.com/manual/core/document/#dot-notation).
 
-**Redis** encourages a best practice very similar to this concept that they just call a ['JSONPath'](https://redislabs.com/redis-best-practices/data-storage-patterns/object-hash-storage/)
+**Redis** encourages a best practice very similar to this concept called [JSONPath](https://redislabs.com/redis-best-practices/data-storage-patterns/object-hash-storage/)
 
 This declarative API to complex models has **advantages in**:
 
@@ -26,7 +26,7 @@ This declarative API to complex models has **advantages in**:
 
 Other related features include:
 
-- [Diff Functions](#diff-functions) based on the 'path' or Dot Notation API & principles.
+- [Diff Functions](#diff-functions) based on the JSONPath or Dot Notation API & principles.
 - [Get & Set pure functions](#get--set-pure-functions) based on the 'path' or Dot Notation API & principles.
 - [Hooks](#hooks) for common problems in React applications.
 
