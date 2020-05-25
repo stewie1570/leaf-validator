@@ -11,7 +11,7 @@ ECMAScript Target: **ES2019**
 ## Philosophy
 
 - There should be a declarative interface to allow navigating objects from the root to any value.
-- This declarative interface should allow you to compute the next immutable version of an object to update any value.
+- This declarative interface should allow you to compute the next immutable version of an object allowing you to set a value at any location.
 - This API should help loosen coupling of data from queries and updates.
 
 **MongoDB** uses a very similar concept called [Dot Notation](https://docs.mongodb.com/manual/core/document/#dot-notation).
