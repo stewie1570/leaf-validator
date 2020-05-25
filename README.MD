@@ -66,7 +66,7 @@ function onPhoneNumberChange(updatedPhoneNumber) {
 
 **The Problems:**
 
-Whether the phone number update was written as a reducer or set state callback function the problems (below) are the same:
+Set state callback functions and reducers of complex models suffer from these problems:
 
 - **Reusability**: The reducers are not re-usable for different parts of the model. So you tend to write a lot of them.
 - **Complexity**: The reducers will fail if they attempt to update an object that doesn't exist in the original model.
@@ -75,7 +75,7 @@ Whether the phone number update was written as a reducer or set state callback f
 
 **Solution:**
 
-Lets not write reducers or set state callbacks and just declaratively operate immutable state progression for that same complex model.
+Lets not write reducers or set state callbacks for complex models and just declaratively operate immutable state progression for that same complex model.
 
 ```jsx
 import { Leaf } from "leaf-validator";
