@@ -304,3 +304,56 @@ test("validate multiple model nodes", async () => {
         expect(queryAllByTestId("top-level-error").map(node => node.textContent)).toEqual([]);
     });
 });
+
+test("get errors for root location via undefined location", async () => {
+    const Wrapper = () => {
+        const [model, setModel] = useState({ contact: { firstName: "", lastName: "" } });
+        const validationModel = useValidationModel();
+
+        const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
+
+        return <>
+            <Leaf
+                showErrors
+                model={model}
+                onChange={setModel}
+                location="contact.firstName"
+                validationModel={validationModel}
+                validators={[isRequired]}>
+                {(email: string, onChange, onBlur, errors) => <>
+                    <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="firstName" />
+                </>}
+            </Leaf>
+            <Leaf
+                showErrors
+                model={model}
+                onChange={setModel}
+                location="contact.lastName"
+                validationModel={validationModel}
+                validators={[isRequired]}>
+                {(email: string, onChange, onBlur, errors) => <>
+                    <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="lastName" />
+                </>}
+            </Leaf>
+            <ul>
+                {validationModel.getAllErrorsForLocation().map((error, index) => <li key={index} data-testid="top-level-error">
+                    {error.location} - {error.messages}
+                </li>)}
+            </ul>
+        </>
+    }
+
+    const { getByTestId, findAllByTestId, queryAllByTestId } = render(<Wrapper />);
+
+    expect((await findAllByTestId("top-level-error")).map(node => node.textContent)).toEqual([
+        "contact.firstName - Value is required",
+        "contact.lastName - Value is required"
+    ]);
+
+    fireEvent.change(getByTestId("firstName"), { target: { value: "Stewart" } });
+    fireEvent.change(getByTestId("lastName"), { target: { value: "Anderson" } });
+
+    await waitFor(() => {
+        expect(queryAllByTestId("top-level-error").map(node => node.textContent)).toEqual([]);
+    });
+});

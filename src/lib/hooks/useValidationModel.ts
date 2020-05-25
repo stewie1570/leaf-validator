@@ -21,7 +21,7 @@ export function useValidationModel(): ValidationModel {
         get: (location: string) => validationModel[location] || [],
         getAllErrorsForLocation: location => filteredObjectToArray(validationModel,
             {
-                keyFilter: key => key.startsWith(location),
+                keyFilter: key => key.startsWith(location || ""),
                 mapper: (key, value) => ({ location: key, messages: value })
             })
             .filter(error => error?.messages?.length)
