@@ -49,35 +49,7 @@ Here is an example model:
 }
 ```
 
-Here is an example set state callback function (below) to update the phone number in the model (above):
-
-```javascript
-function onPhoneNumberChange(updatedPhoneNumber) {
-  setState((origModel) => ({
-    ...origModel,
-    person: {
-      ...origModel.person,
-      contact: {
-        ...origModel.person.contact,
-        phoneNumber: updatedPhoneNumber,
-      },
-    },
-  }));
-}
-```
-
-**The Problems:**
-
-Set state callback functions and reducers of complex models suffer from these problems:
-
-- **Reusability**: The reducers are not re-usable for different parts of the model. So you tend to write a lot of them.
-- **Complexity**: The reducers will fail if they attempt to update an object that doesn't exist in the original model.
-  - For example: **person** is undefined in the **origModel**. When you spread **origModel.person.contact** you'll experience an undefined reference error unless each part of your reducer tests for undefined.
-- **Coupling**: The reducers will need to be completely re-written if/when the model shape changes.
-
-**Solution:**
-
-Lets not write reducers or set state callbacks for complex models and just declaratively operate immutable state progression for that same complex model.
+Using leaf-validator, you could allow a user to edit phone number in the above model like this:
 
 ```jsx
 import { Leaf } from "leaf-validator";
@@ -94,11 +66,39 @@ const [model, setModel] = useState({});
 </Leaf>;
 ```
 
+In the above example, calling **setPhoneNumberInModel** is the same as writing and calling this funtion (below) except it will even work when **origModel** is null or undefined etc... 
+
+```javascript
+function setPhoneNumberInModel(updatedPhoneNumber) {
+  setState((origModel) => ({
+    ...origModel,
+    person: {
+      ...origModel.person,
+      contact: {
+        ...origModel.person.contact,
+        phoneNumber: updatedPhoneNumber,
+      }
+    }
+  }));
+}
+```
+
+This function could have been written inside a reducer. The point is, you can just declare the path to update and leaf-validator will handle the immutable state progression for you.
+
+**The problems this solves:**
+
+Set state callback functions and reducers of complex models suffer from these problems:
+
+- **Reusability**: Reducers and set state callback functions for this model would not be re-usable for different parts of this model. So you tend to write a lot of code.
+- **Complexity**: Reducers of this model would fail if they attempt to update an object that doesn't exist in the original model.
+  - For example: **person** is undefined in the **origModel**. When you spread **origModel.person.contact** you'll experience an undefined reference error unless each part of your reducer tests for undefined.
+- **Coupling**: Reducers of this model would need to be completely re-written if/when the model shape changes.
+
 [![Edit Leaf Example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/leaf-example-n0e8v?fontsize=14&hidenavigation=1&theme=dark)
 
 ## Validation:
 
-If I updated **phoneNumber** to an invalid phone number then there should be a state somewhere that says the **phoneNumber** is invalid. If the **phoneNumber** is invalid that means **contact** is invalid. If **contact** is invalid then **person** is invalid. So the shape of the validation model needs to mirror the shape of the model it validates.
+If the **phoneNumber** is invalid that means **contact** is invalid. If **contact** is invalid then **person** is invalid. So the shape of the validation model needs to mirror the shape of the model it validates.
 
 Lets declaratively update the validation model:
 
