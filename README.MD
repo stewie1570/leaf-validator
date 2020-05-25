@@ -18,7 +18,7 @@ ECMAScript Target: **ES2019**
 
 **Redis** encourages a best practice very similar to this concept called [JSONPath](https://redislabs.com/redis-best-practices/data-storage-patterns/object-hash-storage/)
 
-This declarative API to complex models has **advantages in**:
+This declarative API to complex immutable models has **advantages in**:
 
 - [State Management](#state-management)
 - [Validation](#validation)
