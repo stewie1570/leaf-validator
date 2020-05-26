@@ -3,12 +3,12 @@
 [![Build](https://travis-ci.org/stewie1570/leaf-validator.svg)](https://travis-ci.org/stewie1570/leaf-validator)
 [![Coverage Status](https://coveralls.io/repos/github/stewie1570/leaf-validator/badge.svg?branch=master)](https://coveralls.io/github/stewie1570/leaf-validator?branch=master)
 [![npm version](https://badge.fury.io/js/leaf-validator.svg)](https://badge.fury.io/js/leaf-validator)
-[![Package Size](https://badgen.net/bundlephobia/min/leaf-validator)](https://bundlephobia.com/result?p=leaf-validator)
+[![Package Size](https://badgen.net/bundlephobia/minzip/leaf-validator)](https://bundlephobia.com/result?p=leaf-validator)
 [![Maintainability](https://api.codeclimate.com/v1/badges/c49423ebf81ddf1542c0/maintainability)](https://codeclimate.com/github/stewie1570/leaf-validator/maintainability)
 
 ECMAScript Target: **ES2019**
 
-## Philosophy
+## Overview
 
 We need a declarative API to immutable models such that:
 
@@ -19,6 +19,8 @@ We need a declarative API to immutable models such that:
 **MongoDB** uses a very similar concept called [Dot Notation](https://docs.mongodb.com/manual/core/document/#dot-notation).
 
 **Redis** encourages a best practice very similar to this concept called [JSONPath](https://redislabs.com/redis-best-practices/data-storage-patterns/object-hash-storage/)
+
+## Why use Leaf-Validator?
 
 This declarative API to complex immutable models has **advantages in**:
 
@@ -56,17 +58,22 @@ import { Leaf } from "leaf-validator";
 
 const [model, setModel] = useState({});
 
-<Leaf model={model} onChange={setModel} location="person.contact.phoneNumber">
+<Leaf
+  model={model}
+  onChange={setModel}
+  location="person.contact.phoneNumber">
   {(phoneNumber, setPhoneNumberInModel) => (
     <label>
       Phone Number
-      <TextInput value={phoneNumber} onChange={setPhoneNumberInModel} />
+      <TextInput
+        value={phoneNumber}
+        onChange={setPhoneNumberInModel} />
     </label>
   )}
 </Leaf>;
 ```
 
-In the above example, calling **setPhoneNumberInModel** is the same as writing and calling this funtion (below) except it will even work when **origModel** is null or undefined etc... 
+In the above example, calling **setPhoneNumberInModel** is roughly the same as writing and calling this funtion (below) except it will even work when **origModel** is null or undefined etc...
 
 ```javascript
 function setPhoneNumberInModel(updatedPhoneNumber) {
@@ -83,7 +90,7 @@ function setPhoneNumberInModel(updatedPhoneNumber) {
 }
 ```
 
-This function could have been written inside a reducer. The point is, you can just declare the path to update and leaf-validator will handle the immutable state progression for you.
+This function could have been written inside a reducer. The point is, you can just declare the location to update and leaf-validator will handle the immutable state progression for you.
 
 **The problems this solves:**
 
@@ -141,6 +148,7 @@ const validationModel = useValidationModel();
   )}
 </Leaf>;
 ```
+
 So the above code will track the validation state of each leaf. What if I want to know the validation state of everything downstream of a given location in the model? Here's an example.
 
 ```jsx
@@ -165,7 +173,7 @@ const [model, setModel] = useState({});
   failOverLocations={[
     "oldLocation.phoneNumber",
     "olderLocation.phoneNumber",
-    "oldestLocation.phoneNumber",
+    "oldestLocation.phoneNumber"
   ]}
 >
   {(phoneNumber, setPhoneNumber) => (
@@ -227,9 +235,9 @@ const theObject = {
     prop1: {
       target: "original value",
     },
-    prop2: {},
+    prop2: {}
   },
-  prop2: {},
+  prop2: {}
 };
 
 const progession = set("prop1.prop1.target").to("updated value").in(theObject);
@@ -285,7 +293,7 @@ const original = {
     {
       wrapper: {
         changed: "p1 value 1",
-        original: "p2 value 1"
+        original: "p2 value 1",
       }
     }
   ]
@@ -295,7 +303,7 @@ const updated = {
     {
       wrapper: {
         changed: "p1 value 2",
-        new: "p2 value 1"
+        new: "p2 value 1",
       }
     }
   ]
@@ -320,7 +328,7 @@ expect(
       complex: {
         object: {
           with: ["values"],
-          and: ["other", "values"]
+          and: ["other", "values"],
         }
       }
     }
@@ -333,7 +341,7 @@ expect(
         complex: {
           object: {
             with: ["values"],
-            and: ["other", "values"]
+            and: ["other", "values"],
           }
         }
       }
@@ -347,7 +355,7 @@ expect(
       complex: {
         object: {
           with: ["values"],
-          and: ["other", "values"]
+          and: ["other", "values"],
         }
       }
     }
