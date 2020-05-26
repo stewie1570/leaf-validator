@@ -29,7 +29,7 @@ This declarative API to complex immutable models has **advantages in**:
 Other related features include:
 
 - [Diff Functions](#diff-functions) based on the JSONPath or Dot Notation API & principles.
-- [Get & Set pure functions](#get--set-pure-functions) based on the 'path' or Dot Notation API & principles.
+- [Get & Set pure functions](#get--set-pure-functions) based on the JSONPath or Dot Notation API & principles.
 - [Hooks](#hooks) for common problems in React applications.
 
 ## State Management
