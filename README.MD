@@ -12,8 +12,8 @@ ECMAScript Target: **ES2019**
 
 We need a declarative API to immutable models such that:
 
-- Querying a path that doesn't exist should return undefined and should never throw undefined reference errors.
-- Setting a value at a location that does not exist should build the object necessary to set the value at that location.
+- Querying a location that doesn't exist in an object should return undefined and should never throw undefined reference errors.
+- Setting a value at a location that does not exist in an object should build the object necessary to set the value at that location.
 - This API should help loosen coupling of data from queries and updates.
 
 **MongoDB** uses a very similar concept called [Dot Notation](https://docs.mongodb.com/manual/core/document/#dot-notation).
