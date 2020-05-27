@@ -156,6 +156,14 @@ Now you have a validation model with an API that can tell you if there are error
 validationModel.getAllErrorsForLocation("person.contact");
 
 //will return Array<{ location: string, messages: Array<string> }> of all errors (or [] if there are no errors) at that location or downstream of that location.
+
+
+validationModel.get("person.contact");
+//will return Array<string> of all errors at that location.
+//Since in this example there would only be errors at the leaf values you would likely use this instead:
+
+validationModel.get("person.contact.phoneNumber");
+//however keep in mind that the errors for a leaf are passed via the children render function parameters as in the example above.
 ```
 
 ## Backward Compatibility
