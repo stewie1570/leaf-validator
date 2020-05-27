@@ -170,7 +170,7 @@ const [model, setModel] = useState({});
 <Leaf
   model={model}
   onChange={setModel}
-  location="newLocation.phoneNumber"
+  location="currentLocation.phoneNumber"
   failOverLocations={[
     "oldLocation.phoneNumber",
     "olderLocation.phoneNumber",
