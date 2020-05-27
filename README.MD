@@ -149,7 +149,8 @@ const validationModel = useValidationModel();
 </Leaf>;
 ```
 
-So the above code will track the validation state of each leaf. What if I want to know the validation state of everything downstream of a given location in the model? Here's an example.
+So the above code will track the validation state of each leaf.
+Now you have a validation model with an API that can tell you if there are errors at any location in the model and if there any errors downstream of a given location.
 
 ```jsx
 validationModel.getAllErrorsForLocation("person.contact");
