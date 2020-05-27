@@ -160,7 +160,7 @@ validationModel.getAllErrorsForLocation("person.contact");
 
 ## Backward Compatibility
 
-Here's another hypothetical. You're persisting the same model that you have in a client-side app to a Mongo Database and you've changed the shape of the model. You don't want downtime and you don't want to coordinate DB migrations with code updates. So, lets make the app backward compatible with the previous model shape(s):
+Let's say you update your server side code and your requests to the server are now returning a different shape of model. Using this declarative API you can support backward compatibility because it will support multiple shapes of the model. See example below.
 
 ```jsx
 import { Leaf } from "leaf-validator";
@@ -185,6 +185,8 @@ const [model, setModel] = useState({});
   )}
 </Leaf>;
 ```
+
+This will try to read from the **location** in the model first. If **location** in the model is not available then it will start looking at the **failOverLocations**. Updates are done to **location** in the model.
 
 Now you can run DB migration whenever you want.
 
