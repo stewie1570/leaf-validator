@@ -94,7 +94,7 @@ This function could have been written inside a reducer. The point is, you can ju
 
 **The problems this solves:**
 
-Set state callback functions and reducers of complex models suffer from these problems:
+This API/abstraction does not suffer from the problems that set state callback functions and reducers of complex models suffer from:
 
 - **Reusability**: Reducers and set state callback functions for this model would not be re-usable for different parts of this model. So you tend to write a lot of code.
 - **Complexity**: Reducers of this model would fail if they attempt to update an object that doesn't exist in the original model.
