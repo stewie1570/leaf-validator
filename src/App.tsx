@@ -9,7 +9,7 @@ import { useLoadingState } from './lib/hooks/useLoadingState'
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 const isValidEmailAddress = (value: string) => !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) && [`"${value || ""}" is not a valid email address`];
 const isValidPhoneNumber = (value: string) => !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(value) && [`"${value || ""}" is not a valid phone number`];
-const doesNotExistYet = (value: string) => new Promise(resolve => setTimeout(() => resolve([`"${value}" is not valid.`]), Math.random() * 2000))
+const doesNotExistYet = (value: string) => new Promise(resolve => setTimeout(() => resolve([`"${value}" resolved invalid.`]), Math.random() * 2000))
     .then(result => {
         console.log(`validated "${value}"`);
         return result;

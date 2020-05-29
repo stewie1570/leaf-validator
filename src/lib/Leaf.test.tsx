@@ -3,6 +3,7 @@ import { render, fireEvent, waitFor } from '@testing-library/react'
 import { Leaf } from './Leaf'
 import { TextInput } from '../TextInput'
 import { useValidationModel } from './hooks/useValidationModel';
+import { ValidationModel } from './models';
 
 test("can read & edit model nodes nested inside complex object models and arrays", () => {
     const Wrapper = () => {
@@ -215,10 +216,15 @@ test("validate model asynchronously on an interval and show errors on blur", asy
 
 test("deferredValidators and validators work together", async () => {
     let resolver = () => { };
+    let validationModel: ValidationModel = {
+        get: () => [],
+        set: () => undefined,
+        getAllErrorsForLocation: () => []
+    };
 
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
-        const validationModel = useValidationModel();
+        validationModel = useValidationModel();
 
         const willBeInvalid = (value: string) => Promise.resolve(`${value} resolved invalid`);
         const isInvalid = (value: string) => `${value} is invalid`;
@@ -249,6 +255,10 @@ test("deferredValidators and validators work together", async () => {
         "test value is invalid",
         "test value resolved invalid"
     ]);
+    expect(validationModel.getAllErrorsForLocation()).toEqual([{
+        location: "contact.email",
+        messages: ["test value is invalid", "test value resolved invalid"]
+    }]);
 });
 
 test("validate model immediately show errors", async () => {

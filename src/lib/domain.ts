@@ -69,7 +69,7 @@ export const set = (target: string) => ({
     })
 });
 
-const distinctArrayFrom = (left: Array<any>, right: Array<any>) => {
+export const distinctArrayFrom = (left: Array<any>, right: Array<any>) => {
     const composite = [...left, ...right];
     return composite.filter((value, index) => composite.indexOf(value) === index);
 }

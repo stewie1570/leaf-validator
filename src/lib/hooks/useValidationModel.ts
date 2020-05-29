@@ -1,5 +1,6 @@
 import { ValidationModel } from "../models";
 import { useMountedOnlyState } from "./useMountedOnlyState";
+import { distinctArrayFrom } from '../domain'
 
 type FilteredObjectOptions<T> = {
     keyFilter: (key: string) => boolean,
@@ -40,7 +41,7 @@ export function useValidationModel(): ValidationModel {
         },
         getAllErrorsForLocation: location => {
             const validationModelsFromAllNamespaces = Object.values(validationModel);
-            return validationModelsFromAllNamespaces
+            const unGroupedResults = validationModelsFromAllNamespaces
                 .map((validationModel: any) => filteredObjectToArray(validationModel,
                     {
                         keyFilter: key => key.startsWith(location || ""),
@@ -48,6 +49,14 @@ export function useValidationModel(): ValidationModel {
                     })
                     .filter(error => error?.messages?.length))
                 .flat();
+            const locations = distinctArrayFrom(unGroupedResults.map(result => result.location), []);
+            return locations.map(location => ({
+                location,
+                messages: unGroupedResults
+                    .filter(result => result.location === location)
+                    .map(result => result.messages)
+                    .flat()
+            }));
         }
     }
 }
