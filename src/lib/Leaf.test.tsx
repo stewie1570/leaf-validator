@@ -213,6 +213,44 @@ test("validate model asynchronously on an interval and show errors on blur", asy
     expect((await findAllByTestId("error")).map(node => node.textContent)).toEqual(['"second" is invalid.']);
 });
 
+test("deferredValidators and validators work together", async () => {
+    let resolver = () => { };
+
+    const Wrapper = () => {
+        const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
+        const validationModel = useValidationModel();
+
+        const willBeInvalid = (value: string) => Promise.resolve(`${value} resolved invalid`);
+        const isInvalid = (value: string) => `${value} is invalid`;
+
+        return <Leaf
+            model={model}
+            onChange={setModel}
+            location="contact.email"
+            validationModel={validationModel}
+            validators={[isInvalid]}
+            deferredValidators={[willBeInvalid]}>
+            {(email: string, onChange, onBlur, errors) => <>
+                <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="email" />
+                {errors.length > 0 && <ul>
+                    {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
+                </ul>}
+            </>}
+        </Leaf>
+    }
+
+    const { getByTestId, getAllByTestId, findByText } = render(<Wrapper />);
+
+    fireEvent.change(getByTestId("email"), { target: { value: "test value" } });
+    fireEvent.blur(getByTestId("email"));
+    resolver();
+    await findByText("test value resolved invalid");
+    expect((await getAllByTestId("error")).map(node => node.textContent)).toEqual([
+        "test value is invalid",
+        "test value resolved invalid"
+    ]);
+});
+
 test("validate model immediately show errors", async () => {
     const Wrapper = () => {
         const [model, setModel] = useState({ contact: { email: "" } });

@@ -15,18 +15,25 @@ type Instance<Target> = {
     deferrmentTimeout?: any
 };
 
-async function validateWith<Target>(
+type Validate<Target> = {
     validators: Validator<Target>[] | undefined,
     instance: Instance<Target>,
     location: string,
-    targetValue: Target) {
+    targetValue: Target,
+    namespace: string
+}
+
+async function validateWith<Target>({ validators, instance, location, targetValue, namespace }: Validate<Target>) {
     if (instance.validationModel && validators && validators.length) {
         const validationResults = (await Promise.all(validators.map(validator => validator(targetValue))))
             .filter(value => value)
             .flat();
         targetValue === instance.validationTarget && instance.validationModel.set((origValidationModel: any) => ({
             ...origValidationModel,
-            [location]: validationResults
+            [namespace]: {
+                ...(origValidationModel[namespace]),
+                [location]: validationResults
+            }
         }));
     }
 }
@@ -76,22 +83,26 @@ export function Leaf<Model, Target>(props: {
         instance.current.validationTarget = targetValue;
         const { validators } = instance.current;
 
-        validateWith(
+        validateWith({
             validators,
-            instance.current,
+            instance: instance.current,
             location,
-            targetValue);
+            targetValue,
+            namespace: "non-deferred"
+        });
     }, [targetValue, location]);
 
     useDeferredEffect(() => {
         instance.current.validationTarget = targetValue;
         const { deferredValidators } = instance.current;
 
-        validateWith(
-            deferredValidators,
-            instance.current,
+        validateWith({
+            validators: deferredValidators,
+            instance: instance.current,
             location,
-            targetValue)
+            targetValue,
+            namespace: "deferred"
+        })
     }, deferMilliseconds || 500, [targetValue, location, deferMilliseconds]);
 
     return children(
