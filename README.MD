@@ -58,16 +58,11 @@ import { Leaf } from "leaf-validator";
 
 const [model, setModel] = useState({});
 
-<Leaf
-  model={model}
-  onChange={setModel}
-  location="person.contact.phoneNumber">
+<Leaf model={model} onChange={setModel} location="person.contact.phoneNumber">
   {(phoneNumber, setPhoneNumberInModel) => (
     <label>
       Phone Number
-      <TextInput
-        value={phoneNumber}
-        onChange={setPhoneNumberInModel} />
+      <TextInput value={phoneNumber} onChange={setPhoneNumberInModel} />
     </label>
   )}
 </Leaf>;
@@ -84,8 +79,8 @@ function setPhoneNumberInModel(updatedPhoneNumber) {
       contact: {
         ...origModel.person.contact,
         phoneNumber: updatedPhoneNumber,
-      }
-    }
+      },
+    },
   }));
 }
 ```
@@ -152,11 +147,12 @@ const validationModel = useValidationModel();
 So the above code will track the validation state of each leaf.
 Now you have a validation model with an API that can tell you if there are errors at any location in the model and if there any errors downstream of a given location.
 
+**Validation Queries**
+
 ```jsx
 validationModel.getAllErrorsForLocation("person.contact");
 
 //will return Array<{ location: string, messages: Array<string> }> of all errors (or [] if there are no errors) at that location or downstream of that location.
-
 
 validationModel.get("person.contact");
 //will return Array<string> of all errors at that location.
@@ -164,6 +160,39 @@ validationModel.get("person.contact");
 
 validationModel.get("person.contact.phoneNumber");
 //however keep in mind that the errors for a leaf are passed via the children render function parameters as in the example above.
+```
+
+**Async Validation**
+
+The functions that you pass to the **validators** attribute can by async. That is supported. However, a lot of the time when you have asynchronous validators you don't want the validators to be run every time the input changes. For example, say you have a text input for user names on a new user registration form. You might have an async validator to make sure the user name isn't already taken. You probably don't want that to run on each keystroke. So we have **deferredValidators**. The **deferredValidators** run **deferMilliseconds** trailing the last onChange. The default **deferMilliseconds** is 500 milliseconds.
+
+```jsx
+import { Leaf, useValidationModel } from "leaf-validator";
+
+const [model, setModel] = useState({});
+const validationModel = useValidationModel();
+
+<Leaf
+  model={model}
+  onChange={setModel}
+  location="person.userName"
+  validationModel={validationModel}
+  deferredValidators={[isUserNameAvailable]}
+>
+  {(userName, setUserName, showErrors, errors) => (
+    <label>
+      User Name
+      <TextInput value={userName} onChange={setUserName} onBlur={showErrors} />
+      {errors.length > 0 && (
+        <ul>
+          {errors.map((error, index) => (
+            <li key={index}>{error}</li>
+          ))}
+        </ul>
+      )}
+    </label>
+  )}
+</Leaf>;
 ```
 
 ## Backward Compatibility
@@ -182,7 +211,7 @@ const [model, setModel] = useState({});
   failOverLocations={[
     "oldLocation.phoneNumber",
     "olderLocation.phoneNumber",
-    "oldestLocation.phoneNumber"
+    "oldestLocation.phoneNumber",
   ]}
 >
   {(phoneNumber, setPhoneNumber) => (
@@ -246,9 +275,9 @@ const theObject = {
     prop1: {
       target: "original value",
     },
-    prop2: {}
+    prop2: {},
   },
-  prop2: {}
+  prop2: {},
 };
 
 const progession = set("prop1.prop1.target").to("updated value").in(theObject);
@@ -305,9 +334,9 @@ const original = {
       wrapper: {
         changed: "p1 value 1",
         original: "p2 value 1",
-      }
-    }
-  ]
+      },
+    },
+  ],
 };
 const updated = {
   outer: [
@@ -315,9 +344,9 @@ const updated = {
       wrapper: {
         changed: "p1 value 2",
         new: "p2 value 1",
-      }
-    }
-  ]
+      },
+    },
+  ],
 };
 const diffs = diff.from(original).to(updated);
 const constructed = [original, ...diffs].reduce((currentValue, diff) =>
@@ -340,9 +369,9 @@ expect(
         object: {
           with: ["values"],
           and: ["other", "values"],
-        }
-      }
-    }
+        },
+      },
+    },
   })
 ).toEqual([
   {
@@ -353,11 +382,11 @@ expect(
           object: {
             with: ["values"],
             and: ["other", "values"],
-          }
-        }
-      }
-    }
-  }
+          },
+        },
+      },
+    },
+  },
 ]);
 
 expect(
@@ -367,14 +396,14 @@ expect(
         object: {
           with: ["values"],
           and: ["other", "values"],
-        }
-      }
-    }
+        },
+      },
+    },
   })
 ).toEqual([
   { location: "some.complex.object.with.0", updatedValue: "values" },
   { location: "some.complex.object.and.0", updatedValue: "other" },
-  { location: "some.complex.object.and.1", updatedValue: "values" }
+  { location: "some.complex.object.and.1", updatedValue: "values" },
 ]);
 ```
 
