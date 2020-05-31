@@ -4,6 +4,7 @@ import { Leaf } from './Leaf'
 import { TextInput } from '../TextInput'
 import { useValidationModel } from './hooks/useValidationModel';
 import { ValidationModel } from './models';
+import { isValidating } from './domain'
 
 test("can read & edit model nodes nested inside complex object models and arrays", () => {
     const Wrapper = () => {
@@ -215,7 +216,6 @@ test("validate model asynchronously on an interval and show errors on blur", asy
 });
 
 test("deferredValidators and validators work together", async () => {
-    let resolver = () => { };
     let validationModel: ValidationModel = {
         get: () => [],
         set: () => undefined,
@@ -249,7 +249,6 @@ test("deferredValidators and validators work together", async () => {
 
     fireEvent.change(getByTestId("email"), { target: { value: "test value" } });
     fireEvent.blur(getByTestId("email"));
-    resolver();
     await findByText("test value resolved invalid");
     expect((await getAllByTestId("error")).map(node => node.textContent)).toEqual([
         "test value is invalid",
@@ -259,6 +258,59 @@ test("deferredValidators and validators work together", async () => {
         location: "contact.email",
         messages: ["test value is invalid", "test value resolved invalid"]
     }]);
+});
+
+test("validation queries can see isValidating state while async validators are in-flight", async () => {
+    let validationModel: ValidationModel = {
+        get: () => [],
+        set: () => undefined,
+        getAllErrorsForLocation: () => []
+    };
+
+    const Wrapper = () => {
+        const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
+        validationModel = useValidationModel();
+
+        const willBeInvalid = (value: string) => Promise.resolve(`${value} resolved invalid`);
+
+        return <Leaf
+            model={model}
+            onChange={setModel}
+            location="contact.email"
+            validationModel={validationModel}
+            validators={[willBeInvalid]}
+            deferredValidators={[willBeInvalid]}>
+            {(email: string, onChange) => <>
+                <TextInput value={email} onChange={onChange} data-testid="email" />
+            </>}
+        </Leaf>
+    }
+
+    const { getByTestId } = render(<Wrapper />);
+
+    fireEvent.change(getByTestId("email"), { target: { value: "test value" } });
+    fireEvent.blur(getByTestId("email"));
+
+    expect(validationModel.getAllErrorsForLocation()).toEqual([]);
+    expect(validationModel.isValidating()).toBe(true);
+    expect(validationModel.getAllErrorsForLocation(undefined, { includeIsValidating: true })).toEqual([{
+        location: "contact.email",
+        messages: [
+            isValidating,
+            isValidating
+        ]
+    }]);
+
+    await waitFor(() => {
+        expect(validationModel.getAllErrorsForLocation()).toEqual([{
+            location: "contact.email",
+            messages: [
+                "test value resolved invalid",
+                "test value resolved invalid"
+            ]
+        }]);
+    });
+    expect(validationModel.isValidating()).toBe(false);
 });
 
 test("validate model immediately show errors", async () => {

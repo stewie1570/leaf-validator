@@ -6,5 +6,6 @@ export type Error = {
 export type ValidationModel = {
     set: React.Dispatch<any>,
     get: (location: string) => Array<string>,
-    getAllErrorsForLocation: (location?: string) => Array<Error>
+    getAllErrorsForLocation: (location?: string, options?: { includeIsValidating?: boolean }) => Array<Error>,
+    isValidating: () => boolean
 };

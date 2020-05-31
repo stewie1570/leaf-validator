@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { get, set } from './domain'
+import { get, set, isValidating } from './domain'
 import { ValidationModel } from './models';
 import { useDeferredEffect } from './hooks/useDeferredEffect'
 
@@ -23,18 +23,32 @@ type Validate<Target> = {
     namespace: string
 }
 
+const isPromise = (value: any) => typeof value?.then === "function";
+
 async function validateWith<Target>({ validators, instance, location, targetValue, namespace }: Validate<Target>) {
     if (instance.validationModel && validators && validators.length) {
-        const validationResults = (await Promise.all(validators.map(validator => validator(targetValue))))
+        const results = validators.map(validator => validator(targetValue));
+
+        const setResults = (validationsResults: any) => targetValue === instance.validationTarget
+            && instance.validationModel
+            && instance.validationModel.set((origValidationModel: any) => ({
+                ...origValidationModel,
+                [namespace]: {
+                    ...(origValidationModel[namespace]),
+                    [location]: validationsResults
+                }
+            }));
+
+        const unResolvedResults = results
+            .map(result => isPromise(result) ? isValidating : result)
             .filter(value => value)
             .flat();
-        targetValue === instance.validationTarget && instance.validationModel.set((origValidationModel: any) => ({
-            ...origValidationModel,
-            [namespace]: {
-                ...(origValidationModel[namespace]),
-                [location]: validationResults
-            }
-        }));
+        setResults(unResolvedResults);
+
+        const resolvedResults = (await Promise.all(results))
+            .filter(value => value)
+            .flat();
+        setResults(resolvedResults);
     }
 }
 
@@ -44,6 +58,9 @@ function findDefinedTargetIn<Target>(model: any, targets: Array<string>): Target
         ? value
         : findDefinedTargetIn(model, targets.slice(1));
 }
+
+const deferredNamespace = "deferred";
+const nonDeferredNamespace = "non-deferred";
 
 export function Leaf<Model, Target>(props: {
     children: (model: Target, onChange: Update<Target>, onBlur: Blur, errors: Array<string>) => any,
@@ -88,20 +105,39 @@ export function Leaf<Model, Target>(props: {
             instance: instance.current,
             location,
             targetValue,
-            namespace: "non-deferred"
+            namespace: nonDeferredNamespace
         });
     }, [targetValue, location]);
+
+    useEffect(() => {
+        instance.current.validationTarget = targetValue;
+        instance?.current?.validationModel && instance.current.validationModel.set((origValidationModel: any) => ({
+            ...origValidationModel,
+            [deferredNamespace]: {
+                ...(origValidationModel[deferredNamespace]),
+                [location]: [isValidating]
+            }
+        }));
+    }, [targetValue, location, deferMilliseconds]);
 
     useDeferredEffect(() => {
         instance.current.validationTarget = targetValue;
         const { deferredValidators } = instance.current;
 
+        const namespace = "deferred";
+        instance?.current?.validationModel && instance.current.validationModel.set((origValidationModel: any) => ({
+            ...origValidationModel,
+            [namespace]: {
+                ...(origValidationModel[namespace]),
+                [location]: isValidating
+            }
+        }))
         validateWith({
             validators: deferredValidators,
             instance: instance.current,
             location,
             targetValue,
-            namespace: "deferred"
+            namespace
         })
     }, deferMilliseconds || 500, [targetValue, location, deferMilliseconds]);
 

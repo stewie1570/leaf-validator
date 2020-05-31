@@ -1,6 +1,6 @@
 import { ValidationModel } from "../models";
 import { useMountedOnlyState } from "./useMountedOnlyState";
-import { distinctArrayFrom } from '../domain'
+import { distinctArrayFrom, isValidating } from '../domain'
 
 type FilteredObjectOptions<T> = {
     keyFilter: (key: string) => boolean,
@@ -37,15 +37,22 @@ export function useValidationModel(): ValidationModel {
             const validationModelsFromAllNamespaces = Object.values(validationModel);
             return validationModelsFromAllNamespaces
                 .map((validationModel: any) => validationModel[location] || [])
-                .flat();
+                .flat()
+                .filter(value => value !== isValidating)
         },
-        getAllErrorsForLocation: location => {
+        getAllErrorsForLocation: (location, options) => {
+            const removeIsValidatingResults = !(options?.includeIsValidating === true);
             const validationModelsFromAllNamespaces = Object.values(validationModel);
             const unGroupedResults = validationModelsFromAllNamespaces
                 .map((validationModel: any) => filteredObjectToArray(validationModel,
                     {
                         keyFilter: key => key.startsWith(location || ""),
-                        mapper: (key, value) => ({ location: key, messages: value })
+                        mapper: (key, messages) => ({
+                            location: key,
+                            messages: removeIsValidatingResults
+                                ? messages.filter((message: string) => message !== isValidating)
+                                : messages
+                        })
                     })
                     .filter(error => error?.messages?.length))
                 .flat();
@@ -57,6 +64,11 @@ export function useValidationModel(): ValidationModel {
                     .map(result => result.messages)
                     .flat()
             }));
-        }
+        },
+        isValidating: () => Object
+            .values<object>(validationModel)
+            .map(Object.values)
+            .flat(2)
+            .some(value => value === isValidating)
     }
 }
