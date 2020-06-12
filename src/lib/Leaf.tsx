@@ -25,16 +25,29 @@ type Validate<Target> = {
 
 async function validateWith<Target>({ validators, instance, location, targetValue, namespace }: Validate<Target>) {
     if (instance.validationModel && validators && validators.length) {
-        const validationResults = (await Promise.all(validators.map(validator => validator(targetValue))))
-            .filter(value => value)
-            .flat();
-        targetValue === instance.validationTarget && instance.validationModel.set((origValidationModel: any) => ({
-            ...origValidationModel,
-            [namespace]: {
-                ...(origValidationModel[namespace]),
-                [location]: validationResults
-            }
-        }));
+        try {
+            instance
+                .validationModel
+                .setNamespacesCurrentlyValidating(currentlyLoadingNamespaces => [
+                    ...currentlyLoadingNamespaces,
+                    namespace
+                ]);
+            const validationResults = (await Promise.all(validators.map(validator => validator(targetValue))))
+                .filter(value => value)
+                .flat();
+            targetValue === instance.validationTarget && instance.validationModel.set((origValidationModel: any) => ({
+                ...origValidationModel,
+                [namespace]: {
+                    ...(origValidationModel[namespace]),
+                    [location]: validationResults
+                }
+            }));
+        } finally {
+            instance
+                .validationModel
+                .setNamespacesCurrentlyValidating(currentlyLoadingNamespaces => currentlyLoadingNamespaces
+                    .filter(currentNamespace => currentNamespace !== namespace));
+        }
     }
 }
 
