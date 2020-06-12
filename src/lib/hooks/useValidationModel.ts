@@ -30,6 +30,7 @@ function filteredObjectToArray<T>(obj: any, options: FilteredObjectOptions<T>): 
 
 export function useValidationModel(): ValidationModel {
     const [validationModel, setValidationModel] = useMountedOnlyState<any>({});
+    const [currentlyValidatingNamespaces, setNamespacesCurrentlyValidating] = useMountedOnlyState<Array<string>>([]);
 
     return {
         set: setValidationModel,
@@ -57,6 +58,8 @@ export function useValidationModel(): ValidationModel {
                     .map(result => result.messages)
                     .flat()
             }));
-        }
+        },
+        isValidationInProgress: () => currentlyValidatingNamespaces.length > 0,
+        setNamespacesCurrentlyValidating
     }
 }

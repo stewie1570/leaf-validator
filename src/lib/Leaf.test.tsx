@@ -215,11 +215,12 @@ test("validate model asynchronously on an interval and show errors on blur", asy
 });
 
 test("deferredValidators and validators work together", async () => {
-    let resolver = () => { };
     let validationModel: ValidationModel = {
         get: () => [],
         set: () => undefined,
-        getAllErrorsForLocation: () => []
+        getAllErrorsForLocation: () => [],
+        isValidationInProgress: () => false,
+        setNamespacesCurrentlyValidating: () => { }
     };
 
     const Wrapper = () => {
@@ -249,7 +250,6 @@ test("deferredValidators and validators work together", async () => {
 
     fireEvent.change(getByTestId("email"), { target: { value: "test value" } });
     fireEvent.blur(getByTestId("email"));
-    resolver();
     await findByText("test value resolved invalid");
     expect((await getAllByTestId("error")).map(node => node.textContent)).toEqual([
         "test value is invalid",
@@ -259,6 +259,49 @@ test("deferredValidators and validators work together", async () => {
         location: "contact.email",
         messages: ["test value is invalid", "test value resolved invalid"]
     }]);
+});
+
+test("knowing when (async) validation is in progress", async () => {
+    let validationModel: ValidationModel = {
+        get: () => [],
+        set: () => undefined,
+        getAllErrorsForLocation: () => [],
+        isValidationInProgress: () => false,
+        setNamespacesCurrentlyValidating: () => { }
+    };
+
+    const Wrapper = () => {
+        const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
+        validationModel = useValidationModel();
+
+        const willBeInvalid = (value: string) => Promise.resolve(`${value} resolved invalid`);
+
+        return <Leaf
+            model={model}
+            onChange={setModel}
+            location="contact.email"
+            validationModel={validationModel}
+            validators={[willBeInvalid]}
+            deferredValidators={[willBeInvalid]}>
+            {(email: string, onChange, onBlur, errors) => <>
+                <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="email" />
+                {errors.length > 0 && <ul>
+                    {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
+                </ul>}
+            </>}
+        </Leaf>
+    }
+
+    const { getByTestId, getAllByText } = render(<Wrapper />);
+
+    expect(validationModel.isValidationInProgress()).toBe(true);
+
+    fireEvent.blur(getByTestId("email"));
+
+    await waitFor(() => {
+        expect(getAllByText("stewie1570@gmail.com resolved invalid").length).toBe(2);
+    });
+    expect(validationModel.isValidationInProgress()).toBe(false);
 });
 
 test("validate model immediately show errors", async () => {

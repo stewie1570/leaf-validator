@@ -14,9 +14,15 @@ const doesNotExistYet = (value: string) => new Promise(resolve => setTimeout(() 
         console.log(`validated "${value}"`);
         return result;
     });
+const showValidatingFor = (milliseconds: number) => () => new Promise(resolve => setTimeout(resolve, milliseconds));
 
 const form = [
-    { name: "Deferred Async Validation", location: "deferredAsyncValidation", validators: [isRequired], deferredValidators: [doesNotExistYet] },
+    {
+        name: "Deferred Async Validation",
+        location: "deferredAsyncValidation",
+        validators: [isRequired, showValidatingFor(500)],
+        deferredValidators: [doesNotExistYet]
+    },
     { name: "Async Validation", location: "asyncValidation", validators: [doesNotExistYet] },
     { name: "First Name", location: "person.firstName", validators: [isRequired] },
     { name: "Last Name", location: "person.lastName", validators: [isRequired] },
@@ -38,6 +44,7 @@ function App() {
     const validationModel = useValidationModel();
     const [showAllValidation, setShowAllValidation] = useState(false);
     const [isSubmitting, showSubmittingWhile] = useLoadingState();
+    const isValidating = validationModel.isValidationInProgress();
 
     const submit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
@@ -61,9 +68,10 @@ function App() {
         <div className="App">
             <form>
                 {formElements(model, setModel, showAllValidation, validationModel)}
-                <button className="btn btn-primary" type="submit" disabled={isSubmitting} onClick={submit}>Fake Submit Success</button>
+                <button className="btn btn-primary" type="submit" disabled={isValidating || isSubmitting} onClick={submit}>Fake Submit Success</button>
                 &nbsp;
-                <button className="btn btn-secondary" type="button" disabled={isSubmitting} onClick={submitFailire}>Fake Submit Failure</button>
+                <button className="btn btn-secondary" type="button" disabled={isValidating || isSubmitting} onClick={submitFailire}>Fake Submit Failure</button>
+                {isValidating && <i>Validating...</i>}
                 {isSubmitting && <i>Submitting...</i>}
                 <br />
                 <div style={{ verticalAlign: "top", display: "inline-block", width: "33%" }}>
