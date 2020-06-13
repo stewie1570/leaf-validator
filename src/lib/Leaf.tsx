@@ -24,14 +24,8 @@ type Validate<Target> = {
 }
 
 async function validateWith<Target>({ validators, instance, location, targetValue, namespace }: Validate<Target>) {
-    if (instance.validationModel && validators && validators.length) {
-        try {
-            instance
-                .validationModel
-                .setNamespacesCurrentlyValidating(currentlyLoadingNamespaces => [
-                    ...currentlyLoadingNamespaces,
-                    namespace
-                ]);
+    try {
+        if (instance.validationModel && validators && validators.length) {
             const validationResults = (await Promise.all(validators.map(validator => validator(targetValue))))
                 .filter(value => value)
                 .flat();
@@ -42,12 +36,12 @@ async function validateWith<Target>({ validators, instance, location, targetValu
                     [location]: validationResults
                 }
             }));
-        } finally {
-            instance
-                .validationModel
-                .setNamespacesCurrentlyValidating(currentlyLoadingNamespaces => currentlyLoadingNamespaces
-                    .filter(currentNamespace => currentNamespace !== namespace));
         }
+    } finally {
+        instance && instance.validationModel && instance
+            .validationModel
+            .setNamespacesCurrentlyValidating(currentlyLoadingNamespaces => currentlyLoadingNamespaces
+                .filter(currentNamespace => currentNamespace !== namespace));
     }
 }
 
@@ -94,7 +88,14 @@ export function Leaf<Model, Target>(props: {
 
     useEffect(() => {
         instance.current.validationTarget = targetValue;
-        const { validators } = instance.current;
+        const { validators, deferredValidators } = instance.current;
+
+        instance.current && instance.current.validationModel && instance
+            .current
+            .validationModel
+            .setNamespacesCurrentlyValidating(deferredValidators?.length
+                ? ["non-deferred", "deferred"]
+                : ["non-deferred"]);
 
         validateWith({
             validators,

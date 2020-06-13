@@ -227,7 +227,7 @@ test("deferredValidators and validators work together", async () => {
         const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
         validationModel = useValidationModel();
 
-        const willBeInvalid = (value: string) => Promise.resolve(`${value} resolved invalid`);
+        const willBeInvalid = (value: string) => Promise.resolve([`${value} resolved invalid`]);
         const isInvalid = (value: string) => `${value} is invalid`;
 
         return <Leaf
@@ -274,7 +274,7 @@ test("knowing when (async) validation is in progress", async () => {
         const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
         validationModel = useValidationModel();
 
-        const willBeInvalid = (value: string) => Promise.resolve(`${value} resolved invalid`);
+        const willBeInvalid = (value: string) => Promise.resolve([`${value} resolved invalid`]);
 
         return <Leaf
             model={model}
@@ -301,6 +301,87 @@ test("knowing when (async) validation is in progress", async () => {
     await waitFor(() => {
         expect(getAllByText("stewie1570@gmail.com resolved invalid").length).toBe(2);
     });
+    expect(validationModel.isValidationInProgress()).toBe(false);
+});
+
+test("knowing when (async) deferred-only validation is in progress", async () => {
+    let validationModel: ValidationModel = {
+        get: () => [],
+        set: () => undefined,
+        getAllErrorsForLocation: () => [],
+        isValidationInProgress: () => false,
+        setNamespacesCurrentlyValidating: () => { }
+    };
+
+    const Wrapper = () => {
+        const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
+        validationModel = useValidationModel();
+
+        const willBeInvalid = (value: string) => Promise.resolve([`${value} resolved invalid`]);
+
+        return <Leaf
+            model={model}
+            onChange={setModel}
+            location="contact.email"
+            validationModel={validationModel}
+            deferredValidators={[willBeInvalid]}>
+            {(email: string, onChange, onBlur, errors) => <>
+                <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="email" />
+                {errors.length > 0 && <ul>
+                    {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
+                </ul>}
+            </>}
+        </Leaf>
+    }
+
+    const { getByTestId, findByText } = render(<Wrapper />);
+
+    await waitFor(() => expect(validationModel.isValidationInProgress()).toBe(true));
+
+    fireEvent.blur(getByTestId("email"));
+
+    await findByText("stewie1570@gmail.com resolved invalid");
+    expect(validationModel.isValidationInProgress()).toBe(false);
+});
+
+test("does not show validating during validation deferrement when there's no deferred validators", async () => {
+    let validationModel: ValidationModel = {
+        get: () => [],
+        set: () => undefined,
+        getAllErrorsForLocation: () => [],
+        isValidationInProgress: () => false,
+        setNamespacesCurrentlyValidating: () => { }
+    };
+
+    const Wrapper = () => {
+        const [model, setModel] = useState({ contact: { email: "stewie1570@gmail.com" } });
+        validationModel = useValidationModel();
+
+        const isInvalid = (value: string) => [`${value} resolved invalid`];
+
+        return <Leaf
+            model={model}
+            onChange={setModel}
+            location="contact.email"
+            validationModel={validationModel}
+            validators={[isInvalid]}>
+            {(email: string, onChange, onBlur, errors) => <>
+                <TextInput value={email} onChange={onChange} onBlur={onBlur} data-testid="email" />
+                {errors.length > 0 && <ul>
+                    {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
+                </ul>}
+            </>}
+        </Leaf>
+    }
+
+    const { getByTestId, findByText } = render(<Wrapper />);
+
+    fireEvent.blur(getByTestId("email"));
+    expect(validationModel.isValidationInProgress()).toBe(true);
+
+    await Promise.resolve();
+
+    await findByText("stewie1570@gmail.com resolved invalid");
     expect(validationModel.isValidationInProgress()).toBe(false);
 });
 

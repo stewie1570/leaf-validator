@@ -14,13 +14,12 @@ const doesNotExistYet = (value: string) => new Promise(resolve => setTimeout(() 
         console.log(`validated "${value}"`);
         return result;
     });
-const showValidatingFor = (milliseconds: number) => () => new Promise(resolve => setTimeout(resolve, milliseconds));
 
 const form = [
     {
         name: "Deferred Async Validation",
         location: "deferredAsyncValidation",
-        validators: [isRequired, showValidatingFor(500)],
+        validators: [isRequired],
         deferredValidators: [doesNotExistYet]
     },
     { name: "Async Validation", location: "asyncValidation", validators: [doesNotExistYet] },
