@@ -195,6 +195,12 @@ const validationModel = useValidationModel();
 </Leaf>;
 ```
 
+How do I know if any of the async validators are still in-flight?
+
+```jsx
+validationModel.isValidationInProgress(); //returns boolean
+```
+
 ## Backward Compatibility
 
 Let's say you update your server side code and your requests to the server are now returning a different shape of model. Using this declarative API you can support backward compatibility because it will support multiple shapes of the model. See example below.
