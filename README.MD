@@ -6,8 +6,6 @@
 [![Package Size](https://badgen.net/bundlephobia/minzip/leaf-validator)](https://bundlephobia.com/result?p=leaf-validator)
 [![Maintainability](https://api.codeclimate.com/v1/badges/c49423ebf81ddf1542c0/maintainability)](https://codeclimate.com/github/stewie1570/leaf-validator/maintainability)
 
-ECMAScript Target: **ES2019**
-
 ## Overview
 
 We need a declarative API to immutable models such that:
