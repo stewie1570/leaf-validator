@@ -14,9 +14,7 @@
   "author": "Stewart Anderson",
   "license": "MIT",
   "sideEffects": false,
-  "dependencies": {
-    "@scarf/scarf": "^1.0.6"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "react": "^16.6.3"
   },
