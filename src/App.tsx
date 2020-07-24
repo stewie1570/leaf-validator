@@ -1,11 +1,14 @@
 import React, { useState, Dispatch, SetStateAction } from 'react';
 import './App.css';
 import { Leaf } from './lib/Leaf';
+import { ErrorsBoundary } from './lib/ErrorsBoundary'
 import { useValidationModel } from './lib/hooks/useValidationModel'
 import { TextInput } from './TextInput';
 import { leafDiff } from './lib/domain';
 import { useLoadingState } from './lib/hooks/useLoadingState'
+import { useErrorHandler } from './lib/hooks/useErrorHandler'
 
+const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 const isValidEmailAddress = (value: string) => !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) && [`"${value || ""}" is not a valid email address`];
 const isValidPhoneNumber = (value: string) => !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(value) && [`"${value || ""}" is not a valid phone number`];
@@ -37,6 +40,45 @@ const fakeFailSubmit = async () => {
     return await new Promise((resolve, reject) => setTimeout(() => reject("failed result..."), 3000));
 }
 
+const Bomb = ({ message }: { message: string }): JSX.Element => {
+    throw new Error(message);
+}
+
+const SyncError = ({ message }: { message: string }) => {
+    const [renderError, setRenderError] = useState<boolean>();
+
+    return renderError
+        ? <Bomb message={message} />
+        : <button className="btn btn-danger" onClick={() => setRenderError(true)}>
+            invoke {message}
+        </button>;
+};
+
+const AsyncError1 = ({ message }: { message: string }) => {
+    const [renderError] = useState<boolean>();
+    const errorHandler = useErrorHandler();
+
+    return renderError
+        ? <Bomb message={message} />
+        : <button className="btn btn-danger" onClick={() => errorHandler(() => Promise.reject(new Error(message)))}>
+            invoke {message}
+        </button>;
+};
+
+const AsyncError2 = ({ message }: { message: string }) => {
+    const [renderError] = useState<boolean>();
+    const errorHandler = useErrorHandler();
+
+    return renderError
+        ? <Bomb message={message} />
+        : <button className="btn btn-danger" onClick={() => errorHandler(async () => {
+            await wait(2000);
+            throw new Error(message);
+        })}>
+            invoke {message}
+        </button>;
+};
+
 function App() {
     const [originalModel, setOriginalModel] = useState();
     const [model, setModel] = useState();
@@ -65,28 +107,56 @@ function App() {
 
     return (
         <div className="App">
-            <form>
-                {formElements(model, setModel, showAllValidation, validationModel)}
-                <button className="btn btn-primary" type="submit" disabled={isValidating || isSubmitting} onClick={submit}>Fake Submit Success</button>
-                &nbsp;
-                <button className="btn btn-secondary" type="button" disabled={isValidating || isSubmitting} onClick={submitFailire}>Fake Submit Failure</button>
-                {isValidating && <i>Validating...</i>}
-                {isSubmitting && <i>Submitting...</i>}
-                <br />
-                <div style={{ verticalAlign: "top", display: "inline-block", width: "33%" }}>
-                    Model:
-                    <pre>
-                        {JSON.stringify(model, null, 4)}
-                    </pre>
-                </div>
-                {validationOutput("", validationModel)}
-                {validationOutput("person.contact", validationModel)}
-                <br />
-                <b>Diff</b>
-                <pre>
-                    {JSON.stringify(leafDiff.from(originalModel).to(model), null, 2)}
-                </pre>
-            </form>
+            <ErrorsBoundary>
+                {({ errors, clearError }) => <>
+                    {errors?.length > 0 && <ul>
+                        {errors.map((error, index) => <li className="danger" key={index}>
+                            <button className="btn btn-link" onClick={() => clearError(error)}>X</button>
+                            {error.message}
+                        </li>)}
+                    </ul>}
+                    <form>
+                        {formElements(model, setModel, showAllValidation, validationModel)}
+                        <button
+                            className="btn btn-primary"
+                            type="submit"
+                            disabled={isValidating || isSubmitting}
+                            onClick={submit}>
+                            Fake Submit Success
+                        </button>
+                        &nbsp;
+                        <button
+                            className="btn btn-secondary"
+                            type="button"
+                            disabled={isValidating || isSubmitting}
+                            onClick={submitFailire}>
+                            Fake Submit Failure
+                        </button>
+                        &nbsp;
+                        <AsyncError1 message="Test a-sync error 1." />
+                        &nbsp;
+                        <AsyncError2 message="Test a-sync error 2." />
+                        &nbsp;
+                        <SyncError message="Test sync error." />
+                        {isValidating && <i>Validating...</i>}
+                        {isSubmitting && <i>Submitting...</i>}
+                        <br />
+                        <div style={{ verticalAlign: "top", display: "inline-block", width: "33%" }}>
+                            Model:
+                            <pre>
+                                {JSON.stringify(model, null, 4)}
+                            </pre>
+                        </div>
+                        {validationOutput("", validationModel)}
+                        {validationOutput("person.contact", validationModel)}
+                        <br />
+                        <b>Diff</b>
+                        <pre>
+                            {JSON.stringify(leafDiff.from(originalModel).to(model), null, 2)}
+                        </pre>
+                    </form>
+                </>}
+            </ErrorsBoundary>
         </div >
     );
 }

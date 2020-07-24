@@ -20,9 +20,8 @@ afterEach(() => {
     }
 });
 
-const Bomb = ({ message }: { message: string }) => {
+const Bomb = ({ message }: { message: string }): JSX.Element => {
     throw new Error(message);
-    return <></>;
 }
 
 const SyncError = ({ message }: { message: string }) => {
@@ -34,12 +33,12 @@ const SyncError = ({ message }: { message: string }) => {
 };
 
 const AsyncError = ({ message }: { message: string }) => {
-    const [renderError, setRenderError] = useState<boolean>();
+    const [renderError] = useState<boolean>();
     const errorHandler = useErrorHandler();
 
     return renderError
         ? <Bomb message={message} />
-        : <button onClick={() => errorHandler(Promise.reject(new Error(message)))}>
+        : <button onClick={() => errorHandler(() => Promise.reject(new Error(message)))}>
             invoke {message}
         </button>;
 };

@@ -25,10 +25,6 @@ const initialState: State = { errors: {} };
 export class ErrorsBoundary extends Component<Props, State> {
     state = initialState;
 
-    constructor(props: Props) {
-        super(props);
-    }
-
     componentDidCatch(error: Error) {
         this.setState(currentState => ({
             ...currentState,
