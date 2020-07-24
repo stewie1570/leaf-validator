@@ -19,10 +19,10 @@
     "react": "^16.6.3"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.11.0",
-    "@testing-library/react": "^10.4.3",
-    "@testing-library/user-event": "^12.0.11",
-    "@types/jest": "^26.0.3",
+    "@testing-library/jest-dom": "^5.11.1",
+    "@testing-library/react": "^10.4.7",
+    "@testing-library/user-event": "^12.0.13",
+    "@types/jest": "^26.0.7",
     "@types/react": "^16.9.38",
     "@types/react-dom": "^16.9.8",
     "bootstrap": "^4.5.0",
@@ -32,7 +32,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.7"
   },
   "files": [
     "dist/**/*.js",
