@@ -14,6 +14,9 @@ type Diffs = Array<{
     updatedValue: any;
 }>;
 
+export type Errors = {
+    [key: string]: Error;
+};
 const expand = ({ array, toMinLength }: { array: Array<any>, toMinLength: number }): Array<any> => {
     const theArray = array || [];
     return theArray.length >= toMinLength

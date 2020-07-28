@@ -1,21 +1,37 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
+import { Errors } from "../domain";
 
-export function useErrorHandler() {
-    const [error, setError] = useState<Error>();
-    const lastThrownError = useRef<Error>();
-    if (error) {
-        const shouldThrow = lastThrownError.current !== error;
-        lastThrownError.current = error;
-        if (shouldThrow) {
-            throw error;
-        }
-    }
-    return async function <T>(operation: () => Promise<T>) {
-        try {
-            return await operation();
-        }
-        catch (error) {
-            setError(error);
-        }
+type HookResult = {
+    handleErrors: (operation: Promise<any>) => Promise<void>,
+    errors: Array<Error>,
+    clearError: (error: Error) => void
+};
+
+export function useErrorHandler(): HookResult {
+    const [errors, setErrors] = useState<Errors>({});
+
+    return {
+        handleErrors: async (operation: Promise<any>) => {
+            try {
+                await operation;
+            }
+            catch (error) {
+                setErrors(currentErrors => {
+                    const message = typeof error === "string" ? error : error?.message;
+                    return {
+                        ...currentErrors,
+                        [message]: { message }
+                    };
+                });
+            }
+        },
+        errors: Object
+            .keys(errors)
+            .filter(error => error)
+            .map(error => errors[error]),
+        clearError: error => setErrors(currentErrors => {
+            const { [error.message]: removedError, ...otherErrors } = currentErrors;
+            return otherErrors;
+        })
     };
 }
