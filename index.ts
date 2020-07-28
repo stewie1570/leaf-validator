@@ -1,5 +1,4 @@
 export { Leaf } from './src/lib/Leaf'
-export { ErrorsBoundary } from './src/lib/ErrorsBoundary'
 export { useValidationModel } from './src/lib/hooks/useValidationModel'
 export { useLoadingState } from './src/lib/hooks/useLoadingState'
 export { useDeferredEffect } from './src/lib/hooks/useDeferredEffect'
