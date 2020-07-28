@@ -51,7 +51,7 @@ function App() {
     const [showAllValidation, setShowAllValidation] = useState(false);
     const [isSubmitting, showSubmittingWhile] = useLoadingState();
     const isValidating = validationModel.isValidationInProgress();
-    const { errorHandler: handleErrors, clearError, errors } = useErrorHandler();
+    const { errorHandler, clearError, errors } = useErrorHandler();
 
     const submit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
@@ -101,7 +101,7 @@ function App() {
                     className="btn btn-secondary"
                     type="button"
                     disabled={isValidating || isSubmitting}
-                    onClick={() => handleErrors(Promise.reject("test error 1"))}>
+                    onClick={() => errorHandler(Promise.reject("test error 1"))}>
                     Async Error 1
                 </button>
                 &nbsp;
@@ -109,7 +109,7 @@ function App() {
                     className="btn btn-secondary"
                     type="button"
                     disabled={isValidating || isSubmitting}
-                    onClick={() => handleErrors(waitAndThrow("test error 2"))}>
+                    onClick={() => errorHandler(waitAndThrow("test error 2"))}>
                     Async Error 2
                 </button>
                 {isValidating && <i>Validating...</i>}
