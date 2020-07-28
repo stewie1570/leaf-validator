@@ -17,7 +17,7 @@ export function useErrorHandler(): HookResult {
             }
             catch (error) {
                 setErrors(currentErrors => {
-                    const message = typeof error === "string" ? error : error?.message;
+                    const message = error instanceof Error ? error?.message : error;
                     return {
                         ...currentErrors,
                         [message]: { message }
