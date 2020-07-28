@@ -51,7 +51,7 @@ function App() {
     const [showAllValidation, setShowAllValidation] = useState(false);
     const [isSubmitting, showSubmittingWhile] = useLoadingState();
     const isValidating = validationModel.isValidationInProgress();
-    const { handleErrors, clearError, errors } = useErrorHandler();
+    const { errorHandler: handleErrors, clearError, errors } = useErrorHandler();
 
     const submit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();

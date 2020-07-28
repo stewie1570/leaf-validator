@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { useErrorHandler } from './useErrorHandler'
 
 const StringRejectionErrorsTestApp = () => {
-    const { handleErrors, errors, clearError } = useErrorHandler();
+    const { errorHandler, errors, clearError } = useErrorHandler();
 
     return <>
         <ul>
@@ -14,17 +14,17 @@ const StringRejectionErrorsTestApp = () => {
                 {error.message}
             </li>)}
         </ul>
-        <button onClick={() => handleErrors(Promise.reject("message string"))}>
+        <button onClick={() => errorHandler(Promise.reject("message string"))}>
             Reject a promise with message string
         </button>
-        <button onClick={() => handleErrors(Promise.reject("second message string"))}>
+        <button onClick={() => errorHandler(Promise.reject("second message string"))}>
             Reject a promise with second message string
         </button>
     </>;
 }
 
 const ErrorsTestApp = () => {
-    const { handleErrors, errors, clearError } = useErrorHandler();
+    const { errorHandler, errors, clearError } = useErrorHandler();
 
     return <>
         <ul>
@@ -35,10 +35,10 @@ const ErrorsTestApp = () => {
                 {error.message}
             </li>)}
         </ul>
-        <button onClick={() => handleErrors(Promise.reject(new Error("message string")))}>
+        <button onClick={() => errorHandler(Promise.reject(new Error("message string")))}>
             Reject a promise with message string
         </button>
-        <button onClick={() => handleErrors(Promise.reject(new Error("second message string")))}>
+        <button onClick={() => errorHandler(Promise.reject(new Error("second message string")))}>
             Reject a promise with second message string
         </button>
     </>;
@@ -71,3 +71,24 @@ test("can display and clear unique errors", async () => {
     expect((await screen.findAllByTestId("test-error")).map(({ innerHTML }) => innerHTML))
         .toEqual(["message string"]);
 });
+
+test("handleError function returns the awaited promise", async () => {
+    const App = () => {
+        const { errorHandler } = useErrorHandler();
+        const [state, setState] = useState("unchanged");
+        const performAction = async () => {
+            const value = await errorHandler(Promise.resolve("expected value"));
+            value && setState(value);
+        }
+
+        return <>
+            <button onClick={performAction}>Invoke</button>
+            <span data-testid="test-value">
+                {state}
+            </span>
+        </>;
+    };
+    render(<App />);
+    screen.getByText("Invoke").click();
+    expect((await screen.findByTestId("test-value")).innerHTML).toEqual("expected value");
+})

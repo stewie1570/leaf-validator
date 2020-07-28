@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Errors } from "../domain";
 
 type HookResult = {
-    handleErrors: (operation: Promise<any>) => Promise<void>,
+    errorHandler: <T>(operation: Promise<T>) => Promise<T | undefined>,
     errors: Array<Error>,
     clearError: (error: Error) => void
 };
@@ -11,9 +11,9 @@ export function useErrorHandler(): HookResult {
     const [errors, setErrors] = useState<Errors>({});
 
     return {
-        handleErrors: async (operation: Promise<any>) => {
+        errorHandler: async <T>(operation: Promise<T>) => {
             try {
-                await operation;
+                return await operation;
             }
             catch (error) {
                 setErrors(currentErrors => {
