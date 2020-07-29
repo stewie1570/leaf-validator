@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Errors } from "../domain";
+import { useMountedOnlyState } from "./useMountedOnlyState";
 
 type HookResult = {
     errorHandler: <T>(operation: Promise<T>) => Promise<T | undefined>,
@@ -8,7 +8,7 @@ type HookResult = {
 };
 
 export function useErrorHandler(): HookResult {
-    const [errors, setErrors] = useState<Errors>({});
+    const [errors, setErrors] = useMountedOnlyState<Errors>({});
 
     return {
         errorHandler: async <T>(operation: Promise<T>) => {
@@ -25,10 +25,7 @@ export function useErrorHandler(): HookResult {
                 });
             }
         },
-        errors: Object
-            .keys(errors)
-            .filter(error => error)
-            .map(error => errors[error]),
+        errors: Object.values(errors),
         clearError: error => setErrors(currentErrors => {
             const { [error.message]: removedError, ...otherErrors } = currentErrors;
             return otherErrors;

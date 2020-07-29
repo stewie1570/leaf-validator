@@ -67,7 +67,7 @@ function App() {
         setShowAllValidation(true);
 
         if (validationModel.getAllErrorsForLocation("person").length === 0) {
-            console.log(await showSubmittingWhile(fakeFailSubmit()));
+            console.log(await errorHandler(showSubmittingWhile(fakeFailSubmit())));
         }
     }
 
