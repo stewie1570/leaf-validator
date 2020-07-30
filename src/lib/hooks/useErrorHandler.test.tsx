@@ -91,4 +91,33 @@ test("handleError function returns the awaited promise", async () => {
     render(<App />);
     screen.getByText("Invoke").click();
     expect((await screen.findByTestId("test-value")).innerHTML).toEqual("expected value");
-})
+});
+
+type SubError = {
+    message: string,
+    subMessage: string
+};
+
+test("additional error details are available to be rendered", async () => {
+    const App = () => {
+        const { errorHandler, errors } = useErrorHandler<SubError>();
+        const performAction = () => errorHandler(Promise.reject({
+            message: "the message",
+            subMessage: "the sub-message"
+        }));
+
+        return <>
+            <ul>
+                {errors.map(error => <li key={error.message}>
+                    <b>{error.message}</b>
+                    <span>{error.subMessage}</span>
+                </li>)}
+            </ul>
+            <button onClick={performAction}>Invoke</button>
+        </>;
+    };
+    render(<App />);
+    screen.getByText("Invoke").click();
+    await screen.findByText("the message");
+    await screen.findByText("the sub-message");
+});

@@ -1,14 +1,17 @@
-import { Errors } from "../domain";
 import { useMountedOnlyState } from "./useMountedOnlyState";
 
-type HookResult = {
+type Errors<TError> = {
+    [key: string]: TError
+}
+
+type HookResult<TError> = {
     errorHandler: <T>(operation: Promise<T>) => Promise<T | undefined>,
-    errors: Array<Error>,
-    clearError: (error: Error) => void
+    errors: Array<TError>,
+    clearError: (error: TError) => void
 };
 
-export function useErrorHandler(): HookResult {
-    const [errors, setErrors] = useMountedOnlyState<Errors>({});
+export function useErrorHandler<TError extends { message: string }>(): HookResult<TError> {
+    const [errors, setErrors] = useMountedOnlyState<Errors<TError>>({});
 
     return {
         errorHandler: async <T>(operation: Promise<T>) => {
@@ -17,10 +20,10 @@ export function useErrorHandler(): HookResult {
             }
             catch (error) {
                 setErrors(currentErrors => {
-                    const message = error instanceof Error ? error?.message : error;
+                    const message = error?.message || error;
                     return {
                         ...currentErrors,
-                        [message]: { message }
+                        [message]: error instanceof Object ? error : { message }
                     };
                 });
             }
