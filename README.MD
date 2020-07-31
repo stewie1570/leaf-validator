@@ -249,6 +249,36 @@ const response = await showRunningWhile(getDataFromServer());
 {isRunning && <span>Running...</span>}
 ```
 
+**useErrorHandler**
+
+Error Boundaries are meant to recover the application from an un-renderable (crashed) state.
+
+Very often and especially for most asynchrounous errors you'll want the error handling behavior to
+simply inform the user that an attempted operation has failed and allow the user to acknowledge
+that failure.
+
+```jsx
+const { errorHandler, clearError, errors } = useErrorHandler();
+
+await errorHandler(submitData());
+// or
+const response = await errorHandler(getData());
+// or
+await errorHandler(getData().then(useIt));
+// or
+async function useData(){
+  useIt(await getData());
+}
+await errorHandler(useData());
+
+{errors?.length > 0 && <ul>
+    {errors.map(error => <li key={error.message}>
+        <button onClick={() => clearError(error)}>X</button>
+        {error.message}
+    </li>)}
+</ul>}
+```
+
 **useDeferredEffect**
 
 Same as useEffect but will only fire once per configured milliseconds timeout.

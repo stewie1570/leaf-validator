@@ -5,7 +5,9 @@ import { useValidationModel } from './lib/hooks/useValidationModel'
 import { TextInput } from './TextInput';
 import { leafDiff } from './lib/domain';
 import { useLoadingState } from './lib/hooks/useLoadingState'
+import { useErrorHandler } from './lib/hooks/useErrorHandler'
 
+const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
 const isValidEmailAddress = (value: string) => !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) && [`"${value || ""}" is not a valid email address`];
 const isValidPhoneNumber = (value: string) => !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(value) && [`"${value || ""}" is not a valid phone number`];
@@ -37,6 +39,11 @@ const fakeFailSubmit = async () => {
     return await new Promise((resolve, reject) => setTimeout(() => reject("failed result..."), 3000));
 }
 
+async function waitAndThrow(message: string) {
+    await wait(500);
+    throw new Error(message);
+}
+
 function App() {
     const [originalModel, setOriginalModel] = useState();
     const [model, setModel] = useState();
@@ -44,13 +51,14 @@ function App() {
     const [showAllValidation, setShowAllValidation] = useState(false);
     const [isSubmitting, showSubmittingWhile] = useLoadingState();
     const isValidating = validationModel.isValidationInProgress();
+    const { errorHandler, clearError, errors } = useErrorHandler();
 
     const submit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         setShowAllValidation(true);
 
         if (validationModel.getAllErrorsForLocation("person").length === 0) {
-            console.log(await showSubmittingWhile(fakeSuccessSubmit()));
+            console.log(await errorHandler(showSubmittingWhile(fakeSuccessSubmit())));
             setOriginalModel(model);
         }
     }
@@ -59,23 +67,57 @@ function App() {
         setShowAllValidation(true);
 
         if (validationModel.getAllErrorsForLocation("person").length === 0) {
-            console.log(await showSubmittingWhile(fakeFailSubmit()));
+            console.log(await errorHandler(showSubmittingWhile(fakeFailSubmit())));
         }
     }
 
     return (
         <div className="App">
+            {errors?.length > 0 && <ul>
+                {errors.map((error, index) => <li className="danger" key={index}>
+                    <button className="btn btn-link" onClick={() => clearError(error)}>X</button>
+                    {error.message}
+                </li>)}
+            </ul>}
             <form>
                 {formElements(model, setModel, showAllValidation, validationModel)}
-                <button className="btn btn-primary" type="submit" disabled={isValidating || isSubmitting} onClick={submit}>Fake Submit Success</button>
+                <button
+                    className="btn btn-primary"
+                    type="submit"
+                    disabled={isValidating || isSubmitting}
+                    onClick={submit}>
+                    Fake Submit Success
+                </button>
                 &nbsp;
-                <button className="btn btn-secondary" type="button" disabled={isValidating || isSubmitting} onClick={submitFailire}>Fake Submit Failure</button>
+                <button
+                    className="btn btn-secondary"
+                    type="button"
+                    disabled={isValidating || isSubmitting}
+                    onClick={submitFailire}>
+                    Fake Submit Failure
+                </button>
+                &nbsp;
+                <button
+                    className="btn btn-secondary"
+                    type="button"
+                    disabled={isValidating || isSubmitting}
+                    onClick={() => errorHandler(Promise.reject("test error 1"))}>
+                    Async Error 1
+                </button>
+                &nbsp;
+                <button
+                    className="btn btn-secondary"
+                    type="button"
+                    disabled={isValidating || isSubmitting}
+                    onClick={() => errorHandler(waitAndThrow("test error 2"))}>
+                    Async Error 2
+                </button>
                 {isValidating && <i>Validating...</i>}
                 {isSubmitting && <i>Submitting...</i>}
                 <br />
                 <div style={{ verticalAlign: "top", display: "inline-block", width: "33%" }}>
                     Model:
-                    <pre>
+                            <pre>
                         {JSON.stringify(model, null, 4)}
                     </pre>
                 </div>
