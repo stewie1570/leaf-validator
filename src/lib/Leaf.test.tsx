@@ -73,6 +73,41 @@ test("can read & edit model nodes nested inside complex object models and arrays
     expect((getByTestId("email1") as HTMLInputElement).value).toBe("stewie1570@hotmail.com");
 });
 
+test("can compose Leafs via passing parent location into child location string composition", () => {
+    const Wrapper = () => {
+        const [model, setModel] = useState({
+            lists: {
+                emails: [
+                    { email: "stewie1570@gmail.com" },
+                    { email: "something_at_something.com" }
+                ]
+            }
+        });
+
+        return <Leaf model={model} onChange={setModel} location="lists.emails">
+            {(emailNodes: Array<any>, setEmails, onBlur, errors, parentLocation) =>
+                emailNodes.map((emailNode, index) => <Leaf
+                key={index}
+                model={model}
+                onChange={setModel}
+                location={`${parentLocation}.${index}.email`}>
+                {(email: string, onChange) => <TextInput
+                    data-testid={`email${index}`}
+                    value={email}
+                    onChange={onChange} />}
+            </Leaf>)}
+        </Leaf>
+    }
+
+    const { getByTestId } = render(<Wrapper />);
+
+    expect((getByTestId("email0") as HTMLInputElement).value).toBe("stewie1570@gmail.com");
+    expect((getByTestId("email1") as HTMLInputElement).value).toBe("something_at_something.com");
+    fireEvent.change(getByTestId("email1"), { target: { value: "stewie1570@hotmail.com" } });
+    expect((getByTestId("email0") as HTMLInputElement).value).toBe("stewie1570@gmail.com");
+    expect((getByTestId("email1") as HTMLInputElement).value).toBe("stewie1570@hotmail.com");
+});
+
 test("uses failOverLocations when location in model is undefined", () => {
     const Wrapper = (props: { modelReporter: (model: any) => void }) => {
         const [model, setModel] = useState({
