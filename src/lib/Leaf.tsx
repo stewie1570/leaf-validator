@@ -53,7 +53,13 @@ function findDefinedTargetIn<Target>(model: any, targets: Array<string>): Target
 }
 
 export function Leaf<Model, Target>(props: {
-    children: (model: Target, onChange: Update<Target>, onBlur: Blur, errors: Array<string>) => any,
+    children: (
+        model: Target,
+        onChange: Update<Target>,
+        onBlur: Blur,
+        errors: Array<string>,
+        parentLocation: string
+    ) => any,
     location: string,
     model: Model,
     onChange: React.Dispatch<React.SetStateAction<Model>>,
@@ -123,6 +129,7 @@ export function Leaf<Model, Target>(props: {
         targetValue,
         update => onChange(set(location).to(update).in(model)),
         () => setHasBlurred(true),
-        validationModel && (hasBlurred || showErrors) ? validationModel.get(location) : []
+        validationModel && (hasBlurred || showErrors) ? validationModel.get(location) : [],
+        location
     );
 }
