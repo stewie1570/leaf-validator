@@ -19,13 +19,7 @@ export function useErrorHandler<TError extends { message: string }>(): HookResul
                 return await operation;
             }
             catch (error) {
-                setErrors(currentErrors => {
-                    const message = error?.message || error;
-                    return {
-                        ...currentErrors,
-                        [message]: error instanceof Object ? error : { message }
-                    };
-                });
+                setErrors(updatedErrorsWith<TError>(error));
             }
         },
         errors: Object.values(errors),
@@ -33,5 +27,15 @@ export function useErrorHandler<TError extends { message: string }>(): HookResul
             const { [error.message]: removedError, ...otherErrors } = currentErrors;
             return otherErrors;
         })
+    };
+}
+
+function updatedErrorsWith<TError extends { message: string; }>(error: any) {
+    return (currentErrors: Errors<TError>) => {
+        const message = error?.message || error;
+        return {
+            ...currentErrors,
+            [message]: error instanceof Object ? error : { message }
+        };
     };
 }
