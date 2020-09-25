@@ -1,13 +1,26 @@
 import { useMountedOnlyState } from "./useMountedOnlyState";
+import { useRef } from "react";
 
-export function useLoadingState(): [boolean, <T>(theOperation: Promise<T>) => Promise<T>] {
+type Options = {
+    defer: number
+}
+
+export function useLoadingState(options?: Options): [boolean, <T>(theOperation: Promise<T>) => Promise<T>] {
     const [isLoading, setIsLoading] = useMountedOnlyState(false);
+    const timer = useRef<NodeJS.Timeout>();
     async function start<T>(theOperation: Promise<T>): Promise<T> {
-        setIsLoading(true);
+        if (options?.defer) {
+            timer.current = setTimeout(() => setIsLoading(true), options.defer)
+        }
+        else {
+            setIsLoading(true);
+        }
+
         try {
             return await theOperation;
         }
         finally {
+            timer?.current && clearTimeout(timer.current);
             setIsLoading(false);
         }
     }
