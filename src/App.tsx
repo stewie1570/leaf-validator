@@ -49,7 +49,7 @@ function App() {
     const [model, setModel] = useState();
     const validationModel = useValidationModel();
     const [showAllValidation, setShowAllValidation] = useState(false);
-    const [isSubmitting, showSubmittingWhile] = useLoadingState();
+    const [isSubmitting, showSubmittingWhile] = useLoadingState({ defer: 250 });
     const isValidating = validationModel.isValidationInProgress();
     const { errorHandler, clearError, errors } = useErrorHandler();
 
