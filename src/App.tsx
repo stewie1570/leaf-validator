@@ -32,7 +32,7 @@ const form = [
 ]
 
 const fakeSuccessSubmit = async () => {
-    return await new Promise(resolve => setTimeout(() => resolve("successful result..."), 3000));
+    return await new Promise(resolve => setTimeout(() => resolve("successful result..."), 100));
 }
 
 const fakeFailSubmit = async () => {
@@ -49,7 +49,7 @@ function App() {
     const [model, setModel] = useState();
     const validationModel = useValidationModel();
     const [showAllValidation, setShowAllValidation] = useState(false);
-    const [isSubmitting, showSubmittingWhile] = useLoadingState({ defer: 250 });
+    const [isSubmitting, showSubmittingWhile] = useLoadingState({ defer: 250, minLoadingTime: 2000 });
     const isValidating = validationModel.isValidationInProgress();
     const { errorHandler, clearError, errors } = useErrorHandler();
 
