@@ -20,9 +20,8 @@ export function useLoadingState(options?: Options): [boolean, <T>(theOperation: 
         }
 
         try {
-            if (options?.minLoadingTime) {
-                await wait(options.minLoadingTime);
-            }
+            options?.minLoadingTime && await wait(options.minLoadingTime);
+
             return await theOperation;
         }
         finally {
