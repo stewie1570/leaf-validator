@@ -2,8 +2,11 @@ import { useMountedOnlyState } from "./useMountedOnlyState";
 import { useRef } from "react";
 
 type Options = {
-    defer: number
+    defer?: number,
+    minLoadingTime?: number
 }
+
+const wait = (time: number) => new Promise(resolve => setTimeout(resolve, time));
 
 export function useLoadingState(options?: Options): [boolean, <T>(theOperation: Promise<T>) => Promise<T>] {
     const [isLoading, setIsLoading] = useMountedOnlyState(false);
@@ -17,6 +20,8 @@ export function useLoadingState(options?: Options): [boolean, <T>(theOperation: 
         }
 
         try {
+            options?.minLoadingTime && await wait(options.minLoadingTime);
+
             return await theOperation;
         }
         finally {
