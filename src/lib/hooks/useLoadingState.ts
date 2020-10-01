@@ -12,12 +12,8 @@ export function useLoadingState(options?: Options): [boolean, <T>(theOperation: 
     const [isLoading, setIsLoading] = useMountedOnlyState(false);
     const timer = useRef<NodeJS.Timeout>();
     async function start<T>(theOperation: Promise<T>): Promise<T> {
-        if (options?.defer) {
-            timer.current = setTimeout(() => setIsLoading(true), options.defer)
-        }
-        else {
-            setIsLoading(true);
-        }
+        options?.defer && await wait(options.defer);
+        setIsLoading(true);
 
         try {
             options?.minLoadingTime && await wait(options.minLoadingTime);
