@@ -13,6 +13,7 @@ We need a declarative API to immutable models such that:
 - Querying a location that doesn't exist in an object should return undefined and should never throw undefined reference errors.
 - Setting a value at a location that does not exist in an object should build the object necessary to set the value at that location.
 - This API should help loosen coupling of data from queries and updates.
+- Applications that use this package are encouraged to design [Normalized State](https://redux.js.org/recipes/structuring-reducers/normalizing-state-shape) trees.
 
 **MongoDB** uses a very similar concept called [Dot Notation](https://docs.mongodb.com/manual/core/document/#dot-notation).
 
@@ -150,14 +151,16 @@ Now you have a validation model with an API that can tell you if there are error
 ```jsx
 validationModel.getAllErrorsForLocation("person.contact");
 
-//will return Array<{ location: string, messages: Array<string> }> of all errors (or [] if there are no errors) at that location or downstream of that location.
+//will return all errors (or []) at that location or downstream of that location.
 
 validationModel.get("person.contact");
-//will return Array<string> of all errors at that location.
-//Since in this example there would only be errors at the leaf values you would likely use this instead:
+//will return all errors at that location.
+//Note: since in this example there would only be errors
+//at the leaf values you would likely use example (below) instead:
 
 validationModel.get("person.contact.phoneNumber");
-//however keep in mind that the errors for a leaf are passed via the children render function parameters as in the example above.
+//keep in mind that the errors for a leaf are passed via the
+//children render function parameters as in the example above.
 ```
 
 **Async Validation**
@@ -237,6 +240,9 @@ Now you can run DB migration whenever you want.
 
 ```jsx
 const [isRunning, showRunningWhile] = useLoadingState();
+//or
+const [isRunning, showRunningWhile] = useLoadingState({ defer: 100, minLoadingTime: 250 });
+//all options are optional...
 .
 .
 .
