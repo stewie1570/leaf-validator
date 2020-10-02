@@ -12,8 +12,8 @@ We need a declarative API to immutable models such that:
 
 - Querying a location that doesn't exist in an object should return undefined and should never throw undefined reference errors.
 - Setting a value at a location that does not exist in an object should build the object necessary to set the value at that location.
-- This API should help loosen coupling of data from queries and updates.
-- Applications that use this package are encouraged to design [Normalized State](https://redux.js.org/recipes/structuring-reducers/normalizing-state-shape) trees.
+- Help loosen coupling of data from queries and updates.
+- Encourage applications to have [Normalized State](https://redux.js.org/recipes/structuring-reducers/normalizing-state-shape) trees.
 
 **MongoDB** uses a very similar concept called [Dot Notation](https://docs.mongodb.com/manual/core/document/#dot-notation).
 
@@ -21,7 +21,7 @@ We need a declarative API to immutable models such that:
 
 ## Why use Leaf-Validator?
 
-This declarative API to complex immutable models has **advantages in**:
+Advantages in:
 
 - [State Management](#state-management)
 - [Validation](#validation)
@@ -35,7 +35,7 @@ Other related features include:
 
 ## State Management
 
-Here is an example model:
+Refer to this example model in the example usage below:
 
 ```json
 {
@@ -90,7 +90,7 @@ This function could have been written inside a reducer. The point is, you can ju
 
 This API/abstraction does not suffer from the problems that set state callback functions and reducers of complex models suffer from:
 
-- **Reusability**: Reducers and set state callback functions for this model would not be re-usable for different parts of this model. So you tend to write a lot of code.
+- **Reusability**: Reducers and set state callback functions for this model would not be re-usable for different parts of this model. So you tend to write a lot of them.
 - **Complexity**: Reducers of this model would fail if they attempt to update an object that doesn't exist in the original model.
   - For example: **person** is undefined in the **origModel**. When you spread **origModel.person.contact** you'll experience an undefined reference error unless each part of your reducer tests for undefined.
 - **Coupling**: Reducers of this model would need to be completely re-written if/when the model shape changes.
@@ -165,7 +165,7 @@ validationModel.get("person.contact.phoneNumber");
 
 **Async Validation**
 
-The functions that you pass to the **validators** attribute can by async. That is supported. However, a lot of the time when you have asynchronous validators you don't want the validators to be run every time the input changes. For example, say you have a text input for user names on a new user registration form. You might have an async validator to make sure the user name isn't already taken. You probably don't want that to run on each keystroke. So we have **deferredValidators**. The **deferredValidators** run **deferMilliseconds** trailing the last onChange. The default **deferMilliseconds** is 500 milliseconds.
+The functions that you pass to the **validators** attribute can by async. That is supported. However, a lot of the time when you have asynchronous validators you don't want the validators to be run every time the input changes. For example, say you have a text input for user name on a new user registration form. You might have an async validator to make sure the user name isn't already taken. You probably don't want that to run on each keystroke. So we have **deferredValidators**. The **deferredValidators** run **deferMilliseconds** trailing the last onChange. The default **deferMilliseconds** is 500 milliseconds.
 
 ```jsx
 import { Leaf, useValidationModel } from "leaf-validator";
