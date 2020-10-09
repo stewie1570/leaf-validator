@@ -49,7 +49,7 @@ function App() {
     const [model, setModel] = useState();
     const validationModel = useValidationModel();
     const [showAllValidation, setShowAllValidation] = useState(false);
-    const [isSubmitting, showSubmittingWhile] = useLoadingState({ defer: 250, minLoadingTime: 2000 });
+    const [isSubmitting, showSubmittingWhile] = useLoadingState({ minLoadingTime: 2000 });
     const isValidating = validationModel.isValidationInProgress();
     const { errorHandler, clearError, errors } = useErrorHandler();
 
@@ -74,7 +74,7 @@ function App() {
     return (
         <div className="App">
             {errors?.length > 0 && <ul>
-                {errors.map((error, index) => <li className="danger" key={index}>
+                {errors.map((error) => <li className="danger" key={error.message}>
                     <button className="btn btn-link" onClick={() => clearError(error)}>X</button>
                     {error.message}
                 </li>)}
