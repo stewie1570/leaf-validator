@@ -14,6 +14,17 @@ type Diffs = Array<{
     updatedValue: any;
 }>;
 
+export function whenAny(promises: Array<Promise<any>>): Promise<any> {
+    return new Promise(resolve => promises.map(async promise => {
+        try {
+            await promise;
+        }
+        finally {
+            resolve();
+        }
+    }));
+}
+
 const expand = ({ array, toMinLength }: { array: Array<any>, toMinLength: number }): Array<any> => {
     const theArray = array || [];
     return theArray.length >= toMinLength

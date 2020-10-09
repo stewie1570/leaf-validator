@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { render } from "@testing-library/react";
+import { render, waitForElementToBeRemoved } from "@testing-library/react";
 import { useLoadingState } from './useLoadingState';
 
 const wait = (time: number) => new Promise(resolve => setTimeout(resolve, time));
@@ -92,7 +92,7 @@ test("should show loading state for a minimum amount of time", async () => {
     await findByText("resolved value");
 });
 
-test("should show not-loading (even when deferred) once rejected", async () => {
+test("should show not-loading after deferment once rejected", async () => {
     function TestComponent() {
         const [isLoading, showLoadingWhile] = useLoadingState({ defer: 100 });
         const [resolvedValue, setResolvedValue] = useState("not started");
@@ -116,4 +116,31 @@ test("should show not-loading (even when deferred) once rejected", async () => {
     getByText("Execute").click();
     await findByText("Loading...");
     await findByText("the error");
+});
+
+test("should show loading when task running time is less than deferment time", async () => {
+    function TestComponent() {
+        const [isLoading, showLoadingWhile] = useLoadingState({ defer: 200 });
+        const [resolvedValue, setResolvedValue] = useState("not started");
+        const runTheQuery = async () => {
+            try {
+                setResolvedValue(await showLoadingWhile(wait(100).then(() => "expected value")));
+            }
+            catch (error) {
+                setResolvedValue(error);
+            }
+        }
+
+        return <>
+            <button onClick={runTheQuery}>Execute</button>
+            {isLoading ? <div>Loading...</div> : <div>{resolvedValue}</div>}
+        </>;
+    }
+
+    const { getByText, queryByText } = render(<TestComponent />);
+    getByText("not started");
+    getByText("Execute").click();
+    getByText("not started");
+    await waitForElementToBeRemoved(() => queryByText("not started"))
+    getByText("expected value");
 });
