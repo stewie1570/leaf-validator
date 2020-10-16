@@ -121,3 +121,207 @@ test("additional error details are available to be rendered", async () => {
     await screen.findByText("the message");
     await screen.findByText("the sub-message");
 });
+
+describe("Handler Level Error mapping", () => {
+    it("can map error messages from error objects at the handler level", async () => {
+        const App = () => {
+            const { errorHandler, errors } = useErrorHandler<SubError>();
+            const performAction = () => errorHandler(Promise.reject({
+                message: "the message",
+                subMessage: "the sub-message"
+            }), {
+                mapMessage: message => `Prefix: ${message}`
+            });
+
+            return <>
+                <ul>
+                    {errors.map(error => <li key={error.message}>
+                        <b>{error.message}</b>
+                        <span>{error.subMessage}</span>
+                    </li>)}
+                </ul>
+                <button onClick={performAction}>Invoke</button>
+            </>;
+        };
+        render(<App />);
+        screen.getByText("Invoke").click();
+        await screen.findByText("Prefix: the message");
+        screen.getByText("the sub-message");
+    });
+
+    it("can map error messages from error strings at the handler level", async () => {
+        const App = () => {
+            const { errorHandler, errors } = useErrorHandler<SubError>();
+            const performAction = () => errorHandler(Promise.reject("the message"), {
+                mapMessage: message => `Prefix: ${message}`
+            });
+
+            return <>
+                <ul>
+                    {errors.map(error => <li key={error.message}>
+                        <b>{error.message}</b>
+                    </li>)}
+                </ul>
+                <button onClick={performAction}>Invoke</button>
+            </>;
+        };
+        render(<App />);
+        screen.getByText("Invoke").click();
+        await screen.findByText("Prefix: the message");
+    });
+
+    it("can map error objects from error objects at the handler level", async () => {
+        const App = () => {
+            const { errorHandler, errors } = useErrorHandler<SubError & { view?: any }>();
+            const performAction = () => errorHandler(Promise.reject({
+                message: "the message",
+                subMessage: "the sub-message"
+            }), {
+                mapError: error => ({
+                    ...error,
+                    view: <span>Special view for {error.message}</span>
+                })
+            });
+
+            return <>
+                <ul>
+                    {errors.map(error => <li key={error.message}>
+                        <b>{error.view || error.message}</b>
+                        <span>{error.subMessage}</span>
+                    </li>)}
+                </ul>
+                <button onClick={performAction}>Invoke</button>
+            </>;
+        };
+        render(<App />);
+        screen.getByText("Invoke").click();
+        await screen.findByText("Special view for the message");
+        screen.findByText("the sub-message");
+    });
+
+    it("can map error objects from error strings at the handler level", async () => {
+        const App = () => {
+            const { errorHandler, errors } = useErrorHandler<SubError & { view?: any }>();
+            const performAction = () => errorHandler(Promise.reject("the message"), {
+                mapError: error => ({
+                    ...error,
+                    view: <span>Special view for {error.message}</span>
+                })
+            });
+
+            return <>
+                <ul>
+                    {errors.map(error => <li key={error.message}>
+                        <b>{error.view || error.message}</b>
+                    </li>)}
+                </ul>
+                <button onClick={performAction}>Invoke</button>
+            </>;
+        };
+        render(<App />);
+        screen.getByText("Invoke").click();
+        await screen.findByText("Special view for the message");
+    });
+});
+
+describe("Hook Level Error mapping", () => {
+    it("can map error messages from error objects at the handler level", async () => {
+        const App = () => {
+            const { errorHandler, errors } = useErrorHandler<SubError>({
+                mapMessage: message => `Prefix: ${message}`
+            });
+            const performAction = () => errorHandler(Promise.reject({
+                message: "the message",
+                subMessage: "the sub-message"
+            }));
+
+            return <>
+                <ul>
+                    {errors.map(error => <li key={error.message}>
+                        <b>{error.message}</b>
+                        <span>{error.subMessage}</span>
+                    </li>)}
+                </ul>
+                <button onClick={performAction}>Invoke</button>
+            </>;
+        };
+        render(<App />);
+        screen.getByText("Invoke").click();
+        await screen.findByText("Prefix: the message");
+        screen.getByText("the sub-message");
+    });
+
+    it("can map error messages from error strings at the handler level", async () => {
+        const App = () => {
+            const { errorHandler, errors } = useErrorHandler<SubError>({
+                mapMessage: message => `Prefix: ${message}`
+            });
+            const performAction = () => errorHandler(Promise.reject("the message"));
+
+            return <>
+                <ul>
+                    {errors.map(error => <li key={error.message}>
+                        <b>{error.message}</b>
+                    </li>)}
+                </ul>
+                <button onClick={performAction}>Invoke</button>
+            </>;
+        };
+        render(<App />);
+        screen.getByText("Invoke").click();
+        await screen.findByText("Prefix: the message");
+    });
+
+    it("can map error objects from error objects at the handler level", async () => {
+        const App = () => {
+            const { errorHandler, errors } = useErrorHandler<SubError & { view?: any }>({
+                mapError: error => ({
+                    ...error,
+                    view: <span>Special view for {error.message}</span>
+                })
+            });
+            const performAction = () => errorHandler(Promise.reject({
+                message: "the message",
+                subMessage: "the sub-message"
+            }));
+
+            return <>
+                <ul>
+                    {errors.map(error => <li key={error.message}>
+                        <b>{error.view || error.message}</b>
+                        <span>{error.subMessage}</span>
+                    </li>)}
+                </ul>
+                <button onClick={performAction}>Invoke</button>
+            </>;
+        };
+        render(<App />);
+        screen.getByText("Invoke").click();
+        await screen.findByText("Special view for the message");
+        screen.findByText("the sub-message");
+    });
+
+    it("can map error objects from error strings at the handler level", async () => {
+        const App = () => {
+            const { errorHandler, errors } = useErrorHandler<SubError & { view?: any }>({
+                mapError: error => ({
+                    ...error,
+                    view: <span>Special view for {error.message}</span>
+                })
+            });
+            const performAction = () => errorHandler(Promise.reject("the message"));
+
+            return <>
+                <ul>
+                    {errors.map(error => <li key={error.message}>
+                        <b>{error.view || error.message}</b>
+                    </li>)}
+                </ul>
+                <button onClick={performAction}>Invoke</button>
+            </>;
+        };
+        render(<App />);
+        screen.getByText("Invoke").click();
+        await screen.findByText("Special view for the message");
+    });
+});
