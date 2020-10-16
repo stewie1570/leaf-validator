@@ -241,7 +241,7 @@ Now you can run DB migration whenever you want.
 ```jsx
 const [isRunning, showRunningWhile] = useLoadingState();
 //or
-const [isRunning, showRunningWhile] = useLoadingState({ defer: 100, minLoadingTime: 250 });
+const [isRunning, showRunningWhile] = useLoadingState({ minLoadingTime: 250 });
 //all options are optional...
 .
 .
