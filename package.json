@@ -32,6 +32,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.3",
+    "source-map-explorer": "^2.5.0",
     "typescript": "3.9.7"
   },
   "files": [
@@ -39,6 +40,7 @@
     "dist/**/*.d.ts"
   ],
   "scripts": {
+    "analyze": "source-map-explorer 'build/static/js/main.*.js' --json",
     "start": "react-scripts start",
     "build": "react-scripts build && yarn build-package",
     "tdd": "react-scripts test --env=jest-environment-jsdom-sixteen",
