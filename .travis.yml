@@ -12,6 +12,7 @@ script:
   - coveralls < coverage/lcov.info
   - codecov
   - yarn build
+  - yarn analyze
 
 deploy:
   provider: npm
