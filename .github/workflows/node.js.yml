@@ -21,13 +21,15 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-    - run: npm install codecov coveralls -g
+    - run: npm install codecov -g
     - run: yarn
     - run: yarn build
     - run: yarn test
     - run: codecov
-    - run: coveralls < coverage/lcov.info
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
   publish:
     needs: [build]
     if: startsWith(github.ref, 'refs/tags/v')
