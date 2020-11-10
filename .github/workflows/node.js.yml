@@ -36,7 +36,9 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: code-coverage-report
-        path: coverage/lcov-report/**/*.*
+        path: |
+          coverage/lcov-report/index.html
+          coverage/lcov-report/lib/**/*.*
   publish:
     needs: [build]
     if: startsWith(github.ref, 'refs/tags/v')
