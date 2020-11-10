@@ -21,6 +21,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
     - run: npm install codecov coveralls -g
     - run: yarn
     - run: yarn build
