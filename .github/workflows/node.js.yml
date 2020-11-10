@@ -21,9 +21,12 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+    - run: npm install codecov@3.7.2 -g
     - run: yarn
     - run: yarn build
-    - run: npm test      
+    - run: yarn test
+    - run: codecov
+    - run: coveralls < coverage/lcov.info
   publish:
     needs: [build]
     if: startsWith(github.ref, 'refs/tags/v')
