@@ -25,7 +25,7 @@ jobs:
     - run: yarn
     - run: yarn build
     - run: yarn test
-    - run: codecov -t :CODECOV_TOKEN
+    - run: codecov
     - run: coveralls < coverage/lcov.info
   publish:
     needs: [build]
