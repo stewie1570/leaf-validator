@@ -23,9 +23,9 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: yarn
     - run: yarn build
-    - run: npm test
-      
+    - run: npm test      
   publish:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
