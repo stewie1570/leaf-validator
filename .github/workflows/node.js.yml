@@ -24,8 +24,10 @@ jobs:
     - run: npm install codecov -g
     - run: yarn
     - run: yarn build
+    - run: yarn analyze
     - run: yarn test
-    - run: codecov
+    - name: CodeCov
+      run: codecov
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
@@ -40,7 +42,6 @@ jobs:
         with:
           node-version: 12
           registry-url: https://registry.npmjs.org/
-      - run: yarn
-      - run: yarn publish
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
