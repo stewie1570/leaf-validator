@@ -1,6 +1,6 @@
 # leaf-validator
 
-[![Build](https://github.com/stewie1570/leaf-validator/workflows/Node.js%20CI/badge.svg)](https://github.com/stewie1570/leaf-validator/actions?query=workflow%3A%22Node.js+CI%22)
+[![Build](https://github.com/stewie1570/leaf-validator/workflows/Build/badge.svg)](https://github.com/stewie1570/leaf-validator/actions?query=workflow%3A%22Node.js+CI%22)
 [![Coverage Status](https://coveralls.io/repos/github/stewie1570/leaf-validator/badge.svg?branch=master)](https://coveralls.io/github/stewie1570/leaf-validator?branch=master)
 [![npm version](https://badge.fury.io/js/leaf-validator.svg)](https://badge.fury.io/js/leaf-validator)
 [![Package Size](https://badgen.net/bundlephobia/minzip/leaf-validator)](https://bundlephobia.com/result?p=leaf-validator)
