@@ -14,8 +14,11 @@ export function useLoadingState(options?: Options): [boolean, <T>(theOperation: 
         setIsLoading(true);
         try {
             options?.minLoadingTime && await wait(options.minLoadingTime);
+            const errorHandler = options?.errorHandler;
 
-            return await options?.errorHandler?.(theOperation) || await theOperation;
+            await (errorHandler ? errorHandler(theOperation) : theOperation);
+
+            return theOperation;
         }
         finally {
             setIsLoading(false);
