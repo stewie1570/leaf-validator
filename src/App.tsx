@@ -49,16 +49,16 @@ function App() {
     const [model, setModel] = useState();
     const validationModel = useValidationModel();
     const [showAllValidation, setShowAllValidation] = useState(false);
-    const [isSubmitting, showSubmittingWhile] = useLoadingState({ minLoadingTime: 2000 });
-    const isValidating = validationModel.isValidationInProgress();
     const { errorHandler, clearError, errors } = useErrorHandler();
+    const [isSubmitting, showSubmittingWhile] = useLoadingState({ minLoadingTime: 2000, errorHandler });
+    const isValidating = validationModel.isValidationInProgress();
 
     const submit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         setShowAllValidation(true);
 
         if (validationModel.getAllErrorsForLocation("person").length === 0) {
-            console.log(await errorHandler(showSubmittingWhile(fakeSuccessSubmit())));
+            console.log(await showSubmittingWhile(fakeSuccessSubmit()));
             setOriginalModel(model);
         }
     }
@@ -67,7 +67,7 @@ function App() {
         setShowAllValidation(true);
 
         if (validationModel.getAllErrorsForLocation("person").length === 0) {
-            console.log(await errorHandler(showSubmittingWhile(fakeFailSubmit())));
+            console.log(await showSubmittingWhile(fakeFailSubmit()));
         }
     }
 

@@ -4,13 +4,15 @@ type Errors<TError> = {
     [key: string]: TError
 }
 
-type HookResult<TError> = {
-    errorHandler: <T>(operation: Promise<T>) => Promise<T | undefined>,
+export type ErrorHandler = <T>(operation: Promise<T>) => Promise<T | undefined>;
+
+type ErrorHandlerResult<TError> = {
+    errorHandler: ErrorHandler,
     errors: Array<TError>,
     clearError: (error: TError) => void
 };
 
-export function useErrorHandler<TError extends { message: string }>(): HookResult<TError> {
+export function useErrorHandler<TError extends { message: string }>(): ErrorHandlerResult<TError> {
     const [errors, setErrors] = useMountedOnlyState<Errors<TError>>({});
 
     return {
