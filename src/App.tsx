@@ -6,6 +6,7 @@ import { TextInput } from './TextInput';
 import { leafDiff } from './lib/domain';
 import { useLoadingState } from './lib/hooks/useLoadingState'
 import { useErrorHandler } from './lib/hooks/useErrorHandler'
+import { useLocalStorageState } from './lib/hooks/useLocalStorageState'
 
 const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
@@ -46,7 +47,7 @@ async function waitAndThrow(message: string) {
 
 function App() {
     const [originalModel, setOriginalModel] = useState();
-    const [model, setModel] = useState();
+    const [model, setModel] = useLocalStorageState<any>("ModelTest");
     const validationModel = useValidationModel();
     const [showAllValidation, setShowAllValidation] = useState(false);
     const { errorHandler, clearError, errors } = useErrorHandler();

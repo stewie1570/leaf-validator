@@ -303,6 +303,20 @@ useDeferredEffect(
 
 _(exactly the same as useState except it will not set state when the component is not mounted)_
 
+
+**useLocalStorageState**
+
+Similar to useState but as the name implies it stores to local storage under the given key.
+This hook also uses storage events to sync state as local storage is edited.
+So if (for example) the user has two windows or tabs open, both windows or tabs states will be updated at the same time.
+The useLocalStorageState hook uses useMountedOnlyState as the underlying local state so it will not make un-mounted updates.
+
+*Note*: updates to this state are expensive as they need to be JSON stringified and parsed on each update.
+
+```jsx
+const [state, setState] = useLocalStorageState("StorageKey");
+```
+
 ## Get & Set pure functions
 
 ### **Set**: helps create immutable progressions.
