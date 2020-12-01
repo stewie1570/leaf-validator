@@ -71,16 +71,16 @@ In the above example, calling **setPhoneNumberInModel** is roughly the same as w
 
 ```javascript
 function setPhoneNumberInModel(updatedPhoneNumber) {
-  setState((origModel) => ({
-    ...origModel,
+  setState({
+    ...model,
     person: {
-      ...origModel.person,
+      ...model.person,
       contact: {
-        ...origModel.person.contact,
+        ...model.person.contact,
         phoneNumber: updatedPhoneNumber,
       },
     },
-  }));
+  });
 }
 ```
 
