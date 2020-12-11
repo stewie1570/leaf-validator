@@ -40,6 +40,7 @@
   ],
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/main.*.js' --json",
+    "analyze-in-browser": "source-map-explorer 'build/static/js/main.*.js'",
     "start": "react-scripts start",
     "build": "react-scripts build && yarn build-package",
     "tdd": "react-scripts test",
