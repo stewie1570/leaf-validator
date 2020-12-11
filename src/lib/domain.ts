@@ -86,13 +86,19 @@ const processDiffFor = (original: any, updated: any, isObject: IsObjectCheck): D
         ? `.${location}`
         : location;
 
-    return original === updated ? []
-        : isObject(original, updated) ? distinctArrayFrom(
-            Object.keys(original instanceof Object ? original : {}),
-            Object.keys(updated))
-            .flatMap(key => processDiffFor((original || {})[key], updated[key], isObject)
-                .map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })))
-            : [{ location: "", updatedValue: updated }];
+    const allDistinctKeys = () => distinctArrayFrom(
+        Object.keys(original instanceof Object ? original : {}),
+        Object.keys(updated));
+
+    const diffObjects = () => allDistinctKeys()
+        .flatMap(key => processDiffFor((original || {})[key], updated[key], isObject)
+            .map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })));
+
+    const diff = () => isObject(original, updated)
+        ? diffObjects()
+        : [{ location: "", updatedValue: updated }];
+
+    return original === updated ? [] : diff();
 };
 
 const diffApiFrom = ({ recurseWhen }: { recurseWhen: IsObjectCheck }) => ({
