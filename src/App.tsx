@@ -50,7 +50,7 @@ function App() {
     const [model, setModel] = useLocalStorageState<any>("ModelTest");
     const validationModel = useValidationModel();
     const [showAllValidation, setShowAllValidation] = useState(false);
-    const { errorHandler, clearError, errors } = useErrorHandler();
+    const { errorHandler, errorHandleAndReThrow, clearError, errors } = useErrorHandler();
     const [isSubmitting, showSubmittingWhile] = useLoadingState({ minLoadingTime: 2000, errorHandler });
     const isValidating = validationModel.isValidationInProgress();
 
@@ -102,16 +102,18 @@ function App() {
                     className="btn btn-secondary"
                     type="button"
                     disabled={isValidating || isSubmitting}
-                    onClick={() => errorHandler(Promise.reject("test error 1"))}>
-                    Async Error 1
+                    onClick={() => errorHandler(Promise.reject("test error 1"))
+                        .then(() => console.log('happy path'), () => console.log('sad path'))}>
+                    Reject, Handle, Happy
                 </button>
                 &nbsp;
                 <button
                     className="btn btn-secondary"
                     type="button"
                     disabled={isValidating || isSubmitting}
-                    onClick={() => errorHandler(waitAndThrow("test error 2"))}>
-                    Async Error 2
+                    onClick={() => errorHandleAndReThrow(waitAndThrow("test error 2"))
+                        .then(() => console.log('happy path'), () => console.log('sad path'))}>
+                    Queue, Reject, Handle, Rethrow, Sad
                 </button>
                 {isValidating && <i>Validating...</i>}
                 {isSubmitting && <i>Submitting...</i>}

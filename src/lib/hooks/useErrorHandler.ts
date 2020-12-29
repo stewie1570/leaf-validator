@@ -8,6 +8,7 @@ export type ErrorHandler = <T>(operation: Promise<T>) => Promise<T | undefined>;
 
 type ErrorHandlerResult<TError> = {
     errorHandler: ErrorHandler,
+    errorHandleAndReThrow: ErrorHandler,
     errors: Array<TError>,
     clearError: (error: TError) => void
 };
@@ -22,6 +23,15 @@ export function useErrorHandler<TError extends { message: string }>(): ErrorHand
             }
             catch (error) {
                 setErrors(updatedErrorsWith<TError>(error));
+            }
+        },
+        errorHandleAndReThrow: async <T>(operation: Promise<T>) => {
+            try {
+                return await operation;
+            }
+            catch (error) {
+                setErrors(updatedErrorsWith<TError>(error));
+                throw error;
             }
         },
         errors: Object.values(errors),
