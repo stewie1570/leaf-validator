@@ -12,6 +12,7 @@ on:
     
 jobs:
   build:
+    name: Build / Test / Publish
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -39,3 +40,20 @@ jobs:
       run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+  smokeTest: 
+    name: Smoke Test
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        node-version: [14.x]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+        registry-url: https://registry.npmjs.org/
+    - run: yarn
+    - run: yarn build
+    - run: yarn analyze
+    - run: yarn test
