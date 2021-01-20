@@ -45,7 +45,7 @@ async function waitAndThrow(message: string) {
     throw new Error(message);
 }
 
-function App() {
+function App(): JSX.Element {
     const [originalModel, setOriginalModel] = useState();
     const [model, setModel] = useLocalStorageState<any>("ModelTest");
     const validationModel = useValidationModel();
