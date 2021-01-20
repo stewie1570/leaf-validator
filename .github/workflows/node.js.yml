@@ -41,7 +41,7 @@ jobs:
       env:
         NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
   smokeTest: 
-    name: Smoke Test
+    name: MacOS Test
     runs-on: macos-latest
     strategy:
       matrix:
