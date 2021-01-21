@@ -67,7 +67,7 @@ const [model, setModel] = useState({});
 </Leaf>;
 ```
 
-In the above example, calling **setPhoneNumberInModel** is roughly the same as writing and calling this funtion (below) except it will even work when **origModel** is null or undefined etc...
+In the above example, calling **setPhoneNumberInModel** is roughly the same as writing and calling this funtion (below) except it will even work when **model** is null or undefined etc...
 
 ```javascript
 function setPhoneNumberInModel(updatedPhoneNumber) {
@@ -92,7 +92,7 @@ This API/abstraction does not suffer from the problems that set state callback f
 
 - **Reusability**: Reducers and set state callback functions for this model would not be re-usable for different parts of this model. So you tend to write a lot of them.
 - **Complexity**: Reducers of this model would fail if they attempt to update an object that doesn't exist in the original model.
-  - For example: **person** is undefined in the **origModel**. When you spread **origModel.person.contact** you'll experience an undefined reference error unless each part of your reducer tests for undefined.
+  - For example: **person** is undefined in the **model** and you need to update **model.person.contact**. When you spread **model.person.contact** you'll experience an undefined reference error unless each part of your reducer tests for undefined.
 - **Coupling**: Reducers of this model would need to be completely re-written if/when the model shape changes.
 
 [![Edit Leaf Example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/leaf-example-n0e8v?fontsize=14&hidenavigation=1&theme=dark)
