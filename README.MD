@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/stewie1570/leaf-validator/workflows/Build/badge.svg)](https://github.com/stewie1570/leaf-validator/actions)
 [![Coverage Status](https://coveralls.io/repos/github/stewie1570/leaf-validator/badge.svg?branch=master)](https://coveralls.io/github/stewie1570/leaf-validator?branch=master)
-[![npm version](https://badge.fury.io/js/leaf-validator.svg)](https://badge.fury.io/js/leaf-validator)
+[![npm version](https://badgen.net/npm/v/leaf-validator)](https://www.npmjs.com/package/leaf-validator)
 [![Package Size](https://badgen.net/bundlephobia/minzip/leaf-validator)](https://bundlephobia.com/result?p=leaf-validator)
 [![Maintainability](https://api.codeclimate.com/v1/badges/c49423ebf81ddf1542c0/maintainability)](https://codeclimate.com/github/stewie1570/leaf-validator/maintainability)
 
