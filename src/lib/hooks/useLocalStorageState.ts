@@ -10,14 +10,15 @@ export function useLocalStorageState<T>(storageKey: string): [T | undefined, Rea
     const [state, setState] = useState<T | undefined>(undefined);
 
     useEffect(() => {
-        function storageListener() {
+        function pullStateFromStorage() {
             setState(getLocalStateFor(storageKey));
         }
 
-        window.addEventListener('storage', storageListener);
+        window.addEventListener('storage', pullStateFromStorage);
+        pullStateFromStorage();
 
         return () => {
-            window.removeEventListener('storage', storageListener);
+            window.removeEventListener('storage', pullStateFromStorage);
         }
     }, [storageKey]);
 
@@ -32,5 +33,5 @@ export function useLocalStorageState<T>(storageKey: string): [T | undefined, Rea
         }
     }
 
-    return [state || getLocalStateFor(storageKey), setStorageState];
+    return [state, setStorageState];
 }
