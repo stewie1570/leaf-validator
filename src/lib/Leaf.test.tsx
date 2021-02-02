@@ -598,17 +598,21 @@ test("does not re-render when leaf value and state has not changed", () => {
         </>;
     }
 
-    const { getByTestId } = render(<Wrapper />);
+    const { getByTestId, getByDisplayValue } = render(<Wrapper />);
 
     fireEvent.change(getByTestId("firstName"), { target: { value: "John" } });
     fireEvent.change(getByTestId("firstName"), { target: { value: "Stewie" } });
     fireEvent.change(getByTestId("firstName"), { target: { value: "Stewart" } });
+    fireEvent.change(getByTestId("lastName"), { target: { value: "Smith" } });
 
     expect(renders).toEqual([
         "firstName",
         "lastName",
         "firstName",
         "firstName",
-        "firstName"
+        "firstName",
+        "lastName"
     ]);
+    getByDisplayValue("Stewart");
+    getByDisplayValue("Smith");
 });
