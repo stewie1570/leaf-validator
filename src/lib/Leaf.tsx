@@ -125,13 +125,17 @@ export function Leaf<Model, Target>(props: {
         })
     }, deferMilliseconds || 500, [targetValue, location, deferMilliseconds]);
 
-    const errors = validationModel?.get(location) || [];
+    const visibleErrors = validationModel && (hasBlurred || showErrors)
+        ? validationModel.get(location)
+        : [];
+    const combinedVisibleErrors = visibleErrors.join();
 
     return useMemo(() => children(
         targetValue,
         update => onChange(model => set(location).to(update).in(model)),
         () => setHasBlurred(true),
-        validationModel && (hasBlurred || showErrors) ? errors : [],
+        visibleErrors,
         location
-    ), [targetValue, location, errors.join(), hasBlurred, showErrors]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    ), [targetValue, location, combinedVisibleErrors, hasBlurred, showErrors, onChange]);
 }
