@@ -5,40 +5,6 @@ import { TextInput } from '../TextInput'
 import { useValidationModel } from './hooks/useValidationModel';
 import { ValidationModel } from './models';
 
-test("can read & edit model nodes nested inside complex object models and arrays", () => {
-    const Wrapper = () => {
-        const [model, setModel] = useState({
-            lists: {
-                emails: [
-                    { email: "stewie1570@gmail.com" },
-                    { email: "something_at_something.com" }
-                ]
-            }
-        });
-
-        return <Leaf model={model} onChange={setModel} location="lists.emails">
-            {(emailNodes: Array<any>, setEmailNodes) => emailNodes.map((emailNode, index) => <Leaf
-                key={index}
-                model={emailNode}
-                onChange={update => setEmailNodes(emailNodes.map((orig, i) => i === index ? update : orig))}
-                location={`email`}>
-                {(email: string, onChange) => <TextInput
-                    data-testid={`email${index}`}
-                    value={email}
-                    onChange={onChange} />}
-            </Leaf>)}
-        </Leaf>
-    }
-
-    const { getByTestId } = render(<Wrapper />);
-
-    expect((getByTestId("email0") as HTMLInputElement).value).toBe("stewie1570@gmail.com");
-    expect((getByTestId("email1") as HTMLInputElement).value).toBe("something_at_something.com");
-    fireEvent.change(getByTestId("email1"), { target: { value: "stewie1570@hotmail.com" } });
-    expect((getByTestId("email0") as HTMLInputElement).value).toBe("stewie1570@gmail.com");
-    expect((getByTestId("email1") as HTMLInputElement).value).toBe("stewie1570@hotmail.com");
-});
-
 test("can read & edit model nodes nested inside complex object models and arrays via composed location", () => {
     const Wrapper = () => {
         const [model, setModel] = useState({
@@ -87,15 +53,15 @@ test("can compose Leafs via passing parent location into child location string c
         return <Leaf model={model} onChange={setModel} location="lists.emails">
             {(emailNodes: Array<any>, setEmails, onBlur, errors, parentLocation) =>
                 emailNodes.map((emailNode, index) => <Leaf
-                key={index}
-                model={model}
-                onChange={setModel}
-                location={`${parentLocation}.${index}.email`}>
-                {(email: string, onChange) => <TextInput
-                    data-testid={`email${index}`}
-                    value={email}
-                    onChange={onChange} />}
-            </Leaf>)}
+                    key={index}
+                    model={model}
+                    onChange={setModel}
+                    location={`${parentLocation}.${index}.email`}>
+                    {(email: string, onChange) => <TextInput
+                        data-testid={`email${index}`}
+                        value={email}
+                        onChange={onChange} />}
+                </Leaf>)}
         </Leaf>
     }
 
@@ -597,4 +563,52 @@ test("get errors for root location via undefined location", async () => {
     await waitFor(() => {
         expect(queryAllByTestId("top-level-error").map(node => node.textContent)).toEqual([]);
     });
+});
+
+test("does not re-render when leaf value and state has not changed", () => {
+    let renders: Array<string> = [];
+
+    const Wrapper = () => {
+        const [model, setModel] = useState({
+            person: {
+                firstName: "Stewart",
+                lastName: "Anderson"
+            }
+        });
+
+        return <>
+            <Leaf location="person.firstName" model={model} onChange={setModel}>
+                {(firstName: any, updateFirstName) => {
+                    renders.push("firstName");
+                    return <TextInput
+                        data-testid="firstName"
+                        value={firstName}
+                        onChange={updateFirstName} />;
+                }}
+            </Leaf>
+            <Leaf location="person.lastName" model={model} onChange={setModel}>
+                {(lastName: any, updateLastName) => {
+                    renders.push("lastName");
+                    return <TextInput
+                        data-testid="lastName"
+                        value={lastName}
+                        onChange={updateLastName} />;
+                }}
+            </Leaf>
+        </>;
+    }
+
+    const { getByTestId } = render(<Wrapper />);
+
+    fireEvent.change(getByTestId("firstName"), { target: { value: "John" } });
+    fireEvent.change(getByTestId("firstName"), { target: { value: "Stewie" } });
+    fireEvent.change(getByTestId("firstName"), { target: { value: "Stewart" } });
+
+    expect(renders).toEqual([
+        "firstName",
+        "lastName",
+        "firstName",
+        "firstName",
+        "firstName"
+    ]);
 });
