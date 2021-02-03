@@ -67,11 +67,11 @@ const [model, setModel] = useState({});
 </Leaf>;
 ```
 
-In the above example, calling **setPhoneNumberInModel** is roughly the same as writing and calling this funtion (below) except it will even work when **model** is null or undefined etc...
+In the above example, calling **setPhoneNumberInModel** is roughly the same as writing and calling this funtion (below) except it will even work when **model** or any of its properties are null or undefined etc...
 
 ```javascript
 function setPhoneNumberInModel(updatedPhoneNumber) {
-  setState({
+  setState(model => ({
     ...model,
     person: {
       ...model.person,
@@ -80,7 +80,7 @@ function setPhoneNumberInModel(updatedPhoneNumber) {
         phoneNumber: updatedPhoneNumber,
       },
     },
-  });
+  }));
 }
 ```
 
@@ -337,15 +337,15 @@ const theObject = {
 const progession = set("prop1.prop1.target").to("updated value").in(theObject);
 ```
 
-will return the equivalent of:
+will return the equivalent of below except it will work even when theObject or its properties are null or undefined.
 
 ```js
 {
     ...theObject,
     prop1: {
-        ...theObject?.prop1,
+        ...theObject.prop1,
         prop1: {
-            ...theObject?.prop1?.prop1,
+            ...theObject.prop1.prop1,
             target: "updated value"
         }
     }
