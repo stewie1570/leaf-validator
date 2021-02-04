@@ -125,10 +125,9 @@ export function Leaf<Model, Target>(props: {
         })
     }, deferMilliseconds || 500, [targetValue, location, deferMilliseconds]);
 
-    const visibleErrors = validationModel && (hasBlurred || showErrors)
+    const visibleErrors = useMemo(() => validationModel && (hasBlurred || showErrors)
         ? validationModel.get(location)
-        : [];
-    const combinedVisibleErrors = visibleErrors.join();
+        : [], [validationModel, hasBlurred, showErrors, location]);
 
     return useMemo(() => children(
         targetValue,
@@ -136,6 +135,5 @@ export function Leaf<Model, Target>(props: {
         () => setHasBlurred(true),
         visibleErrors,
         location
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [targetValue, location, combinedVisibleErrors, hasBlurred, showErrors, onChange]);
+    ), [targetValue, location, visibleErrors, onChange, children]);
 }

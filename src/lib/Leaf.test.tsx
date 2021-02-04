@@ -576,24 +576,27 @@ test("does not re-render when leaf value and state has not changed", () => {
             }
         });
 
+        const firstName = React.useMemo(() => (firstName: any, updateFirstName: (updatedModel: any) => void): JSX.Element => {
+            renders.push("firstName");
+            return <TextInput
+                data-testid="firstName"
+                value={firstName}
+                onChange={updateFirstName} />;
+        }, []);
+        const lastName = React.useMemo(() => (lastName: any, updateLastName: (updatedModel: any) => void): JSX.Element => {
+            renders.push("lastName");
+            return <TextInput
+                data-testid="lastName"
+                value={lastName}
+                onChange={updateLastName} />;
+        }, []);
+
         return <>
             <Leaf location="person.firstName" model={model} onChange={setModel}>
-                {(firstName: any, updateFirstName) => {
-                    renders.push("firstName");
-                    return <TextInput
-                        data-testid="firstName"
-                        value={firstName}
-                        onChange={updateFirstName} />;
-                }}
+                {firstName}
             </Leaf>
             <Leaf location="person.lastName" model={model} onChange={setModel}>
-                {(lastName: any, updateLastName) => {
-                    renders.push("lastName");
-                    return <TextInput
-                        data-testid="lastName"
-                        value={lastName}
-                        onChange={updateLastName} />;
-                }}
+                {lastName}
             </Leaf>
         </>;
     }
