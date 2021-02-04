@@ -26,6 +26,7 @@ Advantages in:
 - [State Management](#state-management)
 - [Validation](#validation)
 - [Backward Compatibility](#backward-compatibility)
+- [Performance](#performance)
 
 Other related features include:
 
@@ -233,6 +234,13 @@ const [model, setModel] = useState({});
 This will try to read from the **location** in the model first. If **location** in the model is not available then it will start looking at the **failOverLocations**. Updates are done to **location** in the model.
 
 Now you can run DB migration whenever you want.
+
+## Performance
+
+Normally when a large & complex model changes you need to re-render a large component composition. You can memoize the child render function of the 'Leaf' component. This will cause `Leaf` to only call that render function when:
+- a `Leaf` prop (other than `model`) has changed
+- the target value in the `model` has changed
+- or the child render function has changed.
 
 ## Hooks
 
