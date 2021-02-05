@@ -1,6 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { render, screen, waitFor } from "@testing-library/react";
 import { useLocalStorageState } from './useLocalStorageState'
+
+let storage: any = {};
+beforeEach(() => {
+    Storage.prototype.setItem = (key, value) => storage[key] = value;
+    Storage.prototype.getItem = key => storage[key];
+});
+afterEach(() => { storage = {}; });
 
 function SetStateViaValue() {
     const [state, setState] = useLocalStorageState<string>("StorageKey");
@@ -17,9 +24,11 @@ function SetStateViaValue() {
 
 function SetStateViaCallback() {
     const [state, setState] = useLocalStorageState<string>("StorageKey");
+    const callCount = useRef(0);
 
     useEffect(() => {
-        state && window.dispatchEvent(new Event("storage"));
+        state && callCount.current > 0 && window.dispatchEvent(new Event("storage"));
+        callCount.current++;
     }, [state]);
 
     return <div>
@@ -81,6 +90,22 @@ test("can update common state via callback", async () => {
     screen.getAllByText("Set State")[0].click();
     await waitFor(() => {
         expect(screen.getAllByText("value: undefined").length).toBe(2);
+    });
+});
+
+test("can update common pre-existing state via callback", async () => {
+    window.localStorage.setItem("StorageKey", '"initial"');
+    render(<>
+        <SetStateViaCallback />
+        <SetStateViaCallback />
+    </>);
+
+    await waitFor(() => {
+        expect(screen.getAllByText("initial").length).toBe(2);
+    });
+    screen.getAllByText("Set State")[0].click();
+    await waitFor(() => {
+        expect(screen.getAllByText("value: \"initial\"").length).toBe(2);
     });
 });
 
