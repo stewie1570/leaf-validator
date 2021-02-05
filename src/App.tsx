@@ -1,4 +1,4 @@
-import React, { useState, Dispatch, SetStateAction } from 'react';
+import React, { useState, Dispatch, SetStateAction, useMemo } from 'react';
 import './App.css';
 import { Leaf } from './lib/Leaf';
 import { useValidationModel } from './lib/hooks/useValidationModel'
@@ -137,21 +137,40 @@ function App(): JSX.Element {
 }
 
 function formElements(model: any, setModel: Dispatch<SetStateAction<any>>, showAllValidation: boolean, validationModel: any) {
-    return form.map(({ name, ...formElement }, index) => <Leaf
-        key={index}
-        showErrors={showAllValidation}
+    return form.map(({ name, location, ...formElement }) => <MemodLeaf
+        key={location}
+        location={location}
+        showAllValidation={showAllValidation}
         model={model}
-        onChange={setModel}
+        setModel={setModel}
         validationModel={validationModel}
-        {...formElement}>
-        {(value: string, onChange, onBlur, errors) => <label>
+        formElement={formElement}
+        name={name} />);
+}
+
+function MemodLeaf({ location, showAllValidation, model, setModel, validationModel, formElement, name }: any): JSX.Element {
+
+    const field = useMemo(() => (value: string, onChange: (updatedModel: string) => void, onBlur: () => void, errors: string[]): JSX.Element => {
+        console.log(`render ${name}`);
+        return <label>
             {name}
             <TextInput value={value} onChange={onChange} onBlur={onBlur} className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
             {errors.length > 0 && <ul className="errors">
                 {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
             </ul>}
-        </label>}
-    </Leaf>)
+        </label>;
+    }, [name]);
+
+    return <Leaf
+        key={location}
+        showErrors={showAllValidation}
+        model={model}
+        onChange={setModel}
+        validationModel={validationModel}
+        location={location}
+        {...formElement}>
+        {field}
+    </Leaf>;
 }
 
 function validationOutput(location: string, validationModel: any) {

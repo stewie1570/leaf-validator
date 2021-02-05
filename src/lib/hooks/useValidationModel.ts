@@ -1,6 +1,7 @@
 import { ValidationModel } from "../models";
-import { useMountedOnlyState } from "./useMountedOnlyState";
+import { useMountedOnlyState as useState } from "./useMountedOnlyState";
 import { distinctArrayFrom } from '../domain'
+import { useMemo } from "react";
 
 type FilteredObjectOptions<T> = {
     keyFilter: (key: string) => boolean,
@@ -29,10 +30,10 @@ function filteredObjectToArray<T>(obj: any, options: FilteredObjectOptions<T>): 
 // }
 
 export function useValidationModel(): ValidationModel {
-    const [validationModel, setValidationModel] = useMountedOnlyState<any>({});
-    const [currentlyValidatingNamespaces, setNamespacesCurrentlyValidating] = useMountedOnlyState<Array<string>>([]);
+    const [validationModel, setValidationModel] = useState<any>({});
+    const [currentlyValidatingNamespaces, setNamespacesCurrentlyValidating] = useState<Array<string>>([]);
 
-    return {
+    return useMemo(() => ({
         set: setValidationModel,
         get: (location: string) => {
             const validationModelsFromAllNamespaces = Object.values(validationModel);
@@ -61,5 +62,5 @@ export function useValidationModel(): ValidationModel {
         },
         isValidationInProgress: () => currentlyValidatingNamespaces.length > 0,
         setNamespacesCurrentlyValidating
-    }
+    }), [currentlyValidatingNamespaces.length, validationModel]);
 }

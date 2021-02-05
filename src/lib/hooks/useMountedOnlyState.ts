@@ -1,4 +1,4 @@
-import { useState, Dispatch, SetStateAction, useRef, useEffect } from "react"
+import { useState, Dispatch, SetStateAction, useRef, useEffect, useMemo } from "react"
 
 export const useMountedOnlyState = <T>(initialState: T): [T, Dispatch<SetStateAction<T>>] => {
     const [state, setState] = useState<T>(initialState);
@@ -6,5 +6,8 @@ export const useMountedOnlyState = <T>(initialState: T): [T, Dispatch<SetStateAc
 
     useEffect(() => () => { instance.current.isMounted = false; }, []);
 
-    return [state, updatedState => instance.current.isMounted && setState(updatedState)];
+    return [
+        state,
+        useMemo(() => updatedState => instance.current.isMounted && setState(updatedState), [])
+    ];
 }
