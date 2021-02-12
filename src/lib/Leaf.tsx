@@ -3,7 +3,7 @@ import { get, set } from './domain'
 import { ValidationModel } from './models';
 import { useDeferredEffect } from './hooks/useDeferredEffect'
 
-type Validator<T> = (value: T) => Array<string> | any;
+export type Validator<T> = (value: T) => Array<string> | any;
 type Update<TTarget> = (updatedModel: TTarget) => void;
 type Blur = () => void;
 
