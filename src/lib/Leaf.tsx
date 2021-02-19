@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { get, set } from './domain'
 import { ValidationModel } from './models';
 import { useDeferredEffect } from './hooks/useDeferredEffect'
+import { getErrorsForLocation } from './hooks/useValidationModel'
 
 export type Validator<T> = (value: T) => Array<string> | any;
 type Update<TTarget> = (updatedModel: TTarget) => void;
@@ -122,11 +123,11 @@ export function Leaf<Model, Target>(props: {
             location,
             targetValue,
             namespace: "deferred"
-        })
+        });
     }, deferMilliseconds || 500, [targetValue, location, deferMilliseconds]);
 
     const visibleErrors = useMemo(() => validationModel && (hasBlurred || showErrors)
-        ? validationModel.get(location)
+        ? getErrorsForLocation(location).from(validationModel)
         : [], [validationModel, hasBlurred, showErrors, location]);
 
     return useMemo(() => children(

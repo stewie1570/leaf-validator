@@ -1,7 +1,7 @@
 import React, { useState, Dispatch, SetStateAction, useMemo } from 'react';
 import './App.css';
 import { Leaf } from './lib/Leaf';
-import { useValidationModel } from './lib/hooks/useValidationModel'
+import { useValidationModel, getAllErrorsForLocation, isValidationInProgress } from './lib/hooks/useValidationModel'
 import { TextInput } from './TextInput';
 import { leafDiff } from './lib/domain';
 import { useLoadingState } from './lib/hooks/useLoadingState'
@@ -52,13 +52,13 @@ function App(): JSX.Element {
     const [showAllValidation, setShowAllValidation] = useState(false);
     const { errorHandler, errorHandleAndReThrow, clearError, errors } = useErrorHandler();
     const [isSubmitting, showSubmittingWhile] = useLoadingState({ minLoadingTime: 2000, errorHandler });
-    const isValidating = validationModel.isValidationInProgress();
+    const isValidating = isValidationInProgress.in(validationModel);
 
     const submit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         setShowAllValidation(true);
 
-        if (validationModel.getAllErrorsForLocation("person").length === 0) {
+        if (getAllErrorsForLocation("person").from(validationModel).length === 0) {
             console.log(await showSubmittingWhile(fakeSuccessSubmit()));
             setOriginalModel(model);
         }
@@ -67,7 +67,7 @@ function App(): JSX.Element {
     const submitFailire = async () => {
         setShowAllValidation(true);
 
-        if (validationModel.getAllErrorsForLocation("person").length === 0) {
+        if (getAllErrorsForLocation("person").from(validationModel).length === 0) {
             console.log(await showSubmittingWhile(fakeFailSubmit()));
         }
     }
@@ -177,7 +177,7 @@ function validationOutput(location: string, validationModel: any) {
     return <div style={{ verticalAlign: "top", display: "inline-block", width: "33%" }}>
         Validation Model for "{location}":
         <pre>
-            {JSON.stringify(validationModel.getAllErrorsForLocation(location), null, 4)}
+            {JSON.stringify(getAllErrorsForLocation(location).from(validationModel), null, 4)}
         </pre>
     </div>
 }

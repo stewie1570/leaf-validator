@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { render, fireEvent, waitFor } from '@testing-library/react'
 import { Leaf, Validator } from './Leaf'
 import { TextInput } from '../TextInput'
-import { useValidationModel } from './hooks/useValidationModel';
+import { useValidationModel, getAllErrorsForLocation, isValidationInProgress } from './hooks/useValidationModel';
 import { ValidationModel } from './models';
 
 test("can read/edit leafs nested in object/arrays via composed location", () => {
@@ -251,10 +251,7 @@ test("validate model asynchronously on an interval and show errors on blur", asy
 
 test("deferredValidators and validators work together", async () => {
     let validationModel: ValidationModel = {
-        get: () => [],
         set: () => undefined,
-        getAllErrorsForLocation: () => [],
-        isValidationInProgress: () => false,
         setNamespacesCurrentlyValidating: () => { }
     };
 
@@ -290,7 +287,7 @@ test("deferredValidators and validators work together", async () => {
         "test value is invalid",
         "test value resolved invalid"
     ]);
-    expect(validationModel.getAllErrorsForLocation()).toEqual([{
+    expect(getAllErrorsForLocation().from(validationModel)).toEqual([{
         location: "contact.email",
         messages: ["test value is invalid", "test value resolved invalid"]
     }]);
@@ -298,10 +295,7 @@ test("deferredValidators and validators work together", async () => {
 
 test("knowing when (async) validation is in progress", async () => {
     let validationModel: ValidationModel = {
-        get: () => [],
         set: () => undefined,
-        getAllErrorsForLocation: () => [],
-        isValidationInProgress: () => false,
         setNamespacesCurrentlyValidating: () => { }
     };
 
@@ -329,22 +323,19 @@ test("knowing when (async) validation is in progress", async () => {
 
     const { getByTestId, getAllByText } = render(<Wrapper />);
 
-    expect(validationModel.isValidationInProgress()).toBe(true);
+    expect(isValidationInProgress.in(validationModel)).toBe(true);
 
     fireEvent.blur(getByTestId("email"));
 
     await waitFor(() => {
         expect(getAllByText("stewie1570@gmail.com resolved invalid").length).toBe(2);
     });
-    expect(validationModel.isValidationInProgress()).toBe(false);
+    expect(isValidationInProgress.in(validationModel)).toBe(false);
 });
 
 test("knowing when (async) deferred-only validation is in progress", async () => {
     let validationModel: ValidationModel = {
-        get: () => [],
         set: () => undefined,
-        getAllErrorsForLocation: () => [],
-        isValidationInProgress: () => false,
         setNamespacesCurrentlyValidating: () => { }
     };
 
@@ -371,20 +362,17 @@ test("knowing when (async) deferred-only validation is in progress", async () =>
 
     const { getByTestId, findByText } = render(<Wrapper />);
 
-    await waitFor(() => expect(validationModel.isValidationInProgress()).toBe(true));
+    await waitFor(() => expect(isValidationInProgress.in(validationModel)).toBe(true));
 
     fireEvent.blur(getByTestId("email"));
 
     await findByText("stewie1570@gmail.com resolved invalid");
-    expect(validationModel.isValidationInProgress()).toBe(false);
+    expect(isValidationInProgress.in(validationModel)).toBe(false);
 });
 
 test("does not show validating during validation deferrement when there's no deferred validators", async () => {
     let validationModel: ValidationModel = {
-        get: () => [],
         set: () => undefined,
-        getAllErrorsForLocation: () => [],
-        isValidationInProgress: () => false,
         setNamespacesCurrentlyValidating: () => { }
     };
 
@@ -412,12 +400,12 @@ test("does not show validating during validation deferrement when there's no def
     const { getByTestId, findByText } = render(<Wrapper />);
 
     fireEvent.blur(getByTestId("email"));
-    expect(validationModel.isValidationInProgress()).toBe(true);
+    expect(isValidationInProgress.in(validationModel)).toBe(true);
 
     await Promise.resolve();
 
     await findByText("stewie1570@gmail.com resolved invalid");
-    expect(validationModel.isValidationInProgress()).toBe(false);
+    expect(isValidationInProgress.in(validationModel)).toBe(false);
 });
 
 test("validate model immediately show errors", async () => {
@@ -485,7 +473,7 @@ test("validate multiple model nodes", async () => {
                 </>}
             </Leaf>
             <ul>
-                {validationModel.getAllErrorsForLocation("").map((error, index) => <li key={index} data-testid="top-level-error">
+                {getAllErrorsForLocation("").from(validationModel).map((error, index) => <li key={index} data-testid="top-level-error">
                     {error.location} - {error.messages}
                 </li>)}
             </ul>
@@ -543,7 +531,7 @@ test("get errors for root location via undefined location", async () => {
                 </>}
             </Leaf>
             <ul>
-                {validationModel.getAllErrorsForLocation().map((error, index) => <li key={index} data-testid="top-level-error">
+                {getAllErrorsForLocation().from(validationModel).map((error, index) => <li key={index} data-testid="top-level-error">
                     {error.location} - {error.messages}
                 </li>)}
             </ul>
@@ -578,6 +566,7 @@ test.skip("does not re-render when leaf value and state has not changed", async 
         const validationModel = useValidationModel();
         const isRequired: Validator<any> = value => Promise.resolve(['is required']);
 
+
         const firstName = React.useMemo(() => (
             firstName: any,
             updateFirstName: (updatedModel: any) => void,
@@ -590,9 +579,10 @@ test.skip("does not re-render when leaf value and state has not changed", async 
                     data-testid="firstName"
                     value={firstName}
                     onChange={updateFirstName} />
-                <ul>{errors.map(error => <li>{error}</li>)}</ul>
+                <ul>{errors.map(error => <li key={error}>{error}</li>)}</ul>
             </>;
         }, []);
+
         const lastName = React.useMemo(() => (
             lastName: any,
             updateLastName: (updatedModel: any) => void,
@@ -605,7 +595,7 @@ test.skip("does not re-render when leaf value and state has not changed", async 
                     data-testid="lastName"
                     value={lastName}
                     onChange={updateLastName} />
-                <ul>{errors.map(error => <li>{error}</li>)}</ul>
+                <ul>{errors.map(error => <li key={error}>{error}</li>)}</ul>
             </>;
         }, []);
 
