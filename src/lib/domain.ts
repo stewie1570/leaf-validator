@@ -55,7 +55,7 @@ function getValueFrom<T>({ target, obj }: ValueTarget): T {
 
     return target === "" || obj === undefined ? obj
         : firstDotIndex === -1
-            ? obj[target]
+            ? obj?.[target]
             : get(target.substring(firstDotIndex + 1)).from(obj[childLocation]);
 }
 
