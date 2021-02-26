@@ -283,6 +283,22 @@ describe("set value at target location of object to get next immutable progressi
         });
     });
 
+    it("can add data to a null value in an object", () => {
+        const orig = {
+            level1: {
+                level2: null
+            }
+        };
+        expect(set("level1.level2.level3.level4")
+            .to("value")
+            .in(orig))
+            .toEqual({
+                level1: {
+                    level2: { level3: { level4: "value" } }
+                }
+            });
+    });
+
     it("can set a target value that navigates through an array", () => {
         expect(set("list.1.value").to("updated").in({
             list: [
