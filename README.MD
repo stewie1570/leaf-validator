@@ -341,11 +341,11 @@ will return the equivalent of:
 
 ```js
 {
-    ...theObject,
+    ...(theObject || {}),
     prop1: {
-        ...theObject?.prop1,
+        ...(theObject?.prop1 || {}),
         prop1: {
-            ...theObject?.prop1?.prop1,
+            ...(theObject?.prop1?.prop1 || {}),
             target: "updated value"
         }
     }
