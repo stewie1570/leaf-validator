@@ -349,11 +349,11 @@ will return the equivalent of below except it will work even when theObject or i
 
 ```js
 {
-    ...theObject,
+    ...(theObject || {}),
     prop1: {
-        ...theObject.prop1,
+        ...(theObject?.prop1 || {}),
         prop1: {
-            ...theObject.prop1.prop1,
+            ...(theObject?.prop1?.prop1 || {}),
             target: "updated value"
         }
     }
