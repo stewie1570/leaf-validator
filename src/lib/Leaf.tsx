@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { get, set } from './domain'
 import { ValidationModel } from './models';
 import { useDeferredEffect } from './hooks/useDeferredEffect'
+import { getErrorsForLocation } from './hooks/useValidationModel'
 
-type Validator<T> = (value: T) => Array<string> | any;
+export type Validator<T> = (value: T) => Array<string> | any;
 type Update<TTarget> = (updatedModel: TTarget) => void;
 type Blur = () => void;
 
@@ -122,14 +123,18 @@ export function Leaf<Model, Target>(props: {
             location,
             targetValue,
             namespace: "deferred"
-        })
+        });
     }, deferMilliseconds || 500, [targetValue, location, deferMilliseconds]);
 
-    return children(
+    const visibleErrors = useMemo(() => validationModel && (hasBlurred || showErrors)
+        ? getErrorsForLocation(location).from(validationModel)
+        : [], [validationModel, hasBlurred, showErrors, location]);
+
+    return useMemo(() => children(
         targetValue,
-        update => onChange(set(location).to(update).in(model)),
+        update => onChange(model => set(location).to(update).in(model)),
         () => setHasBlurred(true),
-        validationModel && (hasBlurred || showErrors) ? validationModel.get(location) : [],
+        visibleErrors,
         location
-    );
+    ), [targetValue, location, visibleErrors, onChange, children]);
 }

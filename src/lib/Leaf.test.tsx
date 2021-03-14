@@ -1,45 +1,11 @@
 import React, { useState } from 'react'
 import { render, fireEvent, waitFor } from '@testing-library/react'
-import { Leaf } from './Leaf'
+import { Leaf, Validator } from './Leaf'
 import { TextInput } from '../TextInput'
-import { useValidationModel } from './hooks/useValidationModel';
+import { useValidationModel, getAllErrorsForLocation, isValidationInProgress } from './hooks/useValidationModel';
 import { ValidationModel } from './models';
 
-test("can read & edit model nodes nested inside complex object models and arrays", () => {
-    const Wrapper = () => {
-        const [model, setModel] = useState({
-            lists: {
-                emails: [
-                    { email: "stewie1570@gmail.com" },
-                    { email: "something_at_something.com" }
-                ]
-            }
-        });
-
-        return <Leaf model={model} onChange={setModel} location="lists.emails">
-            {(emailNodes: Array<any>, setEmailNodes) => emailNodes.map((emailNode, index) => <Leaf
-                key={index}
-                model={emailNode}
-                onChange={update => setEmailNodes(emailNodes.map((orig, i) => i === index ? update : orig))}
-                location={`email`}>
-                {(email: string, onChange) => <TextInput
-                    data-testid={`email${index}`}
-                    value={email}
-                    onChange={onChange} />}
-            </Leaf>)}
-        </Leaf>
-    }
-
-    const { getByTestId } = render(<Wrapper />);
-
-    expect((getByTestId("email0") as HTMLInputElement).value).toBe("stewie1570@gmail.com");
-    expect((getByTestId("email1") as HTMLInputElement).value).toBe("something_at_something.com");
-    fireEvent.change(getByTestId("email1"), { target: { value: "stewie1570@hotmail.com" } });
-    expect((getByTestId("email0") as HTMLInputElement).value).toBe("stewie1570@gmail.com");
-    expect((getByTestId("email1") as HTMLInputElement).value).toBe("stewie1570@hotmail.com");
-});
-
-test("can read & edit model nodes nested inside complex object models and arrays via composed location", () => {
+test("can read/edit leafs nested in object/arrays via composed location", () => {
     const Wrapper = () => {
         const [model, setModel] = useState({
             lists: {
@@ -87,15 +53,15 @@ test("can compose Leafs via passing parent location into child location string c
         return <Leaf model={model} onChange={setModel} location="lists.emails">
             {(emailNodes: Array<any>, setEmails, onBlur, errors, parentLocation) =>
                 emailNodes.map((emailNode, index) => <Leaf
-                key={index}
-                model={model}
-                onChange={setModel}
-                location={`${parentLocation}.${index}.email`}>
-                {(email: string, onChange) => <TextInput
-                    data-testid={`email${index}`}
-                    value={email}
-                    onChange={onChange} />}
-            </Leaf>)}
+                    key={index}
+                    model={model}
+                    onChange={setModel}
+                    location={`${parentLocation}.${index}.email`}>
+                    {(email: string, onChange) => <TextInput
+                        data-testid={`email${index}`}
+                        value={email}
+                        onChange={onChange} />}
+                </Leaf>)}
         </Leaf>
     }
 
@@ -285,10 +251,7 @@ test("validate model asynchronously on an interval and show errors on blur", asy
 
 test("deferredValidators and validators work together", async () => {
     let validationModel: ValidationModel = {
-        get: () => [],
         set: () => undefined,
-        getAllErrorsForLocation: () => [],
-        isValidationInProgress: () => false,
         setNamespacesCurrentlyValidating: () => { }
     };
 
@@ -324,7 +287,7 @@ test("deferredValidators and validators work together", async () => {
         "test value is invalid",
         "test value resolved invalid"
     ]);
-    expect(validationModel.getAllErrorsForLocation()).toEqual([{
+    expect(getAllErrorsForLocation().from(validationModel)).toEqual([{
         location: "contact.email",
         messages: ["test value is invalid", "test value resolved invalid"]
     }]);
@@ -332,10 +295,7 @@ test("deferredValidators and validators work together", async () => {
 
 test("knowing when (async) validation is in progress", async () => {
     let validationModel: ValidationModel = {
-        get: () => [],
         set: () => undefined,
-        getAllErrorsForLocation: () => [],
-        isValidationInProgress: () => false,
         setNamespacesCurrentlyValidating: () => { }
     };
 
@@ -363,22 +323,19 @@ test("knowing when (async) validation is in progress", async () => {
 
     const { getByTestId, getAllByText } = render(<Wrapper />);
 
-    expect(validationModel.isValidationInProgress()).toBe(true);
+    expect(isValidationInProgress.in(validationModel)).toBe(true);
 
     fireEvent.blur(getByTestId("email"));
 
     await waitFor(() => {
         expect(getAllByText("stewie1570@gmail.com resolved invalid").length).toBe(2);
     });
-    expect(validationModel.isValidationInProgress()).toBe(false);
+    expect(isValidationInProgress.in(validationModel)).toBe(false);
 });
 
 test("knowing when (async) deferred-only validation is in progress", async () => {
     let validationModel: ValidationModel = {
-        get: () => [],
         set: () => undefined,
-        getAllErrorsForLocation: () => [],
-        isValidationInProgress: () => false,
         setNamespacesCurrentlyValidating: () => { }
     };
 
@@ -405,20 +362,17 @@ test("knowing when (async) deferred-only validation is in progress", async () =>
 
     const { getByTestId, findByText } = render(<Wrapper />);
 
-    await waitFor(() => expect(validationModel.isValidationInProgress()).toBe(true));
+    await waitFor(() => expect(isValidationInProgress.in(validationModel)).toBe(true));
 
     fireEvent.blur(getByTestId("email"));
 
     await findByText("stewie1570@gmail.com resolved invalid");
-    expect(validationModel.isValidationInProgress()).toBe(false);
+    expect(isValidationInProgress.in(validationModel)).toBe(false);
 });
 
 test("does not show validating during validation deferrement when there's no deferred validators", async () => {
     let validationModel: ValidationModel = {
-        get: () => [],
         set: () => undefined,
-        getAllErrorsForLocation: () => [],
-        isValidationInProgress: () => false,
         setNamespacesCurrentlyValidating: () => { }
     };
 
@@ -446,12 +400,12 @@ test("does not show validating during validation deferrement when there's no def
     const { getByTestId, findByText } = render(<Wrapper />);
 
     fireEvent.blur(getByTestId("email"));
-    expect(validationModel.isValidationInProgress()).toBe(true);
+    expect(isValidationInProgress.in(validationModel)).toBe(true);
 
     await Promise.resolve();
 
     await findByText("stewie1570@gmail.com resolved invalid");
-    expect(validationModel.isValidationInProgress()).toBe(false);
+    expect(isValidationInProgress.in(validationModel)).toBe(false);
 });
 
 test("validate model immediately show errors", async () => {
@@ -519,7 +473,7 @@ test("validate multiple model nodes", async () => {
                 </>}
             </Leaf>
             <ul>
-                {validationModel.getAllErrorsForLocation("").map((error, index) => <li key={index} data-testid="top-level-error">
+                {getAllErrorsForLocation("").from(validationModel).map((error, index) => <li key={index} data-testid="top-level-error">
                     {error.location} - {error.messages}
                 </li>)}
             </ul>
@@ -577,7 +531,7 @@ test("get errors for root location via undefined location", async () => {
                 </>}
             </Leaf>
             <ul>
-                {validationModel.getAllErrorsForLocation().map((error, index) => <li key={index} data-testid="top-level-error">
+                {getAllErrorsForLocation().from(validationModel).map((error, index) => <li key={index} data-testid="top-level-error">
                     {error.location} - {error.messages}
                 </li>)}
             </ul>
@@ -597,4 +551,97 @@ test("get errors for root location via undefined location", async () => {
     await waitFor(() => {
         expect(queryAllByTestId("top-level-error").map(node => node.textContent)).toEqual([]);
     });
+});
+
+test.skip("does not re-render when leaf value and state has not changed", async () => {
+    let renders: Array<string> = [];
+
+    const Wrapper = () => {
+        const [model, setModel] = useState({
+            person: {
+                firstName: "Stewart",
+                lastName: "Anderson"
+            }
+        });
+        const validationModel = useValidationModel();
+        const isRequired: Validator<any> = value => Promise.resolve(['is required']);
+
+
+        const firstName = React.useMemo(() => (
+            firstName: any,
+            updateFirstName: (updatedModel: any) => void,
+            onBlur: () => any,
+            errors: Array<string>
+        ): JSX.Element => {
+            renders.push("firstName");
+            return <>
+                <TextInput
+                    data-testid="firstName"
+                    value={firstName}
+                    onChange={updateFirstName} />
+                <ul>{errors.map(error => <li key={error}>{error}</li>)}</ul>
+            </>;
+        }, []);
+
+        const lastName = React.useMemo(() => (
+            lastName: any,
+            updateLastName: (updatedModel: any) => void,
+            onBlur: () => any,
+            errors: Array<string>
+        ): JSX.Element => {
+            renders.push("lastName");
+            return <>
+                <TextInput
+                    data-testid="lastName"
+                    value={lastName}
+                    onChange={updateLastName} />
+                <ul>{errors.map(error => <li key={error}>{error}</li>)}</ul>
+            </>;
+        }, []);
+
+        return <>
+            <Leaf
+                showErrors
+                location="person.firstName"
+                model={model}
+                onChange={setModel}
+                validationModel={validationModel}
+                deferMilliseconds={10}
+                deferredValidators={[isRequired]}>
+                {firstName}
+            </Leaf>
+            <Leaf
+                showErrors
+                location="person.lastName"
+                model={model}
+                onChange={setModel}
+                validationModel={validationModel}
+                deferMilliseconds={10}
+                deferredValidators={[isRequired]}>
+                {lastName}
+            </Leaf>
+        </>;
+    }
+
+    const { getByTestId, getByDisplayValue, getAllByText } = render(<Wrapper />);
+
+    fireEvent.change(getByTestId("firstName"), { target: { value: "John" } });
+    fireEvent.change(getByTestId("firstName"), { target: { value: "Stewie" } });
+    fireEvent.change(getByTestId("firstName"), { target: { value: "Stewart" } });
+    fireEvent.change(getByTestId("lastName"), { target: { value: "Smith" } });
+
+    await waitFor(() => {
+        expect(getAllByText("is required").length).toBe(2);
+    });
+
+    expect(renders).toEqual([
+        "firstName",
+        "lastName",
+        "firstName",
+        "firstName",
+        "firstName",
+        "lastName"
+    ]);
+    getByDisplayValue("Stewart");
+    getByDisplayValue("Smith");
 });

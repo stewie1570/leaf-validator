@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useMountedOnlyState as useState } from './useMountedOnlyState'
 
 function getLocalStateFor(storageKey: string) {
@@ -22,7 +22,7 @@ export function useLocalStorageState<T>(storageKey: string): [T | undefined, Rea
         }
     }, [storageKey]);
 
-    function setStorageState(valueOrSetter: React.SetStateAction<T | undefined>) {
+    const setStorageState = useMemo(() => (valueOrSetter: React.SetStateAction<T | undefined>) => {
         setState(valueOrSetter instanceof Function
             ? state => updateStorageValue(valueOrSetter(state))
             : updateStorageValue(valueOrSetter));
@@ -31,7 +31,7 @@ export function useLocalStorageState<T>(storageKey: string): [T | undefined, Rea
             window.localStorage.setItem(storageKey, JSON.stringify(value));
             return value;
         }
-    }
+    }, [storageKey]);
 
     return [state, setStorageState];
 }

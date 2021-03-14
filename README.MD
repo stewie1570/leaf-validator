@@ -26,6 +26,7 @@ Advantages in:
 - [State Management](#state-management)
 - [Validation](#validation)
 - [Backward Compatibility](#backward-compatibility)
+- [Performance](#performance)
 
 Other related features include:
 
@@ -67,11 +68,11 @@ const [model, setModel] = useState({});
 </Leaf>;
 ```
 
-In the above example, calling **setPhoneNumberInModel** is roughly the same as writing and calling this funtion (below) except it will even work when **model** is null or undefined etc...
+In the above example, calling **setPhoneNumberInModel** is roughly the same as writing and calling this funtion (below) except it will even work when **model** or any of its properties are null or undefined etc...
 
 ```javascript
 function setPhoneNumberInModel(updatedPhoneNumber) {
-  setState({
+  setState(model => ({
     ...model,
     person: {
       ...model.person,
@@ -80,7 +81,7 @@ function setPhoneNumberInModel(updatedPhoneNumber) {
         phoneNumber: updatedPhoneNumber,
       },
     },
-  });
+  }));
 }
 ```
 
@@ -234,6 +235,13 @@ This will try to read from the **location** in the model first. If **location** 
 
 Now you can run DB migration whenever you want.
 
+## Performance
+
+Normally when a large & complex model changes you need to re-render a large component composition. You can memoize the child render function of the 'Leaf' component. This will cause `Leaf` to only call that render function when:
+- a `Leaf` prop (other than `model`) has changed
+- the target value in the `model` has changed
+- or the child render function has changed.
+
 ## Hooks
 
 **useLoadingState**
@@ -337,7 +345,7 @@ const theObject = {
 const progession = set("prop1.prop1.target").to("updated value").in(theObject);
 ```
 
-will return the equivalent of:
+will return the equivalent of below except it will work even when theObject or its properties are null or undefined.
 
 ```js
 {
