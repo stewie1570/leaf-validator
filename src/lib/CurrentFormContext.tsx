@@ -5,31 +5,13 @@ import { useMountedOnlyState } from "./hooks/useMountedOnlyState";
 type CurrentFormId = object | undefined;
 type CurrentForm = [CurrentFormId, React.Dispatch<React.SetStateAction<CurrentFormId>>];
 
-const CurrentFormContext = createContext<CurrentForm>([undefined, () => undefined]);
+const CurrentFormContext = createContext<CurrentForm | undefined>(undefined);
 const FormIdContext = createContext<any>(undefined);
 
-export const withVirtualNestability = (Form: React.ElementType) => ({ children, ...otherProps }: any) => {
-    const currentForm = useContext(CurrentFormContext);
-    const formInstanceRef = useRef({});
-    const form = <FormIdContext.Provider value={formInstanceRef.current}>
-        {currentForm && currentForm[0] === formInstanceRef.current
-            ? <Form {...otherProps}>
-                {children}
-            </Form>
-            : children}
-    </FormIdContext.Provider>;
-
-    return currentForm
-        ? form
-        : <OuterForm>
-            {form}
-        </OuterForm>;
-};
-
-export const withFormSelectionOnFocus = (Input: React.ElementType) => (props: any) => {
+export const inputWithFormSelectionOnFocus = (Input: React.ElementType) => (props: any) => {
     const { onFocus, ...otherProps } = props;
     const formId = useContext(FormIdContext);
-    const [currentFormId, setCurrentFormId] = useContext(CurrentFormContext);
+    const [currentFormId, setCurrentFormId] = useContext(CurrentFormContext) ?? [undefined, () => undefined];
 
     const handleFocus = (...args: any) => {
         setCurrentFormId(formId);
@@ -38,6 +20,26 @@ export const withFormSelectionOnFocus = (Input: React.ElementType) => (props: an
 
     return <Input {...otherProps} onFocus={handleFocus} />;
 }
+
+export const formWithVirtualNestability = (Form: React.ElementType) => ({ children, name, ...otherProps }: any) => {
+    const currentForm = useContext(CurrentFormContext);
+    const formInstanceRef = useRef({ name });
+    const isInRenderedForm = currentForm && currentForm[0] === formInstanceRef.current;
+    console.log(`selected form: ${JSON.stringify(currentForm && currentForm[0])} === me: ${JSON.stringify(formInstanceRef.current)} > ${isInRenderedForm}`);
+    const form = <FormIdContext.Provider value={formInstanceRef.current}>
+        {isInRenderedForm
+            ? <Form name={name} {...otherProps}>
+                {children}
+            </Form>
+            : children}
+    </FormIdContext.Provider>;
+
+    const isInOuterContext = Boolean(currentForm);
+
+    return isInOuterContext
+        ? <>{form}</>
+        : <OuterForm>{form}</OuterForm>;
+};
 
 function OuterForm({ children }: any) {
     const [currentForm, setCurrentForm] = useMountedOnlyState<CurrentFormId>(undefined);

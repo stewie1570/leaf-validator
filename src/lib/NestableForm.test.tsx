@@ -1,18 +1,43 @@
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import React from "react";
 import { TextInput } from "../TextInput";
-import { withFormSelectionOnFocus, withVirtualNestability } from "./CurrentFormContext";
+import { inputWithFormSelectionOnFocus, formWithVirtualNestability } from "./CurrentFormContext";
 
-const NestableForm = withVirtualNestability('form');
-const Input = withFormSelectionOnFocus(TextInput);
+const NestableForm = formWithVirtualNestability('form');
+const Input = inputWithFormSelectionOnFocus(TextInput);
 
-it.skip("should not render nested forms", () => {
-    render(<NestableForm name="outer">
-        <NestableForm name="inner">
+test("should render & submit inner form only", async () => {
+    let submittedForm: any = undefined;
+    render(<NestableForm name="outer" onSubmit={() => { submittedForm = "outer"; }}>
+        <NestableForm name="inner" onSubmit={() => { submittedForm = "inner"; }}>
             <Input data-testid="inner-input" />
         </NestableForm>
         <Input data-testid="outer-input" />
     </NestableForm>);
 
-    expect(screen.getAllByRole("form").length).toBe(1);
-})
+    fireEvent.focus(screen.getByTestId("inner-input"));
+    fireEvent.submit(screen.getByTestId("inner-input"));
+
+    await waitFor(() => {
+        expect(screen.getAllByRole("form").length).toBe(1);
+        expect(submittedForm).toBe("inner");
+    });
+});
+
+test.skip("should render & submit outer form only", async () => {
+    let submittedForm: any = undefined;
+    render(<NestableForm name="outer" onSubmit={() => { submittedForm = "outer"; }}>
+        <NestableForm name="inner" onSubmit={() => { submittedForm = "inner"; }}>
+            <Input data-testid="inner-input" />
+        </NestableForm>
+        <Input data-testid="outer-input" />
+    </NestableForm>);
+
+    fireEvent.focus(screen.getByTestId("outer-input"));
+    fireEvent.submit(screen.getByTestId("outer-input"));
+
+    await waitFor(() => {
+        expect(screen.getAllByRole("form").length).toBe(1);
+        expect(submittedForm).toBe("outer");
+    });
+});
