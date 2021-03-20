@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import React from "react";
 import { TextInput } from "../TextInput";
-import { inputWithFormSelectionOnFocus, formWithVirtualNestability } from "./CurrentFormContext";
+import { inputWithFormSelectionOnFocus, formWithVirtualNestability } from "./NestableForm";
 
 const NestableForm = formWithVirtualNestability('form');
 const Input = inputWithFormSelectionOnFocus(TextInput);
