@@ -22,10 +22,10 @@ export const inputWithFormSelectionOnFocus = (Input: React.ElementType) => (prop
 }
 
 export const formWithVirtualNestability = (Form: React.ElementType) => ({ children, name, ...otherProps }: any) => {
-    const currentForm = useContext(CurrentFormContext);
+    const [currentForm, setCurrentForm] = useContext(CurrentFormContext) ?? [undefined, () => undefined];
     const formInstanceRef = useRef({ name });
-    const isInRenderedForm = currentForm && currentForm[0] === formInstanceRef.current;
-    console.log(`selected form: ${JSON.stringify(currentForm && currentForm[0])} === me: ${JSON.stringify(formInstanceRef.current)} > ${isInRenderedForm}`);
+    const isInRenderedForm = currentForm === formInstanceRef.current;
+    console.log(`selected form: ${JSON.stringify(currentForm)} === me: ${JSON.stringify(formInstanceRef.current)} > ${isInRenderedForm}`);
     const form = <FormIdContext.Provider value={formInstanceRef.current}>
         {isInRenderedForm
             ? <Form name={name} {...otherProps}>
@@ -42,7 +42,7 @@ export const formWithVirtualNestability = (Form: React.ElementType) => ({ childr
 };
 
 function OuterForm({ children }: any) {
-    const [currentForm, setCurrentForm] = useMountedOnlyState<CurrentFormId>(undefined);
+    const [currentForm, setCurrentForm] = useMountedOnlyState<CurrentFormId>({});
 
     return <CurrentFormContext.Provider value={[currentForm, setCurrentForm]}>
         {children}
