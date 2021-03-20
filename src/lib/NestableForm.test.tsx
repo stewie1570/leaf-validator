@@ -6,7 +6,7 @@ import { inputWithFormSelectionOnFocus, formWithVirtualNestability } from "./Cur
 const NestableForm = formWithVirtualNestability('form');
 const Input = inputWithFormSelectionOnFocus(TextInput);
 
-test("should render & submit inner form only", async () => {
+test("should render & submit INNER form only", async () => {
     let submittedForm: any = undefined;
     render(<NestableForm name="outer" onSubmit={() => { submittedForm = "outer"; }}>
         <NestableForm name="inner" onSubmit={() => { submittedForm = "inner"; }}>
@@ -24,7 +24,7 @@ test("should render & submit inner form only", async () => {
     });
 });
 
-test.skip("should render & submit outer form only", async () => {
+test("should render & submit OUTER form only", async () => {
     let submittedForm: any = undefined;
     render(<NestableForm name="outer" onSubmit={() => { submittedForm = "outer"; }}>
         <NestableForm name="inner" onSubmit={() => { submittedForm = "inner"; }}>
