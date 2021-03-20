@@ -41,3 +41,8 @@ test("should render & submit OUTER form only", async () => {
         expect(submittedForm).toBe("outer");
     });
 });
+
+test("input with form selection doesn't cause a crash when used out of nestable forms", () => {
+    render(<Input />);
+    fireEvent.focus(screen.getByRole("textbox"));
+});
