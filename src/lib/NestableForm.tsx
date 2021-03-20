@@ -12,7 +12,7 @@ const FormIdContext = createContext<any>(undefined);
 export const inputWithFormSelectionOnFocus = (Input: React.ElementType) => (props: any) => {
     const { onFocus, ...otherProps } = props;
     const formId = useContext(FormIdContext);
-    const [currentFormId, setCurrentFormId] = useContext(CurrentFormContext) ?? [undefined, () => undefined];
+    const [, setCurrentFormId] = useContext(CurrentFormContext) ?? [undefined, () => undefined];
 
     const handleFocus = (...args: any) => {
         setCurrentFormId(formId);
