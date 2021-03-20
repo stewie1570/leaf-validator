@@ -2,8 +2,9 @@ import React, { useRef } from "react";
 import { createContext, useContext } from "react";
 import { useMountedOnlyState } from "./hooks/useMountedOnlyState";
 
-type CurrentFormId = object | undefined;
+type CurrentFormId = string | undefined;
 type CurrentForm = [CurrentFormId, React.Dispatch<React.SetStateAction<CurrentFormId>>];
+type Form = { children: any, name: string, [otherPropNames: string]: any };
 
 const CurrentFormContext = createContext<CurrentForm | undefined>(undefined);
 const FormIdContext = createContext<any>(undefined);
@@ -21,12 +22,14 @@ export const inputWithFormSelectionOnFocus = (Input: React.ElementType) => (prop
     return <Input {...otherProps} onFocus={handleFocus} />;
 }
 
-export const formWithVirtualNestability = (Form: React.ElementType) => ({ children, name, ...otherProps }: any) => {
+export const formWithVirtualNestability = (Form: React.ElementType) => ({ children, name, ...otherProps }: Form) => {
     const formInstanceRef = useRef(name);
-    const [localForm, setLocalForm] = useMountedOnlyState<CurrentFormId>(formInstanceRef.current);
     const currentFormContext = useContext(CurrentFormContext);
+    const [localForm, setLocalForm] = useMountedOnlyState<CurrentFormId>(formInstanceRef.current);
     const [currentForm] = currentFormContext ?? [localForm, setLocalForm];
     const isInRenderedForm = currentForm === formInstanceRef.current;
+    const isInOuterContext = Boolean(currentFormContext);
+
     const form = <FormIdContext.Provider value={formInstanceRef.current}>
         {isInRenderedForm
             ? <Form name={name} {...otherProps}>
@@ -35,13 +38,9 @@ export const formWithVirtualNestability = (Form: React.ElementType) => ({ childr
             : children}
     </FormIdContext.Provider>;
 
-    const isInOuterContext = Boolean(currentFormContext);
-
     return isInOuterContext
         ? <>{form}</>
         : <CurrentFormContext.Provider value={[localForm, setLocalForm]}>
-            <div data-something="CONTEXT">
-                {form}
-            </div>
+            {form}
         </CurrentFormContext.Provider>;
 };
