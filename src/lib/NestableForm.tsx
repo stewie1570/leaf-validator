@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createContext, useContext } from "react";
 import { useMountedOnlyState } from "./hooks/useMountedOnlyState";
 
@@ -6,7 +6,9 @@ type CurrentFormId = string | undefined;
 type CurrentForm = [
     CurrentFormId,
     React.Dispatch<React.SetStateAction<CurrentFormId>>,
-    (name: string, handler: (event?: React.FormEvent<HTMLFormElement>) => void) => void
+    React.Dispatch<React.SetStateAction<{
+        [x: string]: (event?: React.FormEvent<HTMLFormElement> | undefined) => void;
+    }>>
 ];
 type Form = {
     children: any,
@@ -35,20 +37,17 @@ export const formWithVirtualNestability = (Form: React.ElementType) => ({ childr
     const [submitHandlers, setSubmitHandlers] = useState({
         [name]: onSubmit
     });
-    const addHandler = (name: string, handler: any) => {
-        setSubmitHandlers(submitHandlers => ({
-            ...submitHandlers,
-            [name]: handler
-        }));
-    }
     const currentFormContext = useContext(CurrentFormContext);
-    const [selectedHandlerName, , setHandler] = currentFormContext ?? [name, undefined, addHandler];
+    const [, , setHandlers] = currentFormContext ?? [name, undefined, undefined];
     const [localFormName, setLocalFormName] = useMountedOnlyState<CurrentFormId>(name);
     const isInsideForm = Boolean(currentFormContext);
 
     useEffect(() => {
-        isInsideForm && setHandler?.(name, onSubmit);
-    }, []);
+        isInsideForm && setHandlers?.(submitHandlers => ({
+            ...submitHandlers,
+            [name]: onSubmit
+        }));
+    }, [isInsideForm, name, onSubmit, setHandlers]);
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -59,7 +58,7 @@ export const formWithVirtualNestability = (Form: React.ElementType) => ({ childr
         {
             isInsideForm
                 ? children
-                : <CurrentFormContext.Provider value={[localFormName, setLocalFormName, addHandler]}>
+                : <CurrentFormContext.Provider value={[localFormName, setLocalFormName, setSubmitHandlers]}>
                     <Form {...otherProps} onSubmit={handleSubmit} name={name} >
                         {children}
                     </Form>
