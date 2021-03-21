@@ -7,6 +7,7 @@ import { leafDiff } from './lib/domain';
 import { useLoadingState } from './lib/hooks/useLoadingState'
 import { useErrorHandler } from './lib/hooks/useErrorHandler'
 import { useLocalStorageState } from './lib/hooks/useLocalStorageState'
+import { formWithVirtualNestability, inputWithFormSelectionOnFocus } from './lib/NestableForm';
 
 const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
@@ -43,6 +44,35 @@ const fakeFailSubmit = async () => {
 async function waitAndThrow(message: string) {
     await wait(500);
     throw new Error(message);
+}
+
+const NestableForm = formWithVirtualNestability('form');
+const Text = inputWithFormSelectionOnFocus(TextInput);
+const Button = inputWithFormSelectionOnFocus('button');
+
+const NestableFormTest = () => {
+    const [model, setModel] = useState();
+
+    return <NestableForm name="outer" onSubmit={() => console.log("submitted outer")}>
+
+        <NestableForm name="inner" onSubmit={() => console.log("submitting inner")}>
+            <Leaf model={model} onChange={setModel} location="inner">
+                {(innerValue, setInnerValue) => <label>
+                    Inner Value
+                    <Text value={innerValue} onChange={setInnerValue} />
+                </label>}
+            </Leaf>
+            <Button type="subit">Submit Inner</Button>
+        </NestableForm>
+
+        <Leaf model={model} onChange={setModel} location="outer">
+            {(outerValue, setOuterValue) => <label>
+                Outer Value
+                    <Text value={outerValue} onChange={setOuterValue} />
+            </label>}
+        </Leaf>
+        <Button type="submit">Submit Outer</Button>
+    </NestableForm>
 }
 
 function App(): JSX.Element {
@@ -132,6 +162,7 @@ function App(): JSX.Element {
                     {JSON.stringify(leafDiff.from(originalModel).to(model), null, 2)}
                 </pre>
             </form>
+            <NestableFormTest />
         </div >
     );
 }
