@@ -10,12 +10,6 @@ type CurrentForm = [
         [x: string]: (event?: React.FormEvent<HTMLFormElement> | undefined) => void;
     }>>
 ];
-// type FormProps = {
-//     children: any,
-//     name: string,
-//     onSubmit: (event?: React.FormEvent<HTMLFormElement>) => void,
-//     [otherPropNames: string]: any
-// };
 type NestableFormInputHOC = <P>(Input: React.ComponentType<P>) => React.ComponentType<P>;
 type NestableFormHOC = <P>(Form: React.ComponentType<P>) => React.ComponentType<P>;
 
