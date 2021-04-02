@@ -48,7 +48,8 @@ async function waitAndThrow(message: string) {
 
 const NestableForm = formWithVirtualNestability('form');
 const Text = inputWithFormSelectionOnFocus(TextInput);
-const Button = inputWithFormSelectionOnFocus('button');
+const button = (props: any) => <button {...props} />;
+const Button = inputWithFormSelectionOnFocus(button);
 
 const NestableFormTest = () => {
     const [model, setModel] = useState();
@@ -57,7 +58,7 @@ const NestableFormTest = () => {
 
         <NestableForm name="inner" onSubmit={() => console.log("submitting inner")}>
             <Leaf model={model} onChange={setModel} location="inner">
-                {(innerValue, setInnerValue) => <label>
+                {(innerValue: string, setInnerValue) => <label>
                     Inner Value
                     <Text value={innerValue} onChange={setInnerValue} />
                 </label>}
@@ -66,7 +67,7 @@ const NestableFormTest = () => {
         </NestableForm>
 
         <Leaf model={model} onChange={setModel} location="outer">
-            {(outerValue, setOuterValue) => <label>
+            {(outerValue: string, setOuterValue) => <label>
                 Outer Value
                     <Text value={outerValue} onChange={setOuterValue} />
             </label>}
