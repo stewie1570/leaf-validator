@@ -16,11 +16,12 @@ type Form = {
     onSubmit: (event?: React.FormEvent<HTMLFormElement>) => void,
     [otherPropNames: string]: any
 };
+type NestableFormInputHOC = <P>(Input: React.ComponentType<P>) => React.ComponentType<P>;
 
 const CurrentFormContext = createContext<CurrentForm | undefined>(undefined);
 const FormIdContext = createContext<any>(undefined);
 
-export const inputWithFormSelectionOnFocus = (Input: React.ElementType) => (props: any) => {
+export const inputWithFormSelectionOnFocus: NestableFormInputHOC = Input => (props: any) => {
     const { onFocus, ...otherProps } = props;
     const formId = useContext(FormIdContext);
     const [, setCurrentFormId] = useContext(CurrentFormContext) ?? [undefined, () => undefined];

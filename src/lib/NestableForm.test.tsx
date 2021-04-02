@@ -5,14 +5,15 @@ import { inputWithFormSelectionOnFocus, formWithVirtualNestability } from "./Nes
 
 const NestableForm = formWithVirtualNestability('form');
 const Input = inputWithFormSelectionOnFocus(TextInput);
+const noOp = () => undefined;
 
 test("should render & submit INNER form only", async () => {
     let submittedForm: any = undefined;
     render(<NestableForm name="outer" onSubmit={() => { submittedForm = "outer"; }}>
         <NestableForm name="inner" onSubmit={() => { submittedForm = "inner"; }}>
-            <Input data-testid="inner-input" />
+            <Input data-testid="inner-input" value="" onChange={noOp} />
         </NestableForm>
-        <Input data-testid="outer-input" />
+        <Input data-testid="outer-input" value="" onChange={noOp} />
     </NestableForm>);
 
     fireEvent.focus(screen.getByTestId("inner-input"));
@@ -28,9 +29,9 @@ test("should render & submit OUTER form only", async () => {
     let submittedForm: any = undefined;
     render(<NestableForm name="outer" onSubmit={() => { submittedForm = "outer"; }}>
         <NestableForm name="inner" onSubmit={() => { submittedForm = "inner"; }}>
-            <Input data-testid="inner-input" />
+            <Input data-testid="inner-input" value="" onChange={noOp} />
         </NestableForm>
-        <Input data-testid="outer-input" />
+        <Input data-testid="outer-input" value="" onChange={noOp} />
     </NestableForm>);
 
     fireEvent.focus(screen.getByTestId("outer-input"));
@@ -43,6 +44,6 @@ test("should render & submit OUTER form only", async () => {
 });
 
 test("input with form selection doesn't cause a crash when used out of nestable forms", () => {
-    render(<Input />);
+    render(<Input value="" onChange={noOp} />);
     fireEvent.focus(screen.getByRole("textbox"));
 });
