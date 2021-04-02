@@ -10,13 +10,14 @@ type CurrentForm = [
         [x: string]: (event?: React.FormEvent<HTMLFormElement> | undefined) => void;
     }>>
 ];
-type Form = {
-    children: any,
-    name: string,
-    onSubmit: (event?: React.FormEvent<HTMLFormElement>) => void,
-    [otherPropNames: string]: any
-};
+// type FormProps = {
+//     children: any,
+//     name: string,
+//     onSubmit: (event?: React.FormEvent<HTMLFormElement>) => void,
+//     [otherPropNames: string]: any
+// };
 type NestableFormInputHOC = <P>(Input: React.ComponentType<P>) => React.ComponentType<P>;
+type NestableFormHOC = <P>(Form: React.ComponentType<P>) => React.ComponentType<P>;
 
 const CurrentFormContext = createContext<CurrentForm | undefined>(undefined);
 const FormIdContext = createContext<any>(undefined);
@@ -34,8 +35,9 @@ export const inputWithFormSelectionOnFocus: NestableFormInputHOC = Input => (pro
     return <Input {...otherProps} onFocus={handleFocus} />;
 }
 
-export const formWithVirtualNestability = (Form: React.ElementType) => ({ children, name, onSubmit, ...otherProps }: Form) => {
-    const [submitHandlers, setSubmitHandlers] = useState({
+export const formWithVirtualNestability: NestableFormHOC = Form => (props: any) => {
+    const { children, name, onSubmit, ...otherProps } = props;
+    const [submitHandlers, setSubmitHandlers] = useState<{[name: string]: any}>({
         [name]: onSubmit
     });
     const currentFormContext = useContext(CurrentFormContext);
@@ -60,7 +62,7 @@ export const formWithVirtualNestability = (Form: React.ElementType) => ({ childr
             isInsideForm
                 ? children
                 : <CurrentFormContext.Provider value={[localFormName, setLocalFormName, setSubmitHandlers]}>
-                    <Form {...otherProps} onSubmit={handleSubmit} name={name} >
+                    <Form {...otherProps} onSubmit={handleSubmit} name={name}>
                         {children}
                     </Form>
                 </CurrentFormContext.Provider>

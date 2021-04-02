@@ -3,7 +3,8 @@ import React from "react";
 import { TextInput } from "../TextInput";
 import { inputWithFormSelectionOnFocus, formWithVirtualNestability } from "./NestableForm";
 
-const NestableForm = formWithVirtualNestability('form');
+const form = (props: any) => <form {...props} />;
+const NestableForm = formWithVirtualNestability(form);
 const Input = inputWithFormSelectionOnFocus(TextInput);
 const noOp = () => undefined;
 

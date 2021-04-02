@@ -46,10 +46,11 @@ async function waitAndThrow(message: string) {
     throw new Error(message);
 }
 
-const NestableForm = formWithVirtualNestability('form');
+const baseButton = (props: any) => <button {...props} />;
+const baseForm = (props: any) => <form {...props} />;
+const NestableForm = formWithVirtualNestability(baseForm);
 const Text = inputWithFormSelectionOnFocus(TextInput);
-const button = (props: any) => <button {...props} />;
-const Button = inputWithFormSelectionOnFocus(button);
+const Button = inputWithFormSelectionOnFocus(baseButton);
 
 const NestableFormTest = () => {
     const [model, setModel] = useState();
