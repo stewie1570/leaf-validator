@@ -7,29 +7,12 @@ type TextInputProps = {
     [otherProps: string]: any
 };
 
-function useCombinedRefs(...refs: any): React.MutableRefObject<any> {
-    const targetRef = React.useRef()
+const noOp = () => undefined;
 
-    React.useEffect(() => {
-        refs.forEach((ref: any) => {
-            if (!ref) return
-
-            if (typeof ref === 'function') {
-                ref(targetRef.current)
-            } else {
-                ref.current = targetRef.current
-            }
-        })
-    }, [refs])
-
-    return targetRef
-}
-
-export const TextInput = forwardRef((props: TextInputProps, ref: any) => {
+export function TextInput(props: TextInputProps) {
     const { autofocus, value, onChange, ...otherProps } = props;
     const onTextChange = (event: any) => onChange(event && event.target && event.target.value);
-    const theInput = useRef<any>(ref);
-    const combinedRef = useCombinedRefs(ref, theInput);
+    const theInput = useRef<any>({ focus: noOp });
 
     useEffect(() => {
         if (autofocus) theInput?.current?.focus()
@@ -38,8 +21,8 @@ export const TextInput = forwardRef((props: TextInputProps, ref: any) => {
     return <input
         className="form-control"
         {...otherProps}
-        ref={combinedRef}
+        ref={theInput}
         type="text"
         value={value || ""}
         onChange={onTextChange} />
-});
+}

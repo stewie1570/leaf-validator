@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import React, { useRef } from "react";
+import React, { forwardRef, useRef } from "react";
 import { TextInput } from "../TextInput";
 import { inputWithFormSelectionOnFocus, formWithVirtualNestability } from "./NestableForm";
 
@@ -50,11 +50,13 @@ test("input with form selection doesn't cause a crash when used out of nestable 
 });
 
 test("can reference the wrapped input", () => {
+    const MyInput = forwardRef((props: any, ref: any) => <input {...props} ref={ref} />);
+
     const TestApp = () => {
         const inputRef = useRef<any>();
 
         return <>
-            <Input data-testid="input" value="" onChange={noOp} ref={inputRef} />
+            <MyInput data-testid="input" ref={inputRef} />
             <button onClick={() => inputRef.current.focus()}>set focus</button>
         </>;
     }
