@@ -51,12 +51,13 @@ test("input with form selection doesn't cause a crash when used out of nestable 
 
 test("can reference the wrapped input", () => {
     const MyInput = forwardRef((props: any, ref: any) => <input {...props} ref={ref} />);
+    const MyFormNestableInput = inputWithFormSelectionOnFocus(MyInput);
 
     const TestApp = () => {
         const inputRef = useRef<any>();
 
         return <>
-            <MyInput data-testid="input" ref={inputRef} />
+            <MyFormNestableInput data-testid="input" ref={inputRef} />
             <button onClick={() => inputRef.current.focus()}>set focus</button>
         </>;
     }
