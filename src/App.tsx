@@ -179,7 +179,12 @@ function formElements(model: any, setModel: Dispatch<SetStateAction<any>>, showA
         {...formElement}>
         {(value: string, onChange, onBlur, errors) => <label>
             {name}
-            <TextInput value={value} onChange={onChange} onBlur={onBlur} className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
+            <TextInput
+                autofocus={index === 0}
+                value={value}
+                onChange={onChange}
+                onBlur={onBlur}
+                className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
             {errors.length > 0 && <ul className="errors">
                 {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
             </ul>}

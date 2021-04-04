@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { createContext, useContext } from "react";
 import { useMountedOnlyState } from "./hooks/useMountedOnlyState";
 
@@ -16,7 +16,7 @@ type NestableFormHOC = <P>(Form: React.ComponentType<P>) => React.ComponentType<
 const CurrentFormContext = createContext<CurrentForm | undefined>(undefined);
 const FormIdContext = createContext<any>(undefined);
 
-export const inputWithFormSelectionOnFocus: NestableFormInputHOC = Input => (props: any) => {
+export const inputWithFormSelectionOnFocus: NestableFormInputHOC = Input => forwardRef((props: any, ref) => {
     const { onFocus, ...otherProps } = props;
     const formId = useContext(FormIdContext);
     const [, setCurrentFormId] = useContext(CurrentFormContext) ?? [undefined, () => undefined];
@@ -26,12 +26,12 @@ export const inputWithFormSelectionOnFocus: NestableFormInputHOC = Input => (pro
         onFocus?.(...args);
     }
 
-    return <Input {...otherProps} onFocus={handleFocus} />;
-}
+    return <Input {...otherProps} ref={ref} onFocus={handleFocus} />;
+});
 
 export const formWithVirtualNestability: NestableFormHOC = Form => (props: any) => {
     const { children, name, onSubmit, ...otherProps } = props;
-    const [submitHandlers, setSubmitHandlers] = useState<{[name: string]: any}>({
+    const [submitHandlers, setSubmitHandlers] = useState<{ [name: string]: any }>({
         [name]: onSubmit
     });
     const currentFormContext = useContext(CurrentFormContext);

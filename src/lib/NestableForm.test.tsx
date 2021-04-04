@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import React from "react";
+import React, { useRef } from "react";
 import { TextInput } from "../TextInput";
 import { inputWithFormSelectionOnFocus, formWithVirtualNestability } from "./NestableForm";
 
@@ -48,3 +48,19 @@ test("input with form selection doesn't cause a crash when used out of nestable 
     render(<Input value="" onChange={noOp} />);
     fireEvent.focus(screen.getByRole("textbox"));
 });
+
+test("can reference the wrapped input", () => {
+    const TestApp = () => {
+        const inputRef = useRef<any>();
+
+        return <>
+            <Input data-testid="input" value="" onChange={noOp} ref={inputRef} />
+            <button onClick={() => inputRef.current.focus()}>set focus</button>
+        </>;
+    }
+
+    render(<TestApp />);
+
+    screen.getByText("set focus").click();
+    expect(document.activeElement).toBe(screen.getByTestId("input"));
+})
