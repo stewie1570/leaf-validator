@@ -61,7 +61,7 @@ const NestableFormTest = () => {
             <Leaf model={model} onChange={setModel} location="inner">
                 {(innerValue: string, setInnerValue) => <label>
                     Inner Value
-                    <Text value={innerValue} onChange={setInnerValue} />
+                    <Text autofocus value={innerValue} onChange={setInnerValue} />
                 </label>}
             </Leaf>
             <Button type="subit">Submit Inner</Button>
@@ -180,7 +180,6 @@ function formElements(model: any, setModel: Dispatch<SetStateAction<any>>, showA
         {(value: string, onChange, onBlur, errors) => <label>
             {name}
             <TextInput
-                autofocus={index === 0}
                 value={value}
                 onChange={onChange}
                 onBlur={onBlur}
