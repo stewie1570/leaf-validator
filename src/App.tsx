@@ -7,6 +7,7 @@ import { leafDiff } from './lib/domain';
 import { useLoadingState } from './lib/hooks/useLoadingState'
 import { useErrorHandler } from './lib/hooks/useErrorHandler'
 import { useLocalStorageState } from './lib/hooks/useLocalStorageState'
+import { formWithVirtualNestability, inputWithFormSelectionOnFocus } from './lib/NestableForm';
 
 const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 const isRequired = (value: string) => (!value || value.trim() === "") && ["Value is required"];
@@ -43,6 +44,37 @@ const fakeFailSubmit = async () => {
 async function waitAndThrow(message: string) {
     await wait(500);
     throw new Error(message);
+}
+
+const baseButton = (props: any) => <button {...props} />;
+const baseForm = (props: any) => <form {...props} />;
+const NestableForm = formWithVirtualNestability(baseForm);
+const Text = inputWithFormSelectionOnFocus(TextInput);
+const Button = inputWithFormSelectionOnFocus(baseButton);
+
+const NestableFormTest = () => {
+    const [model, setModel] = useState();
+
+    return <NestableForm name="outer" onSubmit={() => console.log("submitted outer")}>
+
+        <NestableForm name="inner" onSubmit={() => console.log("submitting inner")}>
+            <Leaf model={model} onChange={setModel} location="inner">
+                {(innerValue: string, setInnerValue) => <label>
+                    Inner Value
+                    <Text autofocus value={innerValue} onChange={setInnerValue} />
+                </label>}
+            </Leaf>
+            <Button type="subit">Submit Inner</Button>
+        </NestableForm>
+
+        <Leaf model={model} onChange={setModel} location="outer">
+            {(outerValue: string, setOuterValue) => <label>
+                Outer Value
+                    <Text value={outerValue} onChange={setOuterValue} />
+            </label>}
+        </Leaf>
+        <Button type="submit">Submit Outer</Button>
+    </NestableForm>
 }
 
 function App(): JSX.Element {
@@ -132,6 +164,7 @@ function App(): JSX.Element {
                     {JSON.stringify(leafDiff.from(originalModel).to(model), null, 2)}
                 </pre>
             </form>
+            <NestableFormTest />
         </div >
     );
 }
@@ -146,7 +179,11 @@ function formElements(model: any, setModel: Dispatch<SetStateAction<any>>, showA
         {...formElement}>
         {(value: string, onChange, onBlur, errors) => <label>
             {name}
-            <TextInput value={value} onChange={onChange} onBlur={onBlur} className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
+            <TextInput
+                value={value}
+                onChange={onChange}
+                onBlur={onBlur}
+                className={`${errors.length > 0 ? "is-invalid " : ""}form-control mb-1`} />
             {errors.length > 0 && <ul className="errors">
                 {errors.map((error, index) => <li data-testid="error" key={index}>{error}</li>)}
             </ul>}
