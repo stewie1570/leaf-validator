@@ -314,4 +314,13 @@ describe("set value at target location of object to get next immutable progressi
             ]
         });
     });
+
+    it("returns original when target === updated", () => {
+        const orig = {
+            level1: {
+                level2: "value"
+            }
+        };
+        expect(set("level1.level2").to("value").in(orig)).toBe(orig);
+    })
 });
