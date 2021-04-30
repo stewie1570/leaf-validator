@@ -56,7 +56,7 @@ function getValueFrom<T>({ target, obj }: ValueTarget): T {
     return target === "" || obj === undefined ? obj
         : firstDotIndex === -1
             ? obj?.[target]
-            : get(target.substring(firstDotIndex + 1)).from(obj[childLocation]);
+            : get(target.substring(firstDotIndex + 1)).from(obj?.[childLocation]);
 }
 
 export const get = <T>(target: string) => ({
@@ -65,7 +65,9 @@ export const get = <T>(target: string) => ({
 
 export const set = (target: string) => ({
     to: (update: any) => ({
-        in: <T>(obj: T): T => getModelProgressionFrom({ target, update, model: obj })
+        in: <T>(obj: T): T => get(target).from(obj) === update
+            ? obj
+            : getModelProgressionFrom({ target, update, model: obj })
     })
 });
 
