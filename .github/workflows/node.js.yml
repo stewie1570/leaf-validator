@@ -30,10 +30,9 @@ jobs:
     - run: yarn analyze
     - run: yarn test
     - name: Actions Coverage Report
-      uses: romeovs/lcov-reporter-action@v0.2.16
+      uses: artiomtr/jest-coverage-report-action@v1.2
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        lcov-file: ./coverage/lcov.info
+          github_token: ${{ secrets.GITHUB_TOKEN }}
     - name: CodeCov
       run: codecov
     - name: Coveralls
