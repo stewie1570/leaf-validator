@@ -76,16 +76,14 @@ export const distinctArrayFrom = (left: Array<any>, right: Array<any>) => {
     return composite.filter((value, index) => composite.indexOf(value) === index);
 }
 
-type ShouldRecurse = (original: any, updated: any) => boolean;
+type IsObjectCheck = (original: any, updated: any) => boolean;
 
-const isIterableObject = (data: any) => data instanceof Object && Object.keys(data).length > 0;
+const origAndUpdatedAreObjects: IsObjectCheck = (original, updated) =>
+    original instanceof Object && updated instanceof Object;
 
-const origAndUpdatedAreObjects: ShouldRecurse = (original, updated) =>
-    isIterableObject(original) && isIterableObject(updated);
+const updatedIsObject: IsObjectCheck = (original, updated) => updated instanceof Object;
 
-const updatedIsObject: ShouldRecurse = (original, updated) => isIterableObject(updated);
-
-const processDiffFor = (original: any, updated: any, shouldRecurse: ShouldRecurse): Diffs => {
+const processDiffFor = (original: any, updated: any, isObject: IsObjectCheck): Diffs => {
     const prefixedLocation = (location: string) => (location || "").length > 0
         ? `.${location}`
         : location;
@@ -95,17 +93,17 @@ const processDiffFor = (original: any, updated: any, shouldRecurse: ShouldRecurs
         Object.keys(updated));
 
     const diffObjects = () => allDistinctKeys()
-        .flatMap(key => processDiffFor((original || {})[key], updated[key], shouldRecurse)
+        .flatMap(key => processDiffFor((original || {})[key], updated[key], isObject)
             .map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })));
 
-    const diff = () => shouldRecurse(original, updated)
+    const diff = () => isObject(original, updated)
         ? diffObjects()
         : [{ location: "", updatedValue: updated }];
 
     return original === updated ? [] : diff();
 };
 
-const diffApiFrom = ({ recurseWhen }: { recurseWhen: ShouldRecurse }) => ({
+const diffApiFrom = ({ recurseWhen }: { recurseWhen: IsObjectCheck }) => ({
     from: (original: any) => ({
         to: (updated: any) => processDiffFor(original, updated, recurseWhen)
     })
