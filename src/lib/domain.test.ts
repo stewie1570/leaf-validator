@@ -14,10 +14,13 @@ describe("diff", () => {
             expect(sut.from(1).to(2)).toEqual([{ location: "", updatedValue: 2 }]);
             expect(sut.from("hello").to("hi")).toEqual([{ location: "", updatedValue: "hi" }]);
             expect(sut.from(true).to(false)).toEqual([{ location: "", updatedValue: false }]);
+            expect(sut.from(1).to({})).toEqual([{ location: "", updatedValue: {} }]);
         });
+    });
 
-        expect(diff.from(1).to({})).toEqual([{ location: "", updatedValue: {} }]);
-        expect(leafDiff.from(1).to({})).toEqual([]);
+    it("should treat empty objects as a value", () => {
+        expect(leafDiff.from({}).to({ inner: {} })).toEqual([{ location: "inner", updatedValue: {} }]);
+        expect(diff.from({}).to({ inner: {} })).toEqual([{ location: "", updatedValue: { inner: {} } }]);
     });
 
     it("should map simple symmetrical objects to their diffs", () => {
@@ -71,7 +74,7 @@ describe("diff", () => {
                     }
                 },
                 right: {}
-            })).toEqual([{ location: "right.has", updatedValue: undefined }]);
+            })).toEqual([{ location: "right", updatedValue: {} }]);
         });
     });
 
