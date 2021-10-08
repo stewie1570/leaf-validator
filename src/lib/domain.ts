@@ -12,6 +12,7 @@ type ValueTarget = {
 type Diffs = Array<{
     location: string;
     updatedValue: any;
+    status?: "new" | "changed";
 }>;
 
 const expand = ({ array, toMinLength }: { array: Array<any>, toMinLength: number }): Array<any> => {
@@ -77,13 +78,18 @@ export const distinctArrayFrom = (left: Array<any>, right: Array<any>) => {
 }
 
 type IsObjectCheck = (original: any, updated: any) => boolean;
+type DiffOptions = { specifyNewOrUpdated: boolean };
 
 const origAndUpdatedAreObjects: IsObjectCheck = (original, updated) =>
     original instanceof Object && updated instanceof Object;
 
 const updatedIsObject: IsObjectCheck = (original, updated) => updated instanceof Object;
 
-const processDiffFor = (original: any, updated: any, isObject: IsObjectCheck): Diffs => {
+type DiffRequest = { original: any, updated: any, isObject: IsObjectCheck, options?: DiffOptions };
+
+const processDiffFor = (diffRequest: DiffRequest): Diffs => {
+    const { original, updated, isObject, options } = diffRequest;
+
     const prefixedLocation = (location: string) => (location || "").length > 0
         ? `.${location}`
         : location;
@@ -93,19 +99,29 @@ const processDiffFor = (original: any, updated: any, isObject: IsObjectCheck): D
         Object.keys(updated));
 
     const diffObjects = () => allDistinctKeys()
-        .flatMap(key => processDiffFor((original || {})[key], updated[key], isObject)
-            .map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })));
+        .flatMap(key => processDiffFor({
+            ...diffRequest,
+            original: (original || {})[key],
+            updated: updated[key]
+        }).map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })));
 
-    const diff = () => isObject(original, updated)
+    const diff: () => Diffs = () => isObject(original, updated)
         ? diffObjects()
-        : [{ location: "", updatedValue: updated }];
+        : options?.specifyNewOrUpdated
+            ? [{ location: "", updatedValue: updated, status: original === undefined ? "new" : "changed" }]
+            : [{ location: "", updatedValue: updated }];
 
     return original === updated ? [] : diff();
 };
 
 const diffApiFrom = ({ recurseWhen }: { recurseWhen: IsObjectCheck }) => ({
     from: (original: any) => ({
-        to: (updated: any) => processDiffFor(original, updated, recurseWhen)
+        to: (updated: any, options?: DiffOptions) => processDiffFor({
+            original,
+            updated,
+            isObject: recurseWhen,
+            options
+        })
     })
 })
 
