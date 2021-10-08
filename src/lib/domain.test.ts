@@ -32,6 +32,34 @@ describe("diff", () => {
         });
     });
 
+    it("supports an option to include whether the diff was a change or addition", () => {
+        [diff, leafDiff].forEach(sut => {
+            expect(sut.from({
+                changed: "p1 value 1",
+                original: "p2 value 1",
+                deep: {
+                    changed: "p1 value 1",
+                    original: "p2 value 1"
+                }
+            }).to({
+                changed: "p1 value 2",
+                original: "p2 value 1",
+                new: "p3 value 1",
+                deep: {
+                    changed: "p1 value 2",
+                    original: "p2 value 1",
+                    new: "p3 value 1",
+                }
+            }, { specifyNewOrUpdated: true }))
+                .toEqual([
+                    { location: "changed", updatedValue: "p1 value 2", status: "changed" },
+                    { location: "deep.changed", updatedValue: "p1 value 2", status: "changed" },
+                    { location: "deep.new", updatedValue: "p3 value 1", status: "new" },
+                    { location: "new", updatedValue: "p3 value 1", status: "new" }
+                ]);
+        });
+    });
+
     it("should show an entire sub-object has been removed from the original", () => {
         [diff, leafDiff].forEach(sut => {
             expect(sut.from({
