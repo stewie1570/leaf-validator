@@ -60,6 +60,44 @@ describe("diff", () => {
         });
     });
 
+    it("leaf diff shows new deep thats as new or changed", () => {
+        expect(leafDiff.from({
+            original: "p2 value 1",
+        }).to({
+            original: "p2 value 1",
+            newDeep: {
+                prop1: "p1 value 2",
+                prop2: "p3 value 1",
+            }
+        }, { specifyNewOrUpdated: true }))
+            .toEqual([
+                { location: "newDeep.prop1", updatedValue: "p1 value 2", status: "new" },
+                { location: "newDeep.prop2", updatedValue: "p3 value 1", status: "new" }
+            ]);
+    });
+
+    it("diff shows new deep thats as new or changed", () => {
+        expect(diff.from({
+            original: "p2 value 1",
+        }).to({
+            original: "p2 value 1",
+            newDeep: {
+                prop1: "p1 value 2",
+                prop2: "p3 value 1",
+            }
+        }, { specifyNewOrUpdated: true }))
+            .toEqual([
+                {
+                    location: "newDeep",
+                    updatedValue: {
+                        prop1: "p1 value 2",
+                        prop2: "p3 value 1",
+                    },
+                    status: "new"
+                }
+            ]);
+    });
+
     it("should show an entire sub-object has been removed from the original", () => {
         [diff, leafDiff].forEach(sut => {
             expect(sut.from({
