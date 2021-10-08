@@ -85,7 +85,11 @@ const origAndUpdatedAreObjects: IsObjectCheck = (original, updated) =>
 
 const updatedIsObject: IsObjectCheck = (original, updated) => updated instanceof Object;
 
-const processDiffFor = (original: any, updated: any, isObject: IsObjectCheck, options?: DiffOptions): Diffs => {
+type DiffRequest = { original: any, updated: any, isObject: IsObjectCheck, options?: DiffOptions };
+
+const processDiffFor = (diffRequest: DiffRequest): Diffs => {
+    const { original, updated, isObject, options } = diffRequest;
+
     const prefixedLocation = (location: string) => (location || "").length > 0
         ? `.${location}`
         : location;
@@ -95,8 +99,11 @@ const processDiffFor = (original: any, updated: any, isObject: IsObjectCheck, op
         Object.keys(updated));
 
     const diffObjects = () => allDistinctKeys()
-        .flatMap(key => processDiffFor((original || {})[key], updated[key], isObject, options)
-            .map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })));
+        .flatMap(key => processDiffFor({
+            ...diffRequest,
+            original: (original || {})[key],
+            updated: updated[key]
+        }).map(diff => ({ ...diff, location: key + prefixedLocation(diff.location) })));
 
     const diff: () => Diffs = () => isObject(original, updated)
         ? diffObjects()
@@ -109,7 +116,12 @@ const processDiffFor = (original: any, updated: any, isObject: IsObjectCheck, op
 
 const diffApiFrom = ({ recurseWhen }: { recurseWhen: IsObjectCheck }) => ({
     from: (original: any) => ({
-        to: (updated: any, options?: DiffOptions) => processDiffFor(original, updated, recurseWhen, options)
+        to: (updated: any, options?: DiffOptions) => processDiffFor({
+            original,
+            updated,
+            isObject: recurseWhen,
+            options
+        })
     })
 })
 
