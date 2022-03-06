@@ -11,10 +11,19 @@ type CurrentForm = [
     }>>
 ];
 type NestableFormInputHOC = <P>(Input: React.ComponentType<P>) => React.ComponentType<P>;
+type NestableFormSubmitButtonHOC = <P>(Button: React.ComponentType<P>) => React.ComponentType<P>;
 type NestableFormHOC = <P>(Form: React.ComponentType<P>) => React.ComponentType<P>;
 
 const CurrentFormContext = createContext<CurrentForm | undefined>(undefined);
 const FormIdContext = createContext<any>(undefined);
+
+export const submitButtonWithFormSelectionOnClick: NestableFormSubmitButtonHOC = Button => forwardRef((props: any, ref) => {
+    const [currentFormId] = useContext(CurrentFormContext) ?? [undefined];
+    const formId = useContext(FormIdContext);
+    const isActiveSubmitButton = currentFormId === formId;
+
+    return <Button {...props} type={isActiveSubmitButton ? "submit" : "button"} ref={ref} />;
+});
 
 export const inputWithFormSelectionOnFocus: NestableFormInputHOC = Input => forwardRef((props: any, ref) => {
     const { onFocus, ...otherProps } = props;
