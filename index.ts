@@ -1,5 +1,5 @@
 export { Leaf } from './src/lib/Leaf'
-export { formWithVirtualNestability, inputWithFormSelectionOnFocus } from './src/lib/NestableForm'
+export { formWithVirtualNestability, inputWithFormSelectionOnFocus, submitButtonWithFormSelectionOnClick } from './src/lib/NestableForm'
 export { useValidationModel } from './src/lib/hooks/useValidationModel'
 export { useLoadingState } from './src/lib/hooks/useLoadingState'
 export { useDeferredEffect } from './src/lib/hooks/useDeferredEffect'
