@@ -29,16 +29,15 @@ test("should render & submit INNER form only", async () => {
 });
 
 test("should render & click INNER form submit button", async () => {
-    let submittedForm: any = undefined;
     render(<NestableForm name="outer">
         <NestableForm name="inner">
             <Input data-testid="inner-input" value="" onChange={noOp} />
-            <SubmitButton onClick={() => { submittedForm = "inner"; }}>
+            <SubmitButton>
                 Inner Submit
             </SubmitButton>
         </NestableForm>
         <Input data-testid="outer-input" value="" onChange={noOp} />
-        <SubmitButton onClick={() => { submittedForm = "outer"; }}>
+        <SubmitButton>
             Outer Submit
         </SubmitButton>
     </NestableForm>);
@@ -49,16 +48,15 @@ test("should render & click INNER form submit button", async () => {
 });
 
 test("should render & click OUTER form submit button", async () => {
-    let submittedForm: any = undefined;
     render(<NestableForm name="outer">
         <NestableForm name="inner">
             <Input data-testid="inner-input" value="" onChange={noOp} />
-            <SubmitButton onClick={() => { submittedForm = "inner"; }}>
+            <SubmitButton>
                 Inner Submit
             </SubmitButton>
         </NestableForm>
         <Input data-testid="outer-input" value="" onChange={noOp} />
-        <SubmitButton onClick={() => { submittedForm = "outer"; }}>
+        <SubmitButton>
             Outer Submit
         </SubmitButton>
     </NestableForm>);
