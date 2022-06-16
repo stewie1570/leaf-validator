@@ -1,6 +1,6 @@
-import { useMountedOnlyState } from "./useMountedOnlyState";
+import { useMountedOnlyState as useState } from "./useMountedOnlyState";
 import { ErrorHandler } from './useErrorHandler'
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 type Options = {
     minLoadingTime?: number
@@ -10,13 +10,14 @@ type Options = {
 const wait = (time: number) => new Promise(resolve => setTimeout(resolve, time));
 
 export function useLoadingState(options?: Options): [boolean, <T>(theOperation: Promise<T>) => Promise<T | undefined>] {
-    const [isLoading, setIsLoading] = useMountedOnlyState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const optionsRef = useRef(options);
     const start = useCallback(async <T>(theOperation: Promise<T>): Promise<T | undefined> => {
         setIsLoading(true);
         try {
-            options?.minLoadingTime && await wait(options.minLoadingTime);
-            const response = options?.errorHandler
-                ? options.errorHandler(theOperation)
+            optionsRef.current?.minLoadingTime && await wait(optionsRef.current.minLoadingTime);
+            const response = optionsRef.current?.errorHandler
+                ? optionsRef.current.errorHandler(theOperation)
                 : theOperation;
                 
             return await response;
