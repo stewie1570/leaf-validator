@@ -33,7 +33,7 @@ test("should show loading while resolving and not-loading once rejected", async 
             try {
                 setResolvedValue(await showLoadingWhile(Promise.reject("the error")));
             }
-            catch (error) {
+            catch (error: any) {
                 setResolvedValue(error);
             }
         }
