@@ -297,9 +297,45 @@ describe("get target from object", () => {
     it("returns undefined for non-existant target locations in object", () => {
         expect(get("somewhere.that.does.not.exist").from({})).toBe(undefined);
     })
+
+    it("can navigate through objects with numerical property name", () => {
+        expect(get("outer.123.value").from({
+            outer: {
+                '123': {
+                    value: "it worked"
+                }
+            }
+        })).toBe("it worked");
+    })
 });
 
 describe("set value at target location of object to get next immutable progression", () => {
+    it("can update a value nested in a numerical property name", () => {
+        const orig = {
+            outer: {
+                '123': {
+                    values: {
+                        target: "original value",
+                        notTarget: "not changed"
+                    }
+                }
+            }
+        };
+        expect(set("outer.123.values.target").to("updated value").in(orig)).toEqual({
+            ...orig,
+            outer: {
+                ...orig.outer,
+                '123': {
+                    ...orig.outer[123],
+                    values: {
+                        ...orig.outer[123].values,
+                        target: "updated value"
+                    }
+                }
+            }
+        });
+    });
+
     it("can build complex objects with multiple nested arrays in the middle", () => {
         expect(set("outer.1.inner.0.prop").to("value").in({})).toEqual({
             outer: [
