@@ -31,17 +31,15 @@ function getModelProgressionFrom<T>({ target, update, model }: ModelUpdate<T>): 
         ? target
         : target.substring(lastDotIndex + 1);
     const currentArrayIndex = parseInt(currentLocation);
-    const currentlyInArray = !isNaN(currentArrayIndex);
+    const current = get<any>(parentLocation).from(model);
+    const currentlyInArray = current === undefined
+        ? !isNaN(currentArrayIndex)
+        : Array.isArray(current);
 
     const updated = currentlyInArray
-        ? expand({
-            array: get<Array<any>>(parentLocation).from(model),
-            toMinLength: currentArrayIndex + 1
-        }).map((node, index) => index === currentArrayIndex ? update : node)
-        : {
-            ...get<any>(parentLocation).from(model),
-            [currentLocation]: update
-        };
+        ? expand({ array: current, toMinLength: currentArrayIndex + 1 })
+            .map((node, index) => index === currentArrayIndex ? update : node)
+        : { ...current, [currentLocation]: update };
 
     return lastDotIndex === -1
         ? updated
