@@ -76,9 +76,7 @@ test("using managed context that's shared by two components in the same provider
 });
 
 test("using managed context without a context provider only changes the local state but does work", () => {
-    render(<UserContextProvider>
-        <EditUser />
-    </UserContextProvider>);
+    render(<EditUser />);
 
     fireEvent.change(screen.getByLabelText("First Name"), { target: { value: "John" } });
     fireEvent.change(screen.getByLabelText("Last Name"), { target: { value: "Doe" } });
