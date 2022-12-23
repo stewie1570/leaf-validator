@@ -74,12 +74,3 @@ test("using managed context that's shared by two components in the same provider
     expect(screen.getAllByText("First Name: John")).toHaveLength(2);
     expect(screen.getAllByText("Last Name: Doe")).toHaveLength(2);
 });
-
-test("using managed context without a context provider only changes the local state but does work", () => {
-    render(<EditUser />);
-
-    fireEvent.change(screen.getByLabelText("First Name"), { target: { value: "John" } });
-    fireEvent.change(screen.getByLabelText("Last Name"), { target: { value: "Doe" } });
-    expect(screen.getByLabelText("First Name")).toHaveValue("John");
-    expect(screen.getByLabelText("Last Name")).toHaveValue("Doe");
-});
