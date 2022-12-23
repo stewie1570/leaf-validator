@@ -2,7 +2,7 @@ import React, { createContext, useContext } from "react";
 
 type ContextProvider = ({ children }: any) => JSX.Element;
 
-type UseManagedStateHook<T> = () => T | undefined;
+type UseManagedStateHook<T> = () => T;
 
 export function createManagedContext<T>(
   useManagedState: UseManagedStateHook<T>
@@ -16,5 +16,5 @@ export function createManagedContext<T>(
     return useContext(Context);
   };
 
-  return [ContextProvider, useManagedContext];
+  return [ContextProvider, () => useManagedContext() ?? useManagedState()];
 }
