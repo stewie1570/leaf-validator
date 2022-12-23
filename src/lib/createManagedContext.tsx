@@ -13,9 +13,7 @@ export function createManagedContext<T>(
     return <Context.Provider value={managedState}>{children}</Context.Provider>;
   };
   const useManagedContext = () => {
-    const contextState = useContext(Context);
-    const localState = useManagedState();
-    return contextState || localState;
+    return useContext(Context);
   };
 
   return [ContextProvider, useManagedContext];
