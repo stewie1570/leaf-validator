@@ -6,7 +6,7 @@ type UseManagedStateHook<T> = () => T;
 
 export function createManagedContext<T>(
   useManagedState: UseManagedStateHook<T>
-): [ContextProvider, UseManagedStateHook<T>] {
+): [ContextProvider, UseManagedStateHook<T>, React.Context<T | undefined>] {
   const Context = createContext<T | undefined>(undefined);
   const ContextProvider = ({ children }: any) => {
     const managedState = useManagedState();
@@ -16,5 +16,5 @@ export function createManagedContext<T>(
     return useContext(Context);
   };
 
-  return [ContextProvider, () => useManagedContext() ?? useManagedState()];
+  return [ContextProvider, () => useManagedContext() ?? useManagedState(), Context];
 }
