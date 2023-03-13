@@ -80,10 +80,10 @@ type DiffOptions = { specifyNewOrUpdated: boolean };
 
 const isArrayOfString = (obj: any) => Array.isArray(obj) && typeof (obj[0]) === "string";
 
-const origAndUpdatedAreObjects: IsIterableDiff = (original, updated) =>
+const origAndUpdatedAreIterable: IsIterableDiff = (original, updated) =>
     original instanceof Object && updated instanceof Object;
 
-const updatedIsObject: IsIterableDiff = (original, updated) => updated instanceof Object;
+const updatedIsIterable: IsIterableDiff = (original, updated) => updated instanceof Object;
 
 const updatedIsIterableAndNotStringArray: IsIterableDiff = (original, updated) => updated instanceof Object && !isArrayOfString(updated);
 
@@ -134,8 +134,8 @@ const diffApiFrom = ({ recurseWhen }: { recurseWhen: IsIterableDiff }) => ({
     })
 })
 
-export const diff = diffApiFrom({ recurseWhen: origAndUpdatedAreObjects });
+export const diff = diffApiFrom({ recurseWhen: origAndUpdatedAreIterable });
 
-export const leafDiff = diffApiFrom({ recurseWhen: updatedIsObject });
+export const leafDiff = diffApiFrom({ recurseWhen: updatedIsIterable });
 
 export const normalizedLeafDiff = diffApiFrom({ recurseWhen: updatedIsIterableAndNotStringArray });
