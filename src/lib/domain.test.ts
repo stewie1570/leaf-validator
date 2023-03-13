@@ -1,8 +1,8 @@
-import { get, set, diff, leafDiff } from './domain'
+import { get, set, diff, leafDiff, normalizedLeafDiff } from './domain'
 
 describe("diff", () => {
     it("should be empty for same value types", () => {
-        [diff, leafDiff].forEach(sut => {
+        [diff, leafDiff, normalizedLeafDiff].forEach(sut => {
             expect(sut.from(1).to(1)).toEqual([]);
             expect(sut.from("hello").to("hello")).toEqual([]);
             expect(sut.from(true).to(true)).toEqual([]);
@@ -10,7 +10,7 @@ describe("diff", () => {
     });
 
     it("should return updated value types", () => {
-        [diff, leafDiff].forEach(sut => {
+        [diff, leafDiff, normalizedLeafDiff].forEach(sut => {
             expect(sut.from(1).to(2)).toEqual([{ location: "", updatedValue: 2 }]);
             expect(sut.from("hello").to("hi")).toEqual([{ location: "", updatedValue: "hi" }]);
             expect(sut.from(true).to(false)).toEqual([{ location: "", updatedValue: false }]);
@@ -21,7 +21,7 @@ describe("diff", () => {
     });
 
     it("should map simple symmetrical objects to their diffs", () => {
-        [diff, leafDiff].forEach(sut => {
+        [diff, leafDiff, normalizedLeafDiff].forEach(sut => {
             expect(sut.from({
                 changed: "p1 value 1",
                 original: "p2 value 1"
@@ -33,7 +33,7 @@ describe("diff", () => {
     });
 
     it("supports an option to include whether the diff was a change or addition", () => {
-        [diff, leafDiff].forEach(sut => {
+        [diff, leafDiff, normalizedLeafDiff].forEach(sut => {
             expect(sut.from({
                 changed: "p1 value 1",
                 original: "p2 value 1",
@@ -61,19 +61,21 @@ describe("diff", () => {
     });
 
     it("leaf diff shows new deep thats as new or changed", () => {
-        expect(leafDiff.from({
-            original: "p2 value 1",
-        }).to({
-            original: "p2 value 1",
-            newDeep: {
-                prop1: "p1 value 2",
-                prop2: "p3 value 1",
-            }
-        }, { specifyNewOrUpdated: true }))
-            .toEqual([
-                { location: "newDeep.prop1", updatedValue: "p1 value 2", status: "new" },
-                { location: "newDeep.prop2", updatedValue: "p3 value 1", status: "new" }
-            ]);
+        [leafDiff, normalizedLeafDiff].forEach(diff => {
+            expect(diff.from({
+                original: "p2 value 1",
+            }).to({
+                original: "p2 value 1",
+                newDeep: {
+                    prop1: "p1 value 2",
+                    prop2: "p3 value 1",
+                }
+            }, { specifyNewOrUpdated: true }))
+                .toEqual([
+                    { location: "newDeep.prop1", updatedValue: "p1 value 2", status: "new" },
+                    { location: "newDeep.prop2", updatedValue: "p3 value 1", status: "new" }
+                ]);
+        });
     });
 
     it("diff shows new deep thats as new or changed", () => {
@@ -99,7 +101,7 @@ describe("diff", () => {
     });
 
     it("should show an entire sub-object has been removed from the original", () => {
-        [diff, leafDiff].forEach(sut => {
+        [diff, leafDiff, normalizedLeafDiff].forEach(sut => {
             expect(sut.from({
                 left: {
                     with: {
@@ -164,10 +166,49 @@ describe("diff", () => {
             { location: "some.complex.object.and.0", updatedValue: "other" },
             { location: "some.complex.object.and.1", updatedValue: "values" }
         ]);
+
+        expect(normalizedLeafDiff.from(null).to(updatedObject)).toEqual([
+            { location: "some.complex.object.with", updatedValue: ["values"] },
+            { location: "some.complex.object.and", updatedValue: ["other", "values"] },
+        ]);
+    })
+
+    it("should support leaf creation of whole arrays via normalized leaf diff", () => {
+        const origObject = {
+            some: {
+                complex: {
+                    object: {
+                        with: ["1st values"],
+                        and: ["1st other", "1st values"]
+                    }
+                }
+            }
+        };
+        const updatedObject = {
+            some: {
+                complex: {
+                    object: {
+                        with: ["1st values"],
+                        and: ["1st other", "2nd values"],
+                        andFinally: ['something', 'added']
+                    }
+                }
+            }
+        };
+
+        expect(normalizedLeafDiff.from(origObject).to(updatedObject)).toEqual([
+            { location: "some.complex.object.and", updatedValue: ["1st other", "2nd values"] },
+            { location: "some.complex.object.andFinally", updatedValue: ['something', 'added'] },
+        ]);
+
+        expect(normalizedLeafDiff.from(origObject).to(updatedObject, { specifyNewOrUpdated: true })).toEqual([
+            { location: "some.complex.object.and", updatedValue: ["1st other", "2nd values"], status: "changed" },
+            { location: "some.complex.object.andFinally", updatedValue: ['something', 'added'], status: "new" }
+        ]);
     })
 
     it("should map simple non-symmetrical objects to their diffs", () => {
-        [diff, leafDiff].forEach(sut => {
+        [diff, leafDiff, normalizedLeafDiff].forEach(sut => {
             const result = sut.from({
                 changed: "p1 value 1",
                 original: "p2 value 1"
@@ -185,7 +226,7 @@ describe("diff", () => {
     });
 
     it("should map complex non-symmetrical objects to their diffs", () => {
-        [diff, leafDiff].forEach(sut => {
+        [diff, leafDiff, normalizedLeafDiff].forEach(sut => {
             const result = sut.from({
                 outer: {
                     changed: "p1 value 1",
@@ -207,7 +248,7 @@ describe("diff", () => {
     });
 
     it("should map complex non-symmetrical objects inside arrays inside an object to their diffs", () => {
-        [diff, leafDiff].forEach(sut => {
+        [diff, leafDiff, normalizedLeafDiff].forEach(sut => {
             const result = sut.from({
                 outer: [
                     {
@@ -239,7 +280,7 @@ describe("diff", () => {
 
 describe("diff and set working together", () => {
     it("should show that applying the diffs (created from original to updated) to the original constructs an updated equivalent", () => {
-        [diff, leafDiff].forEach(sut => {
+        [diff, leafDiff, normalizedLeafDiff].forEach(sut => {
             const original = {
                 outer: [
                     {
