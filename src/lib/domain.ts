@@ -75,15 +75,26 @@ export const distinctArrayFrom = (left: Array<any>, right: Array<any>) => {
     return composite.filter((value, index) => composite.indexOf(value) === index);
 }
 
-type IsObjectCheck = (original: any, updated: any) => boolean;
+type IsIterableDiff = (original: any, updated: any) => boolean;
 type DiffOptions = { specifyNewOrUpdated: boolean };
 
-const origAndUpdatedAreObjects: IsObjectCheck = (original, updated) =>
+const isArrayOfString = (obj: any) => Array.isArray(obj) && typeof (obj[0]) === "string";
+
+const origAndUpdatedAreObjects: IsIterableDiff = (original, updated) =>
     original instanceof Object && updated instanceof Object;
 
-const updatedIsObject: IsObjectCheck = (original, updated) => updated instanceof Object;
+const updatedIsObject: IsIterableDiff = (original, updated) => updated instanceof Object;
 
-type DiffRequest = { original: any, updated: any, isObject: IsObjectCheck, options?: DiffOptions };
+const updatedIsIterableAndNotStringArray: IsIterableDiff = (original, updated) => updated instanceof Object && !isArrayOfString(updated);
+
+const areArraysWithSameValues = (left: any, right: any) => {
+    return Array.isArray(left)
+        && Array.isArray(right)
+        && left.length === right.length
+        && left.every((leftValue, index) => right[index] === leftValue);
+}
+
+type DiffRequest = { original: any, updated: any, isObject: IsIterableDiff, options?: DiffOptions };
 
 const processDiffFor = (diffRequest: DiffRequest): Diffs => {
     const { original, updated, isObject, options } = diffRequest;
@@ -109,10 +120,10 @@ const processDiffFor = (diffRequest: DiffRequest): Diffs => {
             ? [{ location: "", updatedValue: updated, status: original === undefined ? "new" : "changed" }]
             : [{ location: "", updatedValue: updated }];
 
-    return original === updated ? [] : diff();
+    return original === updated || areArraysWithSameValues(original, updated) ? [] : diff();
 };
 
-const diffApiFrom = ({ recurseWhen }: { recurseWhen: IsObjectCheck }) => ({
+const diffApiFrom = ({ recurseWhen }: { recurseWhen: IsIterableDiff }) => ({
     from: (original: any) => ({
         to: (updated: any, options?: DiffOptions) => processDiffFor({
             original,
@@ -126,3 +137,5 @@ const diffApiFrom = ({ recurseWhen }: { recurseWhen: IsObjectCheck }) => ({
 export const diff = diffApiFrom({ recurseWhen: origAndUpdatedAreObjects });
 
 export const leafDiff = diffApiFrom({ recurseWhen: updatedIsObject });
+
+export const normalizedLeafDiff = diffApiFrom({ recurseWhen: updatedIsIterableAndNotStringArray });
