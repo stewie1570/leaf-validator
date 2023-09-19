@@ -51,20 +51,20 @@ beforeEach(() => {
     window.localStorage.clear();
 });
 
-test("can update state via value", () => {
+test("can update state via value", async () => {
     render(<SetStateViaValue />);
 
     screen.getByText("no state");
     screen.getByText("Set State").click();
-    screen.getByText("expected value");
+    await screen.findByText("expected value");
 });
 
-test("can update state via callback", () => {
+test("can update state via callback", async () => {
     render(<SetStateViaCallback />);
 
     screen.getByText("no state");
     screen.getByText("Set State").click();
-    screen.getByText("value: undefined");
+    await screen.findByText("value: undefined");
 });
 
 test("can update common state via value", async () => {

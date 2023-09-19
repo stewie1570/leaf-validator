@@ -58,7 +58,7 @@ const HandleAndReThrowStringErrorsTestApp = () => {
 test.each([
     [HandleStringErrorsTestApp],
     [HandleAndReThrowStringErrorsTestApp]
-])("can display and clear unique string rejection errors", async (SUT) => {
+])("can display and clear unique string rejection errors", async (SUT: any) => {
     render(<SUT />);
     (await screen.findByText("Reject a promise with message string")).click();
     (await screen.findByText("Reject a promise with second message string")).click();
@@ -68,8 +68,10 @@ test.each([
             "second message string"
         ]));
     screen.getByText("second message string").click();
-    expect((await screen.findAllByTestId("test-error")).map(({ innerHTML }) => innerHTML))
-        .toEqual(["message string"]);
+    await waitFor(async () => {
+        expect((await screen.findAllByTestId("test-error")).map(({ innerHTML }) => innerHTML))
+            .toEqual(["message string"]);
+    });
 });
 
 test("re-throw string error", async () => {
@@ -129,7 +131,7 @@ const ReThrowRealErrorsTestApp = () => {
 test.each([
     [HandleRealErrorsTestApp],
     [ReThrowRealErrorsTestApp]
-])("can display and clear unique errors", async (SUT) => {
+])("can display and clear unique errors", async (SUT: any) => {
     render(<SUT />);
     (await screen.findByText("Reject a promise with message string")).click();
     (await screen.findByText("Reject a promise with second message string")).click();
@@ -139,8 +141,10 @@ test.each([
             "second message string"
         ]));
     screen.getByText("second message string").click();
-    expect((await screen.findAllByTestId("test-error")).map(({ innerHTML }) => innerHTML))
-        .toEqual(["message string"]);
+    await waitFor(async () => {
+        expect((await screen.findAllByTestId("test-error")).map(({ innerHTML }) => innerHTML))
+            .toEqual(["message string"]);
+    });
 });
 
 test("re-throw real error", async () => {
@@ -184,10 +188,12 @@ const ReThrowerReturnTestApp = () => {
 test.each([
     [HandlerReturnTestApp],
     [ReThrowerReturnTestApp]
-])("returns the awaited promise", async (SUT) => {
+])("returns the awaited promise", async (SUT: any) => {
     render(<SUT />);
     screen.getByText("Invoke").click();
-    expect((await screen.findByTestId("test-value")).innerHTML).toEqual("expected value");
+    await waitFor(async () => {
+        expect((await screen.findByTestId("test-value")).innerHTML).toEqual("expected value");
+    });
 });
 
 const AdditionalErrorDetailsHandlerTestApp = () => {
@@ -229,7 +235,7 @@ const AdditionalErrorDetailsReThrowerTestApp = () => {
 test.each([
     [AdditionalErrorDetailsHandlerTestApp],
     [AdditionalErrorDetailsReThrowerTestApp]
-])("additional error details are available to be rendered", async (SUT) => {
+])("additional error details are available to be rendered", async (SUT: any) => {
     render(<SUT />);
     screen.getByText("Invoke").click();
     await screen.findByText("the message");
