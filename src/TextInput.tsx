@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef } from 'react'
+import { useLifeCycle } from './lib/hooks/useLifecycle';
 
 type TextInputProps = {
     autofocus?: boolean
@@ -9,12 +10,14 @@ type TextInputProps = {
 
 export function TextInput(props: TextInputProps) {
     const { autofocus, value, onChange, ...otherProps } = props;
+    const propsRef = useRef(props);
+    propsRef.current = props;
     const onTextChange = (event: any) => onChange(event && event.target && event.target.value);
     const theInput = useRef<any>();
 
-    useEffect(() => {
-        if (autofocus) theInput?.current?.focus()
-    }, [autofocus]);
+    useLifeCycle({
+        onMount: () => propsRef.current.autofocus && theInput?.current?.focus()
+    });
 
     return <input
         className="form-control"

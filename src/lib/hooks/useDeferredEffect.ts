@@ -4,14 +4,14 @@ export function useDeferredEffect(
     action: () => void,
     deferredTimeout: number,
     deps: Array<any>) {
-    const instance = useRef<any>({ timer: undefined });
+    const instance = useRef<any>({ timer: undefined, action });
+    instance.current = { ...instance.current, action };
 
     useEffect(() => {
         instance.current.timer && clearTimeout(instance.current.timer);
-        instance.current.timer = setTimeout(action, deferredTimeout);
+        instance.current.timer = setTimeout(instance.current.action, deferredTimeout);
 
         return () => {
-            // eslint-disable-next-line
             instance.current.timer && clearTimeout(instance.current.timer);
         }
     },
