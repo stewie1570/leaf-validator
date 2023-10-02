@@ -317,6 +317,47 @@ The useLocalStorageState hook uses useMountedOnlyState as the underlying local s
 const [state, setState] = useLocalStorageState("StorageKey");
 ```
 
+## Hook Creators
+
+**createManagedState**
+
+This is an easier way to manage state in a context. It offers:
+
+- Type inference in the context consumers.
+- Strongly encourages good context and state management practices.
+
+```jsx
+const useUser = () => {
+    const [user, setUser] = useState({ firstName: "", lastName: "" });
+
+    return {
+        user,
+        setFirstName: (firstName: string) =>
+            setUser((user) => ({ ...user, firstName })),
+        setLastName: (lastName: string) =>
+            setUser((user) => ({ ...user, lastName }))
+    };
+};
+
+const [UserContextProvider, useUserContext] = createManagedContext(useUser);
+
+const App = () => {
+  return (
+    <UserContextProvider>
+      <User />
+    </UserContextProvider>
+  );
+};
+
+const User = () => {
+  const { user, setFirstName, setLastName } = useUserContext();
+  
+  return <form>
+    [User Form Here]
+  </form>;
+}
+```
+
 ## Get & Set pure functions
 
 ### **Set**: helps create immutable progressions.
