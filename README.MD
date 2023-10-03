@@ -358,6 +358,44 @@ const User = () => {
 }
 ```
 
+Advanced Usages of `createManagedContext`:
+- context initialization props
+```jsx
+const useUser = ({ firstName, lastName }) => {
+    const [user, setUser] = useState({ firstName, lastName });
+
+    return {
+        user,
+        setFirstName: (firstName: string) =>
+            setUser((user) => ({ ...user, firstName })),
+        setLastName: (lastName: string) =>
+            setUser((user) => ({ ...user, lastName }))
+    };
+};
+
+const [UserContextProvider, useUserContext, UserContext] = createManagedContext(useUser);
+```
+
+```jsx
+<UserContextProvider firstName="Stewart" lastName="Anderson">
+  <EditUser />
+  <DisplayUser />
+</UserContextProvider>
+```
+
+- Create a pass-through context so that the top-most context is used. This is can be useful for a few things including and easy abstraction for mocking.
+
+```jsx
+const UserContextPassThrough = ({ children }) => {
+  const parentContext = useContext(UserContext);
+
+  return parentContext
+    ? children
+    : <UserContextProvider>
+      {children}
+    </UserContextProvider>;
+};
+```
 ## Get & Set pure functions
 
 ### **Set**: helps create immutable progressions.
