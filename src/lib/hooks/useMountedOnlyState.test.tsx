@@ -3,7 +3,7 @@ import { render, act } from '@testing-library/react'
 import { useMountedOnlyState } from './useMountedOnlyState';
 
 function manuallyResolvableTask<T>() {
-    let resolve = () => { };
+    let resolve: any = () => { };
     const promise = new Promise<T>(resolver => { resolve = resolver; });
 
     return { promise, resolve };

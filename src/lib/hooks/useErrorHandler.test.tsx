@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import { useErrorHandler } from './useErrorHandler'
 
 type SubError = {
@@ -67,14 +67,20 @@ test.each([
             "message string",
             "second message string"
         ]));
-    screen.getByText("second message string").click();
-    expect((await screen.findAllByTestId("test-error")).map(({ innerHTML }) => innerHTML))
-        .toEqual(["message string"]);
+    await act(async () => {
+        screen.getByText("second message string").click();
+    });
+    await waitFor(async () => {
+        expect((await screen.findAllByTestId("test-error")).map(({ innerHTML }) => innerHTML))
+            .toEqual(["message string"]);
+    });
 });
 
 test("re-throw string error", async () => {
     render(<HandleAndReThrowStringErrorsTestApp />);
-    (await screen.findByText("Reject a promise with message string")).click();
+    await act(async () => {
+        (await screen.findByText("Reject a promise with message string")).click();
+    });
     await screen.findByText("Re-thrown error: message string");
 });
 
@@ -138,14 +144,20 @@ test.each([
             "message string",
             "second message string"
         ]));
-    screen.getByText("second message string").click();
-    expect((await screen.findAllByTestId("test-error")).map(({ innerHTML }) => innerHTML))
-        .toEqual(["message string"]);
+    await act(async () => {
+        screen.getByText("second message string").click();
+    });
+    await waitFor(async () => {
+        expect((await screen.findAllByTestId("test-error")).map(({ innerHTML }) => innerHTML))
+            .toEqual(["message string"]);
+    });
 });
 
 test("re-throw real error", async () => {
     render(<ReThrowRealErrorsTestApp />);
-    (await screen.findByText("Reject a promise with message string")).click();
+    await act(async () => {
+        (await screen.findByText("Reject a promise with message string")).click();
+    });
     await screen.findByText("Re-thrown error: message string");
 });
 
@@ -186,8 +198,12 @@ test.each([
     [ReThrowerReturnTestApp]
 ])("returns the awaited promise", async (SUT) => {
     render(<SUT />);
-    screen.getByText("Invoke").click();
-    expect((await screen.findByTestId("test-value")).innerHTML).toEqual("expected value");
+    await act(async () => {
+        screen.getByText("Invoke").click();
+    });
+    await waitFor(async () => {
+        expect((await screen.findByTestId("test-value")).innerHTML).toEqual("expected value");
+    });
 });
 
 const AdditionalErrorDetailsHandlerTestApp = () => {

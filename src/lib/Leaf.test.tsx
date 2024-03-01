@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { render, fireEvent, waitFor } from '@testing-library/react'
-import { Leaf } from './Leaf'
-import { TextInput } from '../TextInput'
+import React, { useState } from 'react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
+import { Leaf } from './Leaf';
+import { TextInput } from '../TextInput';
 import { useValidationModel } from './hooks/useValidationModel';
 import { ValidationModel } from './models';
 
