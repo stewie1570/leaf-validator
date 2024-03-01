@@ -10,8 +10,8 @@ type CurrentForm = [
         [x: string]: (event?: React.FormEvent<HTMLFormElement> | undefined) => void;
     }>>
 ];
-type NestableFormInputHOC = <P>(Input: React.ComponentType<P>) => React.ComponentType<P>;
-type NestableFormSubmitButtonHOC = <P>(Button: React.ComponentType<P>) => React.ComponentType<P>;
+type NestableFormInputHOC = <P>(Input: React.ComponentType<P>) => React.ForwardRefExoticComponent<Omit<any, "ref"> & React.RefAttributes<unknown>>;
+type NestableFormSubmitButtonHOC = <P>(Button: React.ComponentType<P>) => React.ForwardRefExoticComponent<Omit<any, "ref"> & React.RefAttributes<unknown>>;
 type NestableFormHOC = <P>(Form: React.ComponentType<P>) => React.ComponentType<P>;
 
 const CurrentFormContext = createContext<CurrentForm | undefined>(undefined);

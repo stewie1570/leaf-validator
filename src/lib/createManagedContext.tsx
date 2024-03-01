@@ -4,7 +4,11 @@ type UseManagedStateHook<TParams, TReturn> = (param?: TParams) => TReturn;
 
 export function createManagedContext<THookParam, THookReturn>(
   useManagedState: UseManagedStateHook<THookParam, THookReturn>
-): [React.FC<THookParam>, UseManagedStateHook<THookParam, THookReturn>, React.Context<THookReturn | undefined>] {
+): [
+    React.FC<THookParam & { children?: any }>,
+    UseManagedStateHook<THookParam, THookReturn>,
+    React.Context<THookReturn | undefined>
+  ] {
   const Context = createContext<THookReturn | undefined>(undefined);
   const ContextProvider = ({ children, ...otherParams }: any) => {
     const managedState = useManagedState(otherParams);
