@@ -24,13 +24,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         registry-url: https://registry.npmjs.org/
-    - run: npm install codecov -g
     - run: yarn
     - run: yarn build
     - run: yarn analyze
     - run: yarn test
-    - name: CodeCov
-      run: codecov
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
