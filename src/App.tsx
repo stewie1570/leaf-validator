@@ -70,7 +70,7 @@ const NestableFormTest = () => {
         <Leaf model={model} onChange={setModel} location="outer">
             {(outerValue: string, setOuterValue) => <label>
                 Outer Value
-                    <Text value={outerValue} onChange={setOuterValue} />
+                <Text value={outerValue} onChange={setOuterValue} />
             </label>}
         </Leaf>
         <Button type="submit">Submit Outer</Button>
@@ -84,6 +84,7 @@ function App(): JSX.Element {
     const [showAllValidation, setShowAllValidation] = useState(false);
     const { errorHandler, errorHandleAndReThrow, clearError, errors } = useErrorHandler();
     const [isSubmitting, showSubmittingWhile] = useLoadingState({ minLoadingTime: 2000, errorHandler });
+    const [displayEmail, setDisplayEmail] = useState(true);
     const isValidating = validationModel.isValidationInProgress();
 
     const submit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -113,7 +114,7 @@ function App(): JSX.Element {
                 </li>)}
             </ul>}
             <form>
-                {formElements(model, setModel, showAllValidation, validationModel)}
+                {formElements(model, setModel, showAllValidation, validationModel, displayEmail)}
                 <button
                     className="btn btn-primary"
                     type="submit"
@@ -147,12 +148,19 @@ function App(): JSX.Element {
                         .then(() => console.log('happy path'), () => console.log('sad path'))}>
                     Queue, Reject, Handle, Rethrow, Sad
                 </button>
+                &nbsp;
+                <button
+                    className='btn btn-secondary'
+                    type='button'
+                    onClick={() => setDisplayEmail(!displayEmail)}>
+                    Toggle Email
+                </button>
                 {isValidating && <i>Validating...</i>}
                 {isSubmitting && <i>Submitting...</i>}
                 <br />
                 <div style={{ verticalAlign: "top", display: "inline-block", width: "33%" }}>
                     Model:
-                            <pre>
+                    <pre>
                         {JSON.stringify(model, null, 4)}
                     </pre>
                 </div>
@@ -169,8 +177,16 @@ function App(): JSX.Element {
     );
 }
 
-function formElements(model: any, setModel: Dispatch<SetStateAction<any>>, showAllValidation: boolean, validationModel: any) {
-    return form.map(({ name, ...formElement }, index) => <Leaf
+function formElements(
+    model: any,
+    setModel: Dispatch<SetStateAction<any>>,
+    showAllValidation: boolean,
+    validationModel: any,
+    includeEmail: boolean) {
+
+    const formElements = form.filter(({ location }) => includeEmail || location.indexOf("email") === -1);
+
+    return formElements.map(({ name, ...formElement }, index) => <Leaf
         key={index}
         showErrors={showAllValidation}
         model={model}
