@@ -123,8 +123,8 @@ export function Leaf<Model, Target>(props: {
                 .current
                 .validationModel
                 ?.set((origValidationModel: any) => {
-                    const { [location]: removedDeferred, ...nonDeferredWithoutLocation } = origValidationModel.deferred;
-                    const { [location]: removedNonDeferred, ...deferredWithoutLocation } = origValidationModel['non-deferred'];
+                    const { [location]: removedDeferred, ...nonDeferredWithoutLocation } = origValidationModel.deferred || {};
+                    const { [location]: removedNonDeferred, ...deferredWithoutLocation } = origValidationModel['non-deferred'] || {};
                     const result = {
                         ...origValidationModel,
                         deferred: deferredWithoutLocation,
