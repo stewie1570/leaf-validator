@@ -87,6 +87,11 @@ export function Leaf<Model, Target>(props: {
         validators,
         deferredValidators
     });
+    instance.current = {
+        validationModel,
+        validators,
+        deferredValidators
+    };
     const preferredTargetValue = get<Target>(location).from(model);
     const targetValue = preferredTargetValue === undefined
         ? findDefinedTargetIn<Target>(model, props.failOverLocations || [])
@@ -111,6 +116,24 @@ export function Leaf<Model, Target>(props: {
             namespace: "non-deferred"
         });
     }, [targetValue, location]);
+
+    useEffect(() => {
+        return () => {
+            instance
+                .current
+                .validationModel
+                ?.set((origValidationModel: any) => {
+                    const { [location]: removedDeferred, ...nonDeferredWithoutLocation } = origValidationModel.deferred;
+                    const { [location]: removedNonDeferred, ...deferredWithoutLocation } = origValidationModel['non-deferred'];
+                    const result = {
+                        ...origValidationModel,
+                        deferred: deferredWithoutLocation,
+                        'non-deferred': nonDeferredWithoutLocation
+                    };
+                    return result;
+                });
+        }
+    }, [location]);
 
     useDeferredEffect(() => {
         instance.current.validationTarget = targetValue;
