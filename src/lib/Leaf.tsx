@@ -68,7 +68,8 @@ export function Leaf<Model, Target>(props: {
     deferredValidators?: Array<Validator<Target>>,
     deferMilliseconds?: number,
     showErrors?: boolean,
-    failOverLocations?: Array<string>
+    failOverLocations?: Array<string>,
+    useFunctionalSetter?: boolean
 }) {
     const [hasBlurred, setHasBlurred] = useState(false);
     const {
@@ -80,7 +81,8 @@ export function Leaf<Model, Target>(props: {
         deferredValidators,
         deferMilliseconds,
         onChange,
-        showErrors
+        showErrors,
+        useFunctionalSetter
     } = props;
     const instance = useRef<Instance<Target>>({
         validationModel,
@@ -150,7 +152,9 @@ export function Leaf<Model, Target>(props: {
 
     return children(
         targetValue,
-        update => onChange(set(location).to(update).in(model)),
+        update => onChange(useFunctionalSetter
+            ? currentModel => set(location).to(update).in(currentModel)
+            : set(location).to(update).in(model)),
         () => setHasBlurred(true),
         validationModel && (hasBlurred || showErrors) ? validationModel.get(location) : [],
         location
