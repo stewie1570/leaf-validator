@@ -176,7 +176,7 @@ export function Leaf<Model, Target>(props: {
                 ? set(props.location).to(update).in(currentModel)
                 : set(props.location).to(update).in(props.model)
         );
-    }, [props.location, props.model, props.onChange]);
+    }, [props.location, props.model, props.onChange, propsRef]);
 
     const handleBlur = useCallback(() => {
         setHasBlurred(true);
@@ -186,7 +186,7 @@ export function Leaf<Model, Target>(props: {
         return props.validationModel && (hasBlurred || propsRef.current.showErrors) 
             ? props.validationModel.get(props.location) 
             : [];
-    }, [props.validationModel, hasBlurred, props.location, propsRef.current.showErrors]);
+    }, [props.validationModel, hasBlurred, props.location]);
 
     return props.children(
         targetValue,
