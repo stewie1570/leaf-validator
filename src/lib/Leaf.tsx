@@ -73,6 +73,8 @@ export function Leaf<Model, Target>(props: {
 }) {
     const [hasBlurred, setHasBlurred] = useState(false);
     
+    const { location, model, onChange } = props;
+    
     const propsRef = useRef({
         validationModel: props.validationModel,
         validators: props.validators,
@@ -171,12 +173,12 @@ export function Leaf<Model, Target>(props: {
     }, propsRef.current.deferMilliseconds || 500, [targetValue, props.location, propsRef.current.deferMilliseconds]);
 
     const handleChange = useCallback((update: Target) => {
-        props.onChange(currentModel => 
+        onChange(currentModel => 
             propsRef.current.useFunctionalSetter
-                ? set(props.location).to(update).in(currentModel)
-                : set(props.location).to(update).in(props.model)
+                ? set(location).to(update).in(currentModel)
+                : set(location).to(update).in(model)
         );
-    }, [props.location, props.model, props.onChange, propsRef]);
+    }, [location, model, onChange, propsRef]);
 
     const handleBlur = useCallback(() => {
         setHasBlurred(true);
