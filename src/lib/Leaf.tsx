@@ -170,7 +170,7 @@ export function Leaf<Model, Target>(props: {
             targetValue,
             namespace: "deferred"
         })
-    }, propsRef.current.deferMilliseconds || 500, [targetValue, props.location, propsRef.current.deferMilliseconds]);
+    }, propsRef.current.deferMilliseconds || 500, [targetValue, props.location]);
 
     const handleChange = useCallback((update: Target) => {
         onChange(currentModel => 
