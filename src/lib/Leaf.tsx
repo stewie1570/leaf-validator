@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { get, set } from './domain'
 import { ValidationModel } from './models';
 import { useDeferredEffect } from './hooks/useDeferredEffect'
@@ -72,32 +72,52 @@ export function Leaf<Model, Target>(props: {
     useFunctionalSetter?: boolean
 }) {
     const [hasBlurred, setHasBlurred] = useState(false);
-    const {
-        children,
-        location,
-        model,
-        validationModel,
-        validators,
-        deferredValidators,
-        deferMilliseconds,
-        onChange,
-        showErrors,
-        useFunctionalSetter
-    } = props;
-    const instance = useRef<Instance<Target>>({
-        validationModel,
-        validators,
-        deferredValidators
+    
+    const propsRef = useRef({
+        validationModel: props.validationModel,
+        validators: props.validators,
+        deferredValidators: props.deferredValidators,
+        deferMilliseconds: props.deferMilliseconds,
+        showErrors: props.showErrors,
+        useFunctionalSetter: props.useFunctionalSetter
     });
+    
+    useEffect(() => {
+        propsRef.current = {
+            validationModel: props.validationModel,
+            validators: props.validators,
+            deferredValidators: props.deferredValidators,
+            deferMilliseconds: props.deferMilliseconds,
+            showErrors: props.showErrors,
+            useFunctionalSetter: props.useFunctionalSetter
+        };
+    }, [
+        props.validationModel,
+        props.validators,
+        props.deferredValidators,
+        props.deferMilliseconds,
+        props.showErrors,
+        props.useFunctionalSetter
+    ]);
+    
+    const targetValue = useMemo(() => {
+        const preferredTargetValue = get<Target>(props.location).from(props.model);
+        return preferredTargetValue === undefined
+            ? findDefinedTargetIn<Target>(props.model, props.failOverLocations || [])
+            : preferredTargetValue;
+    }, [props.model, props.location, props.failOverLocations]);
+    
+    const instance = useRef<Instance<Target>>({
+        validationModel: props.validationModel,
+        validators: props.validators,
+        deferredValidators: props.deferredValidators
+    });
+    
     instance.current = {
-        validationModel,
-        validators,
-        deferredValidators
+        validationModel: props.validationModel,
+        validators: props.validators,
+        deferredValidators: props.deferredValidators
     };
-    const preferredTargetValue = get<Target>(location).from(model);
-    const targetValue = preferredTargetValue === undefined
-        ? findDefinedTargetIn<Target>(model, props.failOverLocations || [])
-        : preferredTargetValue;
 
     useEffect(() => {
         instance.current.validationTarget = targetValue;
@@ -113,11 +133,11 @@ export function Leaf<Model, Target>(props: {
         validateWith({
             validators,
             instance: instance.current,
-            location,
+            location: props.location,
             targetValue,
             namespace: "non-deferred"
         });
-    }, [targetValue, location]);
+    }, [targetValue, props.location]);
 
     useEffect(() => {
         return () => {
@@ -125,8 +145,8 @@ export function Leaf<Model, Target>(props: {
                 .current
                 .validationModel
                 ?.set((origValidationModel: any) => {
-                    const { [location]: removedDeferred, ...nonDeferredWithoutLocation } = origValidationModel.deferred || {};
-                    const { [location]: removedNonDeferred, ...deferredWithoutLocation } = origValidationModel['non-deferred'] || {};
+                    const { [props.location]: removedDeferred, ...nonDeferredWithoutLocation } = origValidationModel.deferred || {};
+                    const { [props.location]: removedNonDeferred, ...deferredWithoutLocation } = origValidationModel['non-deferred'] || {};
                     const result = {
                         ...origValidationModel,
                         deferred: deferredWithoutLocation,
@@ -135,7 +155,7 @@ export function Leaf<Model, Target>(props: {
                     return result;
                 });
         }
-    }, [location]);
+    }, [props.location]);
 
     useDeferredEffect(() => {
         instance.current.validationTarget = targetValue;
@@ -144,19 +164,35 @@ export function Leaf<Model, Target>(props: {
         validateWith({
             validators: deferredValidators,
             instance: instance.current,
-            location,
+            location: props.location,
             targetValue,
             namespace: "deferred"
         })
-    }, deferMilliseconds || 500, [targetValue, location, deferMilliseconds]);
+    }, propsRef.current.deferMilliseconds || 500, [targetValue, props.location, propsRef.current.deferMilliseconds]);
 
-    return children(
+    const handleChange = useCallback((update: Target) => {
+        props.onChange(currentModel => 
+            propsRef.current.useFunctionalSetter
+                ? set(props.location).to(update).in(currentModel)
+                : set(props.location).to(update).in(props.model)
+        );
+    }, [props.location, props.model, props.onChange]);
+
+    const handleBlur = useCallback(() => {
+        setHasBlurred(true);
+    }, []);
+
+    const errors = useMemo(() => {
+        return props.validationModel && (hasBlurred || propsRef.current.showErrors) 
+            ? props.validationModel.get(props.location) 
+            : [];
+    }, [props.validationModel, hasBlurred, props.location, propsRef.current.showErrors]);
+
+    return props.children(
         targetValue,
-        update => onChange(useFunctionalSetter
-            ? currentModel => set(location).to(update).in(currentModel)
-            : set(location).to(update).in(model)),
-        () => setHasBlurred(true),
-        validationModel && (hasBlurred || showErrors) ? validationModel.get(location) : [],
-        location
+        handleChange,
+        handleBlur,
+        errors,
+        props.location
     );
 }
