@@ -8,7 +8,9 @@
 
 ## Overview
 
-We need a declarative API to immutable models such that:
+Declarative state progression & validation for React apps.
+
+## Philosophy
 
 - Querying a location that doesn't exist in an object should return undefined and should never throw undefined reference errors.
 - Setting a value at a location that does not exist in an object should build the object necessary to set the value at that location.
