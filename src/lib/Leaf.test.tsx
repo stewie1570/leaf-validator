@@ -185,25 +185,39 @@ test("uses failOverLocations when location in model is undefined", () => {
     });
 });
 
-test("build an empty model with leafs", async () => {
+test("fix race conditions with useFunctionalSetter", () => {
     const Wrapper = () => {
-        const [model, setModel] = useState({});
+        type ContactModel = { contact: { email: string; name?: string } };
+        const [model, setModel] = useState<ContactModel>({ contact: { email: "stewie1570@gmail.com" } });
 
         return <Leaf
             model={model}
             onChange={setModel}
-            location="contact.email">
+            location="contact.email"
+            useFunctionalSetter>
             {(email: string, onChange) => <>
-                <TextInput value={email} onChange={onChange} data-testid="email" />
+                <TextInput
+                    value={email}
+                    onChange={(newValue) => {
+                        setModel((currentModel) => ({
+                            ...currentModel,
+                            contact: { ...currentModel.contact, name: "Stewart" }
+                        }));
+                        onChange(newValue);
+                    }}
+                    data-testid="email"
+                />
+                Name: {model?.contact?.name}
             </>}
         </Leaf>
     }
 
-    const { getByTestId } = render(<Wrapper />);
+    const { getByTestId, getByText } = render(<Wrapper />);
 
-    expect((getByTestId("email") as HTMLInputElement).value).toBe("");
-    fireEvent.change(getByTestId("email"), { target: { value: "stewie1570@gmail.com" } });
     expect((getByTestId("email") as HTMLInputElement).value).toBe("stewie1570@gmail.com");
+    fireEvent.change(getByTestId("email"), { target: { value: "stewie1570@hotmail.com" } });
+    expect((getByTestId("email") as HTMLInputElement).value).toBe("stewie1570@hotmail.com");
+    expect(getByText("Name: Stewart")).toBeTruthy();
 });
 
 test("validate model node and show errors on blur", async () => {
