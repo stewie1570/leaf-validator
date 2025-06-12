@@ -14,7 +14,6 @@ export const useMountedOnlyState = <T>(initialState: T): [T, Dispatch<SetStateAc
     }, []);
 
     return [state, updatedState => {
-        if (updatedState === 1) console.log({ mounted: instance.current.isMounted, state, updatedState });
         instance.current.isMounted && setState(updatedState);
     }];
 }
