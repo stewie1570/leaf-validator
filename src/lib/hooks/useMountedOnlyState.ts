@@ -6,10 +6,11 @@ export const useMountedOnlyState = <T>(initialState: T): [T, Dispatch<SetStateAc
     instance.current.isMounted = true;
 
     useEffect(() => {
-        instance.current.isMounted = true;
+        const currentInstance = instance.current;
+        currentInstance.isMounted = true;
 
         return () => {
-            instance.current.isMounted = false;
+            currentInstance.isMounted = false;
         };
     }, []);
 
