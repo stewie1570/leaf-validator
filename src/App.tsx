@@ -77,6 +77,16 @@ const NestableFormTest = () => {
     </NestableForm>
 }
 
+function Incrementer() {
+    const [count, setCount] = useLocalStorageState<number | undefined>("countKey");
+    return (
+        <div>
+            <span>Count: {count ?? 0}</span>
+            <button onClick={() => setCount(c => (c ?? 0) + 1)}>Increment</button>
+        </div>
+    );
+}
+
 function App(): JSX.Element {
     const [originalModel, setOriginalModel] = useState();
     const [model, setModel] = useLocalStorageState<any>("ModelTest");
@@ -173,6 +183,7 @@ function App(): JSX.Element {
                 </pre>
             </form>
             <NestableFormTest />
+            <Incrementer />
         </div >
     );
 }

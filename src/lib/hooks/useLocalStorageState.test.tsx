@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { StrictMode, useEffect, useRef, useState } from 'react';
 import { render, screen, waitFor } from "@testing-library/react";
 import { useLocalStorageState } from './useLocalStorageState'
 
@@ -123,4 +123,25 @@ test("shows proper initial state when local storage key is defined", async () =>
     await waitFor(() => {
         expect(screen.getAllByText("expected value").length).toBe(2);
     });
+});
+
+test("support for strict-mode", async () => {
+    function Incrementer() {
+        const [count, setCount] = useLocalStorageState<number | undefined>("countKey");
+        return (
+            <div>
+                <span>Count: {count ?? 0}</span>
+                <button onClick={() => setCount((count ?? 0) + 1)}>Increment</button>
+            </div>
+        );
+    }
+
+    render(<StrictMode>
+        <Incrementer />
+    </StrictMode>);
+    screen.getByText("Count: 0");
+    screen.getByText("Increment").click();
+    await screen.findByText("Count: 1");
+    screen.getByText("Increment").click();
+    await screen.findByText("Count: 2");
 });
