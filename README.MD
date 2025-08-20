@@ -58,7 +58,10 @@ import { Leaf } from "leaf-validator";
 
 const [model, setModel] = useState({});
 
-<Leaf model={model} onChange={setModel} location="person.contact.phoneNumber">
+<Leaf
+  model={model}
+  onChange={setModel}
+  location="person.contact.phoneNumber">
   {(phoneNumber, setPhoneNumberInModel) => (
     <label>
       Phone Number
