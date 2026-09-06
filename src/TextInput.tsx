@@ -10,7 +10,7 @@ type TextInputProps = {
 export function TextInput(props: TextInputProps) {
     const { autofocus, value, onChange, ...otherProps } = props;
     const onTextChange = (event: any) => onChange(event && event.target && event.target.value);
-    const theInput = useRef<any>();
+    const theInput = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (autofocus) theInput?.current?.focus()

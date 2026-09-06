@@ -12,6 +12,10 @@
 /build
 /dist
 
+# vite
+*.tsbuildinfo
+.vitest
+
 # misc
 .DS_Store
 .env.local

@@ -1,18 +1,17 @@
-import React, { forwardRef, useEffect, useState } from "react";
-import { createContext, useContext } from "react";
+import { forwardRef, useEffect, useState, createContext, useContext, type ComponentType, type Dispatch, type FormEvent, type ForwardRefExoticComponent, type RefAttributes, type SetStateAction } from "react";
 import { useMountedOnlyState } from "./hooks/useMountedOnlyState";
 
 type CurrentFormId = string | undefined;
 type CurrentForm = [
     CurrentFormId,
-    React.Dispatch<React.SetStateAction<CurrentFormId>>,
-    React.Dispatch<React.SetStateAction<{
-        [x: string]: (event?: React.FormEvent<HTMLFormElement> | undefined) => void;
+    Dispatch<SetStateAction<CurrentFormId>>,
+    Dispatch<SetStateAction<{
+        [x: string]: (event?: FormEvent<HTMLFormElement> | undefined) => void;
     }>>
 ];
-type NestableFormInputHOC = <P>(Input: React.ComponentType<P>) => React.ForwardRefExoticComponent<Omit<any, "ref"> & React.RefAttributes<unknown>>;
-type NestableFormSubmitButtonHOC = <P>(Button: React.ComponentType<P>) => React.ForwardRefExoticComponent<Omit<any, "ref"> & React.RefAttributes<unknown>>;
-type NestableFormHOC = <P>(Form: React.ComponentType<P>) => React.ComponentType<P>;
+type NestableFormInputHOC = <P>(Input: ComponentType<P>) => ForwardRefExoticComponent<Omit<any, "ref"> & RefAttributes<unknown>>;
+type NestableFormSubmitButtonHOC = <P>(Button: ComponentType<P>) => ForwardRefExoticComponent<Omit<any, "ref"> & RefAttributes<unknown>>;
+type NestableFormHOC = <P>(Form: ComponentType<P>) => ComponentType<P>;
 
 const CurrentFormContext = createContext<CurrentForm | undefined>(undefined);
 const FormIdContext = createContext<any>(undefined);
@@ -55,7 +54,7 @@ export const formWithVirtualNestability: NestableFormHOC = Form => (props: any) 
         }));
     }, [isInsideForm, name, onSubmit, setHandlers]);
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         localFormName && submitHandlers[localFormName]?.(event);
     }

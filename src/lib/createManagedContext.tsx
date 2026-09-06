@@ -1,13 +1,13 @@
-import React, { createContext, useContext } from "react";
+import { createContext, useContext, type Context, type FC } from "react";
 
 type UseManagedStateHook<TParams, TReturn> = (param?: TParams) => TReturn;
 
 export function createManagedContext<THookParam, THookReturn>(
   useManagedState: UseManagedStateHook<THookParam, THookReturn>
 ): [
-    React.FC<THookParam & { children?: any }>,
+    FC<THookParam & { children?: any }>,
     UseManagedStateHook<THookParam, THookReturn>,
-    React.Context<THookReturn | undefined>
+    Context<THookReturn | undefined>
   ] {
   const Context = createContext<THookReturn | undefined>(undefined);
   const ContextProvider = ({ children, ...otherParams }: any) => {

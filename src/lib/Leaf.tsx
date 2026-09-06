@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
 import { get, set } from './domain'
 import { ValidationModel } from './models';
 import { useDeferredEffect } from './hooks/useDeferredEffect'
@@ -62,7 +62,7 @@ export function Leaf<Model, Target>(props: {
     ) => any,
     location: string,
     model: Model,
-    onChange: React.Dispatch<React.SetStateAction<Model>>,
+    onChange: Dispatch<SetStateAction<Model>>,
     validationModel?: ValidationModel,
     validators?: Array<Validator<Target>>,
     deferredValidators?: Array<Validator<Target>>,
