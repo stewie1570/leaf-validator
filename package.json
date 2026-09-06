@@ -1,6 +1,6 @@
 {
   "name": "leaf-validator",
-  "version": "7.10.4",
+  "version": "7.10.5",
   "description": "Declarative state progression & validation",
   "keywords": [
     "react",
@@ -10,45 +10,57 @@
   ],
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    }
+  },
   "repository": "https://github.com/stewie1570/leaf",
   "author": "Stewart Anderson",
   "license": "MIT",
   "sideEffects": false,
-  "dependencies": {},
+  "peerDependencies": {
+    "react": ">=17"
+  },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^14.2.1",
-    "@testing-library/user-event": "^14.5.2",
-    "@types/jest": "^29.5.12",
-    "@types/react": "^18.2.61",
-    "@types/react-dom": "^18.2.19",
-    "bootstrap": "^5.3.3",
-    "coveralls": "^3.1.1",
-    "del-cli": "^5.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "source-map-explorer": "^2.5.3",
-    "typescript": "4.9.5"
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitest/coverage-v8": "^5.0.0",
+    "bootstrap": "^5.3.8",
+    "del-cli": "^7.0.0",
+    "jsdom": "^30.0.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0"
   },
   "files": [
-    "dist/**/*.js",
-    "dist/**/*.d.ts"
+    "dist"
   ],
   "scripts": {
-    "analyze": "source-map-explorer 'build/static/js/main.*.js' --json",
-    "analyze-in-browser": "source-map-explorer 'build/static/js/main.*.js'",
-    "start": "react-scripts start",
-    "build": "react-scripts build && npm run build-package",
-    "tdd": "react-scripts test",
-    "test": "react-scripts test --watchAll=false --colors --coverage --collectCoverageFrom=src/lib/**/*.*",
-    "eject": "react-scripts eject",
+    "analyze": "node scripts/analyze.mjs --json",
+    "analyze-in-browser": "node scripts/analyze.mjs",
+    "start": "vite",
+    "preview": "vite preview",
+    "build": "vite build && npm run build-package",
+    "tdd": "vitest",
+    "test": "vitest run --coverage",
     "build-package": "del-cli ./dist && npm run build-cjs && npm run build-esm",
-    "build-cjs": "tsc index.ts -d --jsx react --esModuleInterop --lib \"ES2019\",\"DOM\" --outDir ./dist/cjs",
-    "build-esm": "tsc index.ts -d --target \"ES2019\" --jsx react --allowSyntheticDefaultImports --moduleResolution \"node\" --module \"esnext\" --lib \"ES2019\",\"DOM\" --outDir ./dist/esm"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
+    "build-cjs": "tsc -p tsconfig.cjs.json",
+    "build-esm": "tsc -p tsconfig.esm.json && node -e \"require('fs').writeFileSync('dist/esm/package.json', JSON.stringify({type:'module'}))\""
   },
   "browserslist": {
     "production": [

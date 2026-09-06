@@ -94,11 +94,11 @@ test("can reference the wrapped input", () => {
     const MyFormNestableInput = inputWithFormSelectionOnFocus(MyInput);
 
     const TestApp = () => {
-        const inputRef = useRef<any>();
+        const inputRef = useRef<HTMLInputElement>(null);
 
         return <>
             <MyFormNestableInput data-testid="input" ref={inputRef} />
-            <button onClick={() => inputRef.current.focus()}>set focus</button>
+            <button onClick={() => inputRef.current?.focus()}>set focus</button>
         </>;
     }
 

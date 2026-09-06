@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, type Dispatch, type SetStateAction } from 'react'
 import { useMountedOnlyState as useState } from './useMountedOnlyState'
 
 function getLocalStateFor(storageKey: string) {
@@ -6,7 +6,7 @@ function getLocalStateFor(storageKey: string) {
     return storageValue ? JSON.parse(storageValue) : undefined;
 }
 
-export function useLocalStorageState<T>(storageKey: string): [T | undefined, React.Dispatch<React.SetStateAction<T | undefined>>] {
+export function useLocalStorageState<T>(storageKey: string): [T | undefined, Dispatch<SetStateAction<T | undefined>>] {
     const [state, setState] = useState<T | undefined>(undefined);
 
     useEffect(() => {
@@ -22,7 +22,7 @@ export function useLocalStorageState<T>(storageKey: string): [T | undefined, Rea
         }
     }, [storageKey]);
 
-    function setStorageState(valueOrSetter: React.SetStateAction<T | undefined>) {
+    function setStorageState(valueOrSetter: SetStateAction<T | undefined>) {
         setState(valueOrSetter instanceof Function
             ? state => updateStorageValue(valueOrSetter(state))
             : updateStorageValue(valueOrSetter));

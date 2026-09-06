@@ -87,7 +87,7 @@ function Incrementer() {
     );
 }
 
-function App(): JSX.Element {
+function App() {
     const [originalModel, setOriginalModel] = useState();
     const [model, setModel] = useLocalStorageState<any>("ModelTest");
     const validationModel = useValidationModel();
@@ -97,7 +97,7 @@ function App(): JSX.Element {
     const [displayEmail, setDisplayEmail] = useState(true);
     const isValidating = validationModel.isValidationInProgress();
 
-    const submit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const submit = async (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         setShowAllValidation(true);
 
