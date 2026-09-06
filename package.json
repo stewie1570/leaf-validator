@@ -23,7 +23,7 @@
       }
     }
   },
-  "repository": "https://github.com/stewie1570/leaf",
+  "repository": "https://github.com/stewie1570/leaf-validator",
   "author": "Stewart Anderson",
   "license": "MIT",
   "sideEffects": false,
