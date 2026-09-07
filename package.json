@@ -60,7 +60,7 @@
     "test": "vitest run --coverage",
     "build-package": "del-cli ./dist && npm run build-cjs && npm run build-esm",
     "build-cjs": "tsc -p tsconfig.cjs.json",
-    "build-esm": "tsc -p tsconfig.esm.json && node -e \"require('fs').writeFileSync('dist/esm/package.json', JSON.stringify({type:'module'}))\""
+    "build-esm": "tsc -p tsconfig.esm.json && node -e \"require('fs').writeFileSync('dist/esm/package.json', JSON.stringify({type:'module'}))\" && node scripts/fix-esm-extensions.mjs && node scripts/verify-esm.mjs"
   },
   "browserslist": {
     "production": [
