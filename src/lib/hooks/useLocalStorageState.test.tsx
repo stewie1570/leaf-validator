@@ -1,5 +1,5 @@
 import React, { StrictMode, useEffect, useRef, useState } from 'react';
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useLocalStorageState } from './useLocalStorageState'
 
 let storage: any = {};
@@ -55,7 +55,7 @@ test("can update state via value", async () => {
     render(<SetStateViaValue />);
 
     screen.getByText("no state");
-    screen.getByText("Set State").click();
+    fireEvent.click(screen.getByText("Set State"));
     await screen.findByText("expected value");
 });
 
@@ -63,7 +63,7 @@ test("can update state via callback", async () => {
     render(<SetStateViaCallback />);
 
     screen.getByText("no state");
-    screen.getByText("Set State").click();
+    fireEvent.click(screen.getByText("Set State"));
     await screen.findByText("value: undefined");
 });
 
@@ -74,7 +74,7 @@ test("can update common state via value", async () => {
     </>);
 
     expect(screen.getAllByText("no state").length).toBe(2);
-    screen.getAllByText("Set State")[0].click();
+    fireEvent.click(screen.getAllByText("Set State")[0]);
     await waitFor(() => {
         expect(screen.getAllByText("expected value").length).toBe(2);
     });
@@ -87,7 +87,7 @@ test("can update common state via callback", async () => {
     </>);
 
     expect(screen.getAllByText("no state").length).toBe(2);
-    screen.getAllByText("Set State")[0].click();
+    fireEvent.click(screen.getAllByText("Set State")[0]);
     await waitFor(() => {
         expect(screen.getAllByText("value: undefined").length).toBe(2);
     });
@@ -103,7 +103,7 @@ test("can update common pre-existing state via callback", async () => {
     await waitFor(() => {
         expect(screen.getAllByText("initial").length).toBe(2);
     });
-    screen.getAllByText("Set State")[0].click();
+    fireEvent.click(screen.getAllByText("Set State")[0]);
     await waitFor(() => {
         expect(screen.getAllByText("value: \"initial\"").length).toBe(2);
     });
@@ -118,8 +118,8 @@ test("shows proper initial state when local storage key is defined", async () =>
     </>);
 
     expect(screen.getAllByText("no state").length).toBe(1);
-    screen.getByText("Set State").click();
-    screen.getByText("Show").click();
+    fireEvent.click(screen.getByText("Set State"));
+    fireEvent.click(screen.getByText("Show"));
     await waitFor(() => {
         expect(screen.getAllByText("expected value").length).toBe(2);
     });
@@ -140,8 +140,8 @@ test("support for strict-mode", async () => {
         <Incrementer />
     </StrictMode>);
     screen.getByText("Count: 0");
-    screen.getByText("Increment").click();
+    fireEvent.click(screen.getByText("Increment"));
     await screen.findByText("Count: 1");
-    screen.getByText("Increment").click();
+    fireEvent.click(screen.getByText("Increment"));
     await screen.findByText("Count: 2");
 });
