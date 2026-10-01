@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { render, act } from '@testing-library/react'
+import { render, act, fireEvent } from '@testing-library/react'
 import { useMountedOnlyState } from './useMountedOnlyState';
 
 function manuallyResolvableTask<T>() {
@@ -82,7 +82,7 @@ test("should not set state when component is not mounted", async () => {
 
     getByText("initial state");
     getByText("Change").click();
-    getByText("Unmount").click();
+    fireEvent.click(getByText("Unmount"));
     act(resolve);
 
     await promise;
