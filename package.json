@@ -1,6 +1,6 @@
 {
   "name": "leaf-validator",
-  "version": "7.10.6",
+  "version": "7.10.7",
   "description": "Declarative state progression & validation",
   "keywords": [
     "react",
