@@ -125,35 +125,25 @@ const maxBytes = Math.max(...sizes.map((row) => row.bytes), 1);
 const nameWidth = Math.max(...sizes.map((row) => row.name.length));
 const sizeWidth = Math.max(...sizes.map((row) => String(row.bytes).length));
 const barWidth = 24;
+const bars = sizes.map((row) => {
+  const filled = Math.round((row.bytes / maxBytes) * barWidth);
+  return "█".repeat(filled) + "░".repeat(barWidth - filled);
+});
 const chart = sizes
-  .map((row) => {
-    const filled = Math.round((row.bytes / maxBytes) * barWidth);
-    const bar = "█".repeat(filled) + "░".repeat(barWidth - filled);
-    return `${row.name.padEnd(nameWidth)}  ${String(row.bytes).padStart(sizeWidth)} B  ${bar}`;
-  })
+  .map((row, index) => `${row.name.padEnd(nameWidth)}  ${String(row.bytes).padStart(sizeWidth)} B  ${bars[index]}`)
   .join("\n");
+const markdownTable = [
+  "| Export | Gzip | Bar |",
+  "| --- | ---: | --- |",
+  ...sizes.map((row, index) => `| \`${row.name}\` | ${row.bytes} B | \`${bars[index]}\` |`),
+].join("\n");
 
 const title = `leaf-validator@${pkg.version} exports (minified gzip bytes)`;
-const chartWithVersion = `${versionLine}\n${chart}`;
-console.log(`${title}\n${chartWithVersion}`);
+console.log(`${title}\n${chart}`);
 
 if (process.env.GITHUB_STEP_SUMMARY) {
   appendFileSync(
     process.env.GITHUB_STEP_SUMMARY,
-    `### ${versionLine}\n\n### ${title}\n\n\`\`\`text\n${chartWithVersion}\n\`\`\`\n`
+    `### ${versionLine}\n\n### ${title}\n\n${markdownTable}\n`
   );
-}
-
-if (process.env.GITHUB_ACTIONS) {
-  const escapeProperty = (value) =>
-    value
-      .replaceAll("%", "%25")
-      .replaceAll("\r", "%0D")
-      .replaceAll("\n", "%0A")
-      .replaceAll(",", "%2C")
-      .replaceAll(":", "%3A");
-  const escapeMessage = (value) =>
-    value.replaceAll("%", "%25").replaceAll("\r", "%0D").replaceAll("\n", "%0A");
-  console.log(`::notice title=${escapeProperty(versionLine)}::${escapeMessage(versionLine)}`);
-  console.log(`::notice title=${escapeProperty(title)}::${escapeMessage(chartWithVersion)}`);
 }
