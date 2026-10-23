@@ -1,5 +1,7 @@
 import { createRequire } from "node:module";
-import { readFileSync } from "node:fs";
+import { appendFileSync, readFileSync } from "node:fs";
+import { gzipSync } from "node:zlib";
+import * as esbuild from "esbuild";
 
 const require = createRequire(import.meta.url);
 
@@ -85,3 +87,63 @@ for (const [label, api] of [
 console.log(
   `leaf-validator@${pkg.version}: imported ${functionExports.length + diffExports.length} exports via ESM and CJS`
 );
+
+const exportNames = Object.keys(esm)
+  .filter((name) => name !== "default" && name !== "__esModule")
+  .sort();
+
+const sizes = [];
+for (const name of exportNames) {
+  if (!/^[A-Za-z_$][\w$]*$/.test(name)) {
+    throw new Error(`Cannot measure export ${name}: name is not an identifier`);
+  }
+  const result = await esbuild.build({
+    stdin: {
+      contents: `export { ${name} } from "leaf-validator";\n`,
+      resolveDir: process.cwd(),
+      sourcefile: `${name}.js`,
+    },
+    bundle: true,
+    format: "esm",
+    minify: true,
+    write: false,
+    legalComments: "none",
+    logLevel: "silent",
+    external: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
+  });
+  sizes.push({ name, bytes: gzipSync(result.outputFiles[0].contents).length });
+}
+
+sizes.sort((left, right) => right.bytes - left.bytes || left.name.localeCompare(right.name));
+
+const maxBytes = Math.max(...sizes.map((row) => row.bytes), 1);
+const nameWidth = Math.max(...sizes.map((row) => row.name.length));
+const sizeWidth = Math.max(...sizes.map((row) => String(row.bytes).length));
+const barWidth = 24;
+const chart = sizes
+  .map((row) => {
+    const filled = Math.round((row.bytes / maxBytes) * barWidth);
+    const bar = "█".repeat(filled) + "░".repeat(barWidth - filled);
+    return `${row.name.padEnd(nameWidth)}  ${String(row.bytes).padStart(sizeWidth)} B  ${bar}`;
+  })
+  .join("\n");
+
+const title = `leaf-validator@${pkg.version} exports (minified gzip bytes)`;
+console.log(`${title}\n${chart}`);
+
+if (process.env.GITHUB_STEP_SUMMARY) {
+  appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### ${title}\n\n\`\`\`text\n${chart}\n\`\`\`\n`);
+}
+
+if (process.env.GITHUB_ACTIONS) {
+  const escapeProperty = (value) =>
+    value
+      .replaceAll("%", "%25")
+      .replaceAll("\r", "%0D")
+      .replaceAll("\n", "%0A")
+      .replaceAll(",", "%2C")
+      .replaceAll(":", "%3A");
+  const escapeMessage = (value) =>
+    value.replaceAll("%", "%25").replaceAll("\r", "%0D").replaceAll("\n", "%0A");
+  console.log(`::notice title=${escapeProperty(title)}::${escapeMessage(chart)}`);
+}
