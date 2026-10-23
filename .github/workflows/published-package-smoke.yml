@@ -1,5 +1,6 @@
-# Installs a published leaf-validator release in a clean project, imports every
-# public export through both ESM and CommonJS, and annotates each export's size.
+# Installs a published leaf-validator release in a clean project, discovers that
+# version's public exports, imports each one through ESM and CommonJS, and
+# annotates each export's size.
 
 name: Published package
 
