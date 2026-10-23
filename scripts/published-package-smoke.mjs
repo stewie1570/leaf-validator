@@ -73,6 +73,11 @@ const cjs = require("leaf-validator");
 const pkg = JSON.parse(
   readFileSync(new URL("./node_modules/leaf-validator/package.json", import.meta.url), "utf8")
 );
+const requested = process.env.PACKAGE_VERSION;
+const versionLine = requested
+  ? `Downloaded leaf-validator@${pkg.version} (requested ${requested})`
+  : `Downloaded leaf-validator@${pkg.version}`;
+console.log(versionLine);
 
 for (const [label, api] of [
   ["ESM", esm],
@@ -129,10 +134,14 @@ const chart = sizes
   .join("\n");
 
 const title = `leaf-validator@${pkg.version} exports (minified gzip bytes)`;
-console.log(`${title}\n${chart}`);
+const chartWithVersion = `${versionLine}\n${chart}`;
+console.log(`${title}\n${chartWithVersion}`);
 
 if (process.env.GITHUB_STEP_SUMMARY) {
-  appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### ${title}\n\n\`\`\`text\n${chart}\n\`\`\`\n`);
+  appendFileSync(
+    process.env.GITHUB_STEP_SUMMARY,
+    `### ${versionLine}\n\n### ${title}\n\n\`\`\`text\n${chartWithVersion}\n\`\`\`\n`
+  );
 }
 
 if (process.env.GITHUB_ACTIONS) {
@@ -145,5 +154,6 @@ if (process.env.GITHUB_ACTIONS) {
       .replaceAll(":", "%3A");
   const escapeMessage = (value) =>
     value.replaceAll("%", "%25").replaceAll("\r", "%0D").replaceAll("\n", "%0A");
-  console.log(`::notice title=${escapeProperty(title)}::${escapeMessage(chart)}`);
+  console.log(`::notice title=${escapeProperty(versionLine)}::${escapeMessage(versionLine)}`);
+  console.log(`::notice title=${escapeProperty(title)}::${escapeMessage(chartWithVersion)}`);
 }

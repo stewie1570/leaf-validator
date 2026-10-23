@@ -36,5 +36,7 @@ jobs:
           cd "$consumer"
           npm init -y
           npm install "leaf-validator@${PACKAGE_VERSION}" react react-dom esbuild
+          installed=$(node -p "require('./node_modules/leaf-validator/package.json').version")
+          echo "Downloaded leaf-validator@${installed} (requested ${PACKAGE_VERSION})"
           cp "$GITHUB_WORKSPACE/scripts/published-package-smoke.mjs" ./published-package-smoke.mjs
           node ./published-package-smoke.mjs
