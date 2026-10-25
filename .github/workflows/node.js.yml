@@ -56,6 +56,9 @@ jobs:
     needs: [build, smokeTest]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.publish.outputs.published }}
+      version: ${{ steps.publish.outputs.version }}
     permissions:
       contents: read
       id-token: write
@@ -70,13 +73,25 @@ jobs:
     - run: npm ci
     - run: npm run build-package
     - name: Publish
+      id: publish
       run: |
         NAME=$(node -p "require('./package.json').name")
         VERSION=$(node -p "require('./package.json').version")
         if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
           echo "$NAME@$VERSION is already on npm; skipping publish."
+          echo "published=false" >> "$GITHUB_OUTPUT"
         else
           npm publish --access public --provenance
+          echo "published=true" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
         fi
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  publishedPackage:
+    name: Published package
+    needs: [publish]
+    if: needs.publish.result == 'success' && needs.publish.outputs.published == 'true'
+    uses: ./.github/workflows/published-package-smoke.yml
+    with:
+      version: ${{ needs.publish.outputs.version }}
+      wait_for_registry: true
