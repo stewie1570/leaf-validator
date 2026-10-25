@@ -1,10 +1,20 @@
 # Installs a published leaf-validator release in a clean project, discovers that
 # version's public exports, imports each one through ESM and CommonJS, and
-# annotates each export's size.
+# annotates each export's size. Exports are listed in alphabetical order.
+#
+# The Build workflow calls this after its test jobs on pull requests and on
+# pushes to master. It can also be run manually.
 
 name: Published package
 
 on:
+  workflow_call:
+    inputs:
+      version:
+        description: npm version or dist-tag (for example latest or 7.10.6)
+        required: false
+        default: latest
+        type: string
   workflow_dispatch:
     inputs:
       version:

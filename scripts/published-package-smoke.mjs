@@ -64,7 +64,7 @@ for (const name of esmExports) {
   sizes.push({ name, bytes: gzipSync(result.outputFiles[0].contents).length });
 }
 
-sizes.sort((left, right) => right.bytes - left.bytes || left.name.localeCompare(right.name));
+sizes.sort((left, right) => left.name.localeCompare(right.name, "en"));
 
 const maxBytes = Math.max(...sizes.map((row) => row.bytes), 1);
 const nameWidth = Math.max(...sizes.map((row) => row.name.length));

@@ -51,6 +51,13 @@ jobs:
     - run: npm run build
     - run: npm run analyze
     - run: npm run test
+  publishedPackage:
+    name: Published package
+    needs: [build, smokeTest]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
+    uses: ./.github/workflows/published-package-smoke.yml
+    with:
+      version: latest
   publish:
     name: Publish to npm
     needs: [build, smokeTest]
