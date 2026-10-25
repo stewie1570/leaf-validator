@@ -88,7 +88,7 @@ jobs:
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   publishedPackage:
-    name: Published package
+    name: Test published package
     needs: [publish]
     if: needs.publish.result == 'success' && needs.publish.outputs.published == 'true'
     uses: ./.github/workflows/published-package-smoke.yml
