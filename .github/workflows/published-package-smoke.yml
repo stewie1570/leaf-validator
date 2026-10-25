@@ -5,7 +5,7 @@
 # The Build workflow calls this after a merge publishes a new npm release.
 # It can also be run manually.
 
-name: Published package
+name: Test published package
 
 on:
   workflow_call:
