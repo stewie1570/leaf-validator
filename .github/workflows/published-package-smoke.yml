@@ -2,8 +2,8 @@
 # version's public exports, imports each one through ESM and CommonJS, and
 # annotates each export's size. Exports are listed in alphabetical order.
 #
-# The Build workflow calls this after its test jobs on pull requests and on
-# pushes to master. It can also be run manually.
+# The Build workflow calls this after a merge publishes a new npm release.
+# It can also be run manually.
 
 name: Published package
 
@@ -15,6 +15,11 @@ on:
         required: false
         default: latest
         type: string
+      wait_for_registry:
+        description: Retry installation while a just-published release propagates
+        required: false
+        default: false
+        type: boolean
   workflow_dispatch:
     inputs:
       version:
@@ -37,6 +42,7 @@ jobs:
       - name: Install and import the published package
         env:
           PACKAGE_VERSION: ${{ inputs.version }}
+          WAIT_FOR_REGISTRY: ${{ inputs.wait_for_registry }}
         run: |
           if [[ ! "$PACKAGE_VERSION" =~ ^[A-Za-z0-9._+-]+$ ]]; then
             echo "Invalid npm version or dist-tag: $PACKAGE_VERSION"
@@ -46,6 +52,20 @@ jobs:
           mkdir -p "$consumer"
           cd "$consumer"
           npm init -y
-          npm install "leaf-validator@${PACKAGE_VERSION}" react react-dom esbuild
+          attempts=1
+          if [[ "$WAIT_FOR_REGISTRY" == "true" ]]; then
+            attempts=12
+          fi
+          for ((attempt = 1; attempt <= attempts; attempt++)); do
+            if npm install "leaf-validator@${PACKAGE_VERSION}" react react-dom esbuild; then
+              break
+            fi
+            if [[ "$attempt" -eq "$attempts" ]]; then
+              echo "Failed to install leaf-validator@${PACKAGE_VERSION}"
+              exit 1
+            fi
+            echo "leaf-validator@${PACKAGE_VERSION} is not installable yet (attempt ${attempt}); retrying in 10s."
+            sleep 10
+          done
           cp "$GITHUB_WORKSPACE/scripts/published-package-smoke.mjs" ./published-package-smoke.mjs
           node ./published-package-smoke.mjs
